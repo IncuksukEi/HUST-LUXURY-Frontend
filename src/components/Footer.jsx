@@ -147,19 +147,17 @@ const NewsletterForm = () => (
     >
       Be the first to know about exciting new designs, special events, store openings and much more.
     </Typography>
-    
-    {/* --- UPDATE: Dùng 'label' thay vì 'placeholder' để có hiệu ứng floating --- */}
     <TextField
       fullWidth
       variant="standard"
-      label="Email" // Hiệu ứng nhãn bay lên
+      label="Email"
       InputLabelProps={{
         sx: { 
             fontFamily: 'serif', 
             fontSize: '14px',
-            color: 'text.secondary', // Màu mặc định khi chưa focus
+            color: 'text.secondary',
             "&.Mui-focused": {
-                color: 'text.primary' // Màu khi focus
+                color: 'text.primary'
             }
         }
       }}
@@ -195,8 +193,6 @@ const SocialIconsStack = ({ mobileJustify = false }) => (
       spacing={mobileJustify ? 0 : 3}
       sx={{
         width: "100%",
-        // --- UPDATE: Nếu mobileJustify=true thì dùng space-between, ngược lại flex-start ---
-        // Chúng ta sẽ truyền true vào ở Desktop Right Wrapper để đạt được hiệu ứng space-between
         justifyContent: mobileJustify ? "space-between" : "flex-start",
       }}
     >
@@ -324,7 +320,6 @@ const Footer = () => {
               <SectionTitle>Latest from MAJEWELRY</SectionTitle>
               <NewsletterForm />
                <Box sx={{ mt: 5, width: '100%' }}>
-                 {/* --- UPDATE: mobileJustify={true} để kích hoạt space-between cho social icons --- */}
                  <SocialIconsStack mobileJustify={true} />
                </Box>
             </Box>
@@ -350,14 +345,13 @@ const Footer = () => {
                 </Typography>
               </Stack>
           ) : (
-             // --- UPDATE: DESKTOP BOTTOM (Row: Location Left - Copyright Right) ---
               <Box 
                 sx={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
                     alignItems: 'center',
                     width: '100%',
-                    mt: 8 // Margin top để tách biệt với phần trên
+                    mt: 8
                 }}
               >
                   {/* Change Location Button (Left) */}
