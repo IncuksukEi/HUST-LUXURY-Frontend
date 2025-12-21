@@ -1,7 +1,9 @@
 // src/App.jsx
 import { useEffect, useState } from 'react';
-import { Card, Col, Row, Typography, Spin, Alert } from 'antd';
+import { Container, Grid, Card, CardMedia, CardContent, Typography, CircularProgress, Alert, Box } from '@mui/material';
 import axiosClient from './api/axiosClient';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 const { Meta } = Card;
 const { Title } = Typography;
@@ -16,6 +18,7 @@ function App() {
     try {
       // Gọi vào endpoint Public mà mình đã cấu hình ở Backend
       const response = await axiosClient.get('/products'); 
+      console.log("Dữ liệu API trả về:", response.data);
       // Hoặc /products/search?q= nếu backend bạn quy định thế
       setProducts(response.data);
     } catch (err) {
@@ -31,27 +34,54 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Title level={2} style={{ textAlign: 'center' }}>Hust Luxury Menu</Title>
-      
-      {error && <Alert message={error} type="error" showIcon style={{ marginBottom: 20 }} />}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Header />
+      <Box component="main" sx={{ flex: 1, py: 4 }}> 
+        {/* Container giúp căn giữa nội dung và tạo padding 2 bên */}
+        <Container maxWidth="xl">
+          <Typography variant='h3' align='center' sx={{ mb: 4, fontWeight: 'bold' }}>
+            Hust Luxury Menu
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-      {loading ? (
-        <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" /></div>
-      ) : (
-        <Row gutter={[16, 16]}>
-          {products.map((product) => (
-            <Col key={product.productId} xs={24} sm={12} md={8} lg={6}>
-              <Card
-                hoverable
-                cover={<img alt={product.name} src={product.urlImg || "https://via.placeholder.com/150"} style={{ height: 200, objectFit: 'cover' }} />}
-              >
-                <Meta title={product.name} description={`${product.price.toLocaleString()} VNĐ`} />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Grid container spacing={2}>
+              {Array.isArray(products) && products.map((product) => (
+                <Grid item key={product.productId} xs={12} sm={6} md={4} lg={3}>
+                  <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={product.urlImg || "https://via.placeholder.com/150"}
+                      alt={product.name}
+                      sx={{ objectFit: 'cover' }}
+                    />
+                    <CardContent>
+                      <Typography gutterBottom variant="h6" noWrap>
+                        {product.name}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {product.price.toLocaleString()} VNĐ
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Container>
+      </Box>
+      
+      <Footer />
     </div>
   );
 }
