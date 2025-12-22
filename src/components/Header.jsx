@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -19,7 +19,7 @@ import {
   Slide,
   useTheme,
   useMediaQuery,
-  Link, // <--- ĐÃ THÊM IMPORT NÀY
+  Link,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -65,11 +65,23 @@ const Header = (props) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
+  // Check if user is logged in
+  const isLoggedIn = !!localStorage.getItem('token');
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleUserClick = () => {
+    if (isLoggedIn) {
+      navigate('/account');
+    } else {
+      navigate('/login');
+    }
   };
 
   const drawerContent = (
@@ -188,12 +200,22 @@ const Header = (props) => {
                   <IconButton component={RouterLink} to="/appointment" color="inherit">
                     <Calendar size={22} strokeWidth={1.5} />
                   </IconButton>
-                  <IconButton component={RouterLink} to="/account" color="inherit">
+                  <IconButton 
+                    color="inherit"
+                    onClick={handleUserClick}
+                  >
                     <User size={22} strokeWidth={1.5} />
                   </IconButton>
                 </Box>
                 <IconButton component={RouterLink} to="/wishlist" color="inherit">
                   <Heart size={22} strokeWidth={1.5} />
+                </IconButton>
+                <IconButton 
+                  color="inherit"
+                  onClick={handleUserClick}
+                  sx={{ display: { xs: "flex", lg: "none" } }}
+                >
+                  <User size={22} strokeWidth={1.5} />
                 </IconButton>
                 <IconButton component={RouterLink} to="/cart" color="inherit">
                   <Badge badgeContent={2} color="primary" sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16 } }}>
