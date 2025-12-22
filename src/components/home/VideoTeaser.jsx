@@ -34,7 +34,7 @@ const VideoTeaser = () => {
               textAlign: { xs: 'center', md: 'left' }, p: { xs: 6, md: 8 }, bgcolor: '#fff' 
             }}
           >
-            <Typography variant="h3" sx={{ mb: 2, fontWeight: 500 }}>
+            <Typography variant="h3" sx={{ mb: 2, fontWeight: 600 }}>
               The Art of Gifting
             </Typography>
             <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', lineHeight: 1.6 }}>

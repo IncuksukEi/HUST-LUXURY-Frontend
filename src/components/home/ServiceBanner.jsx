@@ -4,6 +4,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const BANNER_IMAGE = "//media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_STILL_FWMH_BB1_Desktop-1?$tile$&wid=2992&fmt=webp";
+const TIFFANY_BLUE = "#81d8d0"; // Khai báo biến màu cho tiện dùng
 
 const ServiceBanner = () => {
   return (
@@ -15,8 +16,6 @@ const ServiceBanner = () => {
           size={{ xs: 12, md: 6 }} 
           sx={{ 
             position: 'relative', 
-            // --- FIX: Tăng chiều cao khung ảnh thực tế ---
-            // md: '750px' -> Giúp ảnh hiển thị cao, to, rõ ràng như poster
             minHeight: { xs: '450px', md: '750px' }, 
           }}
         >
@@ -28,17 +27,15 @@ const ServiceBanner = () => {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              // Giữ nguyên left center để thấy hộp quà
               objectPosition: 'left center', 
               display: 'block',
               position: 'absolute',
               inset: 0,
-              // Đã xóa transform: scale(...)
             }}
           />
         </Grid>
 
-        {/* --- CỘT PHẢI: NỘI DUNG (Giãn theo chiều cao ảnh) --- */}
+        {/* --- CỘT PHẢI: NỘI DUNG --- */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Box
             sx={{
@@ -49,14 +46,13 @@ const ServiceBanner = () => {
               textAlign: 'center',
               height: '100%',
               bgcolor: '#ffffff',
-              // Padding vừa phải để nội dung tập trung ở giữa
               p: { xs: 6, md: 8 }, 
             }}
           >
             <Typography 
               variant="h4" 
               sx={{ 
-                fontSize: { xs: '1rem', md: '1.5rem', lg: '1.5rem' }, // Tăng cỡ chữ lên cho cân xứng với ảnh to
+                fontSize: { xs: '1rem', md: '1.5rem', lg: '1.5rem' },
                 color: 'text.primary',
                 mb: 3,
                 fontWeight: 600,
@@ -81,18 +77,39 @@ const ServiceBanner = () => {
               virtual appointment with a MAJewelry client advisor.
             </Typography>
 
+            {/* --- PHẦN LINK ĐÃ SỬA --- */}
             <Link 
               component={RouterLink} 
               to="/appointment" 
-              underline="hover" 
+              underline="none" // 1. Tắt gạch chân mặc định
               sx={{
                 fontSize: '1.1rem',
                 fontWeight: 500,
                 color: 'text.primary',
-                display: 'flex',
+                display: 'inline-flex', // Dùng inline-flex để gạch chân vừa khít với nội dung
                 alignItems: 'center',
+                position: 'relative', // 2. Để định vị đường kẻ
                 transition: 'color 0.3s',
-                '&:hover': { color: '#81d8d0' }
+                
+                // 3. Tạo đường gạch chân ảo
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  width: '0%', // Ban đầu độ rộng bằng 0
+                  height: '2px', // Độ dày
+                  bottom: '-2px', // Khoảng cách so với chữ (chỉnh số âm để đẩy xuống)
+                  left: 0,
+                  backgroundColor: TIFFANY_BLUE, // Màu xanh Tiffany
+                  transition: 'width 0.3s ease-in-out', // Hiệu ứng trượt
+                },
+
+                // 4. Khi Hover
+                '&:hover': { 
+                  color: '#000', // Đổi màu chữ (nếu muốn)
+                  '&::after': {
+                    width: '100%', // Đường gạch chân chạy ra 100%
+                  }
+                }
               }}
             >
               Book an Appointment <ChevronRightIcon sx={{ fontSize: '1.2em', ml: 0.5 }} />

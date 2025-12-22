@@ -19,7 +19,7 @@ import {
   Slide,
   useTheme,
   useMediaQuery,
-  Link, // <--- ĐÃ THÊM IMPORT NÀY
+  Link,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -41,6 +41,8 @@ const navLinks = [
   { label: "Jewelry", href: "/jewelry" },
   { label: "Contact", href: "/contact" },
 ];
+
+const TIFFANY_BLUE = "#81d8d0"; // Màu xanh Tiffany
 
 function ElevationScroll(props) {
   const { children, window } = props;
@@ -75,7 +77,7 @@ const Header = (props) => {
   const drawerContent = (
     <Box sx={{ width: 300, pt: 2, height: "100%", position: "relative" }} role="presentation">
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 3, pb: 2, borderBottom: 1, borderColor: "divider" }}>
-        <Typography variant="h6" sx={{ fontFamily: "serif", textTransform: "uppercase", letterSpacing: 1 }}>
+        <Typography variant="h6" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
           Menu
         </Typography>
         <IconButton onClick={handleDrawerToggle}>
@@ -94,9 +96,10 @@ const Header = (props) => {
               px: 3,
               borderBottom: "1px solid",
               borderColor: "divider",
-              color: "text.primary",
+              color: location.pathname === item.href ? "text.primary" : "text.secondary",
               textDecoration: "none",
-              "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+              bgcolor: location.pathname === item.href ? "action.hover" : "transparent",
+              "&:hover": { bgcolor: "action.hover", color: "text.primary" },
             }}
           >
             <ListItemText
@@ -105,7 +108,8 @@ const Header = (props) => {
                 fontSize: "0.875rem",
                 textTransform: "uppercase",
                 letterSpacing: 1,
-                fontWeight: 500,
+                // In đậm nếu đang active
+                fontWeight: location.pathname === item.href ? 700 : 500,
               }}
             />
           </ListItem>
@@ -154,7 +158,7 @@ const Header = (props) => {
                       fontSize: "0.75rem",
                       fontWeight: 600,
                       letterSpacing: 1,
-                      "&:hover": { color: "primary.main", bgcolor: "transparent" },
+                      "&:hover": { color: TIFFANY_BLUE, bgcolor: "transparent" },
                     }}
                   >
                     Client Care
@@ -170,7 +174,6 @@ const Header = (props) => {
                   position: "absolute",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  fontFamily: "serif",
                   fontWeight: "bold",
                   letterSpacing: 4,
                   textTransform: "uppercase",
@@ -178,6 +181,11 @@ const Header = (props) => {
                   textDecoration: "none",
                   fontSize: { xs: "1.5rem", md: "1.75rem" },
                   whiteSpace: "nowrap",
+                  "&:hover": {
+                    color: "text.primary",
+                    textDecoration: "none",
+                    cursor: "pointer"
+                  }
                 }}
               >
                 MAJewelry
@@ -196,7 +204,15 @@ const Header = (props) => {
                   <Heart size={22} strokeWidth={1.5} />
                 </IconButton>
                 <IconButton component={RouterLink} to="/cart" color="inherit">
-                  <Badge badgeContent={2} color="primary" sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16 } }}>
+                  <Badge badgeContent={2} sx={{ 
+                      "& .MuiBadge-badge": { 
+                        fontSize: 9, 
+                        height: 16, 
+                        minWidth: 16, 
+                        bgcolor: TIFFANY_BLUE, 
+                        color: "#fff" 
+                      } 
+                    }}>
                     <ShoppingBag size={22} strokeWidth={1.5} />
                   </Badge>
                 </IconButton>
@@ -215,37 +231,62 @@ const Header = (props) => {
                 }}
               >
                 <Stack direction="row" spacing={6}>
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      component={RouterLink}
-                      to={link.href}
-                      underline="none"
-                      sx={{
-                        fontSize: "0.875rem",
-                        fontWeight: 500,
-                        textTransform: "uppercase",
-                        letterSpacing: 2,
-                        color: location.pathname === link.href ? "primary.main" : "text.primary",
-                        position: "relative",
-                        transition: "color 0.3s",
-                        "&:hover": { color: "primary.main" },
-                        "&::after": {
-                          content: '""',
-                          position: "absolute",
-                          width: location.pathname === link.href ? "100%" : "0%",
-                          height: "2px",
-                          bottom: -4,
-                          left: 0,
-                          backgroundColor: "primary.main",
-                          transition: "width 0.3s ease-in-out",
-                        },
-                        "&:hover::after": { width: "100%" },
-                      }}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                  {navLinks.map((link) => {
+                    const isActive = location.pathname === link.href;
+                    return (
+                      <Link
+                        key={link.label}
+                        component={RouterLink}
+                        to={link.href}
+                        underline="none"
+                        data-text={link.label} 
+                        sx={{
+                          fontSize: "0.875rem",
+                          color: "text.primary",
+                          position: "relative",
+                          display: "inline-flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          
+                          // 1. Text chính thức
+                          fontWeight: isActive ? 700 : 300,
+                          transition: "color 0.3s ease",
+
+                          "&::before": {
+                            content: "attr(data-text)",
+                            fontWeight: 700,
+                            height: 0,
+                            overflow: "hidden",
+                            visibility: "hidden",
+                            display: "block", 
+                          },
+
+                          "&:hover": { 
+                            fontWeight: 700,
+                            color: "text.primary" 
+                          },
+
+                          "&::after": {
+                            content: '""',
+                            position: "absolute",
+                            width: isActive ? "100%" : "0%", 
+                            height: "2px",
+                            bottom: -4,
+                            left: 0,
+                            backgroundColor: TIFFANY_BLUE,
+                            transition: "width 0.3s ease-in-out",
+                          },
+
+                          "&:hover::after": { 
+                            width: "100%" 
+                          },
+                        }}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
                 </Stack>
               </Box>
             )}
