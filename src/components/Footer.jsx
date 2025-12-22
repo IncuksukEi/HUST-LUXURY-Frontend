@@ -85,7 +85,7 @@ const LinkList = ({ links }) => (
         to={link.href}
         underline="none"
         sx={{
-          color: "text.secondary",
+          color: "text.primary",
           fontSize: "13px",
           display: "block",
           width: "fit-content",
@@ -123,7 +123,6 @@ const SectionTitle = ({ children }) => (
       textTransform: "uppercase",
       letterSpacing: 1,
       mb: { xs: 0.5, lg: 2 },
-      fontFamily: "serif",
       color: "text.primary",
       fontSize: "0.75rem",
     }}
@@ -138,7 +137,6 @@ const NewsletterForm = () => (
       variant="body2" 
       sx={{ 
         mb: 3, 
-        fontFamily: 'serif', 
         fontSize: '13px', 
         lineHeight: 1.6,
         whiteSpace: "normal",
@@ -152,8 +150,7 @@ const NewsletterForm = () => (
       variant="standard"
       label="Email"
       InputLabelProps={{
-        sx: { 
-            fontFamily: 'serif', 
+        sx: {
             fontSize: '14px',
             color: 'text.secondary',
             "&.Mui-focused": {
@@ -163,7 +160,7 @@ const NewsletterForm = () => (
       }}
       sx={{
         mb: 3,
-        '& .MuiInput-input': { fontFamily: 'serif', fontSize: '14px' },
+        '& .MuiInput-input': { fontSize: '14px' },
         '& .MuiInput-underline:before': { borderBottomColor: 'divider' },
         '& .MuiInput-underline:after': { borderBottomColor: 'text.primary' }
       }}
@@ -174,7 +171,6 @@ const NewsletterForm = () => (
       sx={{
         color: "text.primary",
         borderColor: "text.primary",
-        fontFamily: "serif",
         textTransform: "none",
         borderRadius: 0,
         px: 5,
@@ -211,7 +207,6 @@ const ChangeLocationButton = ({ mobile }) => (
       fullWidth={mobile}
       sx={{
           color: "text.primary",
-          fontFamily: "serif",
           fontWeight: "bold",
           textTransform: "uppercase",
           letterSpacing: 1,
@@ -243,10 +238,9 @@ const Footer = () => {
       component="footer"
       sx={{
         bgcolor: "background.paper",
-        borderTop: "1px solid",
-        borderColor: "divider",
+        borderTop: "8px solid",
+        borderColor: "#81d8d0",
         color: "text.primary",
-        fontFamily: "serif",
       }}
     >
       <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 6 }, pb: 0, px: { xs: 2, md: 4 } }}>
@@ -329,18 +323,18 @@ const Footer = () => {
       </Container>
 
       {/* --- BOTTOM SECTION --- */}
-      <Box sx={{ pb: 4, pt: 3 }}>
+      <Box sx={{ pb: 4 }}>
         <Container maxWidth="xl" sx={{ px: { xs: 2, md: 4 } }}>
           {isMobile ? (
              // --- MOBILE BOTTOM ---
               <Stack direction="column" alignItems="center" spacing={2}>
-                <Typography variant="h4" sx={{ fontFamily: 'serif', fontWeight: 'bold', letterSpacing: 4, textTransform: 'uppercase', fontSize: '1.25rem', textAlign: 'center' }}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', letterSpacing: 4, textTransform: 'uppercase', fontSize: '1.25rem', textAlign: 'center' }}>
                     MAJEWELRY
                 </Typography>
                 <Box sx={{ width: '100%' }}>
                     <SocialIconsStack mobileJustify={true} />
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, fontFamily: 'serif', fontSize: "0.7rem" }}>
+                <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, fontSize: "0.7rem" }}>
                   © 2025 MAJEWELRY. All Rights Reserved.
                 </Typography>
               </Stack>
@@ -358,7 +352,7 @@ const Footer = () => {
                   <ChangeLocationButton mobile={false} />
 
                   {/* Copyright (Right) */}
-                  <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, fontFamily: 'serif', fontSize: "0.7rem" }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, fontSize: "0.7rem" }}>
                      © MAJEWELRY. 2025
                   </Typography>
               </Box>
