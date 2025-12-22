@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Santral W01";
+  src: url("fonts/Taner Ardali - Santral-Light.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Santral W01 Italic';
+  src: url('fonts/Taner Ardali - Santral-LightItalic.otf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 @theme {
   --color-tiffany: #0ABAB5;
   --color-tiffany-light: #81D8D0;
@@ -24,7 +38,7 @@
   --color-input: #e4e4e7;
   
   --font-serif: "Times New Roman", Times, serif;
-  --font-sans: system-ui, Avenir, Helvetica, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Santral W01", system-ui, Avenir, Helvetica, "Helvetica Neue", Arial, sans-serif;
 }
 
 :root {
