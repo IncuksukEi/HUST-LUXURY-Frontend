@@ -2,15 +2,15 @@
 
 @font-face {
   font-family: "Santral W01";
-  src: url("fonts/Taner Ardali - Santral-Light.otf") format("opentype");
-  font-weight: 400;
+  src: url("fonts/Taner Ardali - Santral-Light.woff") format("woff");
+  font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Santral W01 Italic';
-  src: url('fonts/Taner Ardali - Santral-LightItalic.otf') format('truetype');
-  font-weight: 400;
+  src: url('fonts/Taner Ardali - Santral-LightItalic.woff') format('woff');
+  font-weight: normal;
   font-style: normal;
 }
 
@@ -37,7 +37,7 @@
   --color-border: #e4e4e7;
   --color-input: #e4e4e7;
   
-  --font-serif: "Times New Roman", Times, serif;
+  --font-serif: "Santral W01", "Times New Roman", Times, serif;
   --font-sans: "Santral W01", system-ui, Avenir, Helvetica, "Helvetica Neue", Arial, sans-serif;
 }
 

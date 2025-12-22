@@ -10,10 +10,10 @@ import HomePage from './pages/home/HomePage';
 // Tạo theme (Font chữ bạn đã cài)
 const theme = createTheme({
   typography: {
-    fontFamily: '"MyLuxuryFont", "Times New Roman", serif',
+    fontFamily: '"Santral W01", "Times New Roman", serif',
   },
   palette: {
-    primary: { main: '#111' }, // Đen sang trọng
+    primary: { main: '#000' }, // Đen sang trọng
     background: { default: '#fff' }
   }
 });
