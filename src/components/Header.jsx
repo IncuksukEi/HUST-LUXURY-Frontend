@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -20,6 +20,9 @@ import {
   useTheme,
   useMediaQuery,
   Link,
+  Popper,
+  Paper,
+  Fade,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -31,6 +34,7 @@ import {
   User,
   Heart,
   ShoppingBag,
+  ChevronRight,
 } from "lucide-react";
 
 // --- CẤU HÌNH MENU ---
@@ -42,36 +46,36 @@ const navLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
-const TIFFANY_BLUE = "#81d8d0"; // Màu xanh Tiffany
+const TIFFANY_BLUE = "#81d8d0";
 
-function ElevationScroll(props) {
+// --- COMPONENT ẨN HEADER KHI CUỘN XUỐNG ---
+function HideOnScroll(props) {
   const { children, window } = props;
   const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 50,
     target: window ? window() : undefined,
   });
 
-  return React.cloneElement(children, {
-    elevation: trigger ? 4 : 0,
-    sx: {
-      backgroundColor: "background.paper",
-      borderBottom: trigger ? "none" : "1px solid",
-      borderColor: "divider",
-      transition: "all 0.3s ease",
-    },
-  });
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
 }
 
 const Header = (props) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  
+  // --- STATE & REF CHO USER POPUP ---
+  const [userAnchorEl, setUserAnchorEl] = useState(null);
+  const userTimeoutRef = useRef(null);
+  const isUserOpen = Boolean(userAnchorEl);
+
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
-  // Check if user is logged in
   const isLoggedIn = !!localStorage.getItem('token');
 
   const handleDrawerToggle = () => {
@@ -84,6 +88,32 @@ const Header = (props) => {
     } else {
       navigate('/login');
     }
+  };
+
+  // --- LOGIC HOVER USER ---
+  const handleUserMouseEnter = (event) => {
+    if (userTimeoutRef.current) {
+      clearTimeout(userTimeoutRef.current);
+    }
+    setUserAnchorEl(event.currentTarget);
+  };
+
+  const handleUserMouseLeave = () => {
+    userTimeoutRef.current = setTimeout(() => {
+      setUserAnchorEl(null);
+    }, 200);
+  };
+
+  const handleMenuMouseEnter = () => {
+    if (userTimeoutRef.current) {
+      clearTimeout(userTimeoutRef.current);
+    }
+  };
+
+  const handleMenuMouseLeave = () => {
+    userTimeoutRef.current = setTimeout(() => {
+      setUserAnchorEl(null);
+    }, 200);
   };
 
   const drawerContent = (
@@ -120,7 +150,6 @@ const Header = (props) => {
                 fontSize: "0.875rem",
                 textTransform: "uppercase",
                 letterSpacing: 1,
-                // In đậm nếu đang active
                 fontWeight: location.pathname === item.href ? 700 : 500,
               }}
             />
@@ -132,17 +161,29 @@ const Header = (props) => {
 
   return (
     <>
-      <ElevationScroll {...props}>
-        <AppBar position="fixed" color="default" sx={{ bgcolor: "background.paper" }}>
+      <HideOnScroll {...props}>
+        <AppBar 
+          position="fixed" 
+          color="default" 
+          elevation={0}
+          sx={{ 
+            bgcolor: "background.paper",
+            boxShadow: "none",
+            borderBottom: "none",
+          }}
+        >
           <Container maxWidth="xl">
+            {/* --- TOP TOOLBAR: GIẢM HEIGHT XUỐNG 50px --- */}
             <Toolbar
               disableGutters
               sx={{
-                height: 70,
+                height: 50, // Cập nhật height nhỏ hơn (Cũ: 70)
+                minHeight: "50px !important", // Đảm bảo override mặc định của MUI
                 justifyContent: "space-between",
                 position: "relative",
               }}
             >
+              {/* --- LEFT --- */}
               <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
                 <IconButton
                   edge="start"
@@ -154,16 +195,16 @@ const Header = (props) => {
                   <MenuIcon size={24} strokeWidth={1.5} />
                 </IconButton>
                 <IconButton color="inherit" onClick={() => setSearchOpen(!searchOpen)}>
-                  <Search size={22} strokeWidth={1.5} />
+                  <Search size={20} strokeWidth={1.5} /> {/* Giảm size icon chút cho cân đối */}
                 </IconButton>
                 <Box sx={{ display: { xs: "none", lg: "flex" }, alignItems: "center", gap: 2, ml: 1 }}>
                   <IconButton component={RouterLink} to="/stores" color="inherit">
-                    <MapPin size={22} strokeWidth={1.5} />
+                    <MapPin size={20} strokeWidth={1.5} />
                   </IconButton>
                   <Button
                     component={RouterLink}
                     to="/contact"
-                    startIcon={<MessageCircle size={20} strokeWidth={1.5} />}
+                    startIcon={<MessageCircle size={18} strokeWidth={1.5} />}
                     sx={{
                       display: { xs: "none", xl: "flex" },
                       color: "text.primary",
@@ -178,6 +219,7 @@ const Header = (props) => {
                 </Box>
               </Stack>
 
+              {/* --- CENTER: LOGO --- */}
               <Typography
                 variant="h4"
                 component={RouterLink}
@@ -191,7 +233,8 @@ const Header = (props) => {
                   textTransform: "uppercase",
                   color: "text.primary",
                   textDecoration: "none",
-                  fontSize: { xs: "1.5rem", md: "1.75rem" },
+                  // Giảm font size logo một chút cho phù hợp header nhỏ
+                  fontSize: { xs: "1.25rem", md: "1.5rem" }, 
                   whiteSpace: "nowrap",
                   "&:hover": {
                     color: "text.primary",
@@ -203,27 +246,105 @@ const Header = (props) => {
                 MAJewelry
               </Typography>
 
+              {/* --- RIGHT: ICONS --- */}
               <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, lg: 2 }} sx={{ flex: 1, justifyContent: "flex-end" }}>
                 <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 2 }}>
                   <IconButton component={RouterLink} to="/appointment" color="inherit">
-                    <Calendar size={22} strokeWidth={1.5} />
+                    <Calendar size={20} strokeWidth={1.5} />
                   </IconButton>
-                  <IconButton 
-                    color="inherit"
-                    onClick={handleUserClick}
+                  
+                  {/* USER ICON */}
+                  <Box 
+                    sx={{ position: 'relative', display: 'inline-block' }}
+                    onMouseLeave={handleUserMouseLeave}
+                    onMouseEnter={handleUserMouseEnter}
                   >
-                    <User size={22} strokeWidth={1.5} />
-                  </IconButton>
+                    <IconButton 
+                      color={isUserOpen ? "primary" : "inherit"}
+                      onClick={handleUserClick}
+                      sx={{ color: isUserOpen ? TIFFANY_BLUE : 'inherit' }}
+                    >
+                      <User size={20} strokeWidth={1.5} />
+                    </IconButton>
+
+                    <Popper
+                      open={isUserOpen}
+                      anchorEl={userAnchorEl}
+                      placement="bottom-end"
+                      transition
+                      sx={{ zIndex: 1300, pt: 1.5 }}
+                      onMouseEnter={handleMenuMouseEnter}
+                      onMouseLeave={handleMenuMouseLeave}
+                    >
+                      {({ TransitionProps }) => (
+                        <Fade {...TransitionProps} timeout={350}>
+                          <Paper 
+                            elevation={4} 
+                            sx={{ 
+                              width: 320, 
+                              p: 4, 
+                              borderRadius: 0,
+                              bgcolor: 'background.paper',
+                              borderTop: `3px solid ${TIFFANY_BLUE}`,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-start',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2, fontSize: '1.25rem' }}>
+                              Sign in or create an account
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+                              With an account you can check out faster, view your online order history and access your shopping bag or saved items from any device.
+                            </Typography>
+                            <Stack spacing={2} width="100%">
+                              <Link 
+                                component={RouterLink} 
+                                to="/register" 
+                                underline="hover"
+                                sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  fontWeight: 600, 
+                                  color: 'text.primary',
+                                  fontSize: '0.95rem',
+                                  '&:hover': { color: TIFFANY_BLUE }
+                                }}
+                              >
+                                Create an Account <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                              </Link>
+                              <Link 
+                                component={RouterLink} 
+                                to="/login" 
+                                underline="hover"
+                                sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  fontWeight: 600, 
+                                  color: 'text.primary',
+                                  fontSize: '0.95rem',
+                                  '&:hover': { color: TIFFANY_BLUE }
+                                }}
+                              >
+                                Sign In <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                              </Link>
+                            </Stack>
+                          </Paper>
+                        </Fade>
+                      )}
+                    </Popper>
+                  </Box>
                 </Box>
                 <IconButton component={RouterLink} to="/wishlist" color="inherit">
-                  <Heart size={22} strokeWidth={1.5} />
+                  <Heart size={20} strokeWidth={1.5} />
                 </IconButton>
                 <IconButton 
                   color="inherit"
                   onClick={handleUserClick}
                   sx={{ display: { xs: "flex", lg: "none" } }}
                 >
-                  <User size={22} strokeWidth={1.5} />
+                  <User size={20} strokeWidth={1.5} />
                 </IconButton>
                 <IconButton component={RouterLink} to="/cart" color="inherit">
                   <Badge badgeContent={2} sx={{ 
@@ -235,12 +356,13 @@ const Header = (props) => {
                         color: "#fff" 
                       } 
                     }}>
-                    <ShoppingBag size={22} strokeWidth={1.5} />
+                    <ShoppingBag size={20} strokeWidth={1.5} />
                   </Badge>
                 </IconButton>
               </Stack>
             </Toolbar>
 
+            {/* --- DESKTOP MENU --- */}
             {isDesktop && (
               <Box
                 component="nav"
@@ -248,8 +370,7 @@ const Header = (props) => {
                   display: "flex",
                   justifyContent: "center",
                   py: 1.5,
-                  borderTop: "1px solid",
-                  borderColor: "divider",
+                  borderTop: "none"
                 }}
               >
                 <Stack direction="row" spacing={6}>
@@ -263,46 +384,50 @@ const Header = (props) => {
                         underline="none"
                         data-text={link.label} 
                         sx={{
-                          fontSize: "0.875rem",
-                          color: "text.primary",
                           position: "relative",
-                          display: "inline-flex",
-                          flexDirection: "column",
-                          alignItems: "center",
                           cursor: "pointer",
+                          color: "text.primary",
                           
-                          // 1. Text chính thức
+                          display: "inline-block",
+                          textAlign: "center",
+                          textDecoration: "none",
+                          verticalAlign: "middle",
+                          padding: 0,
+                          lineHeight: 1.5,
+                          
+                          // --- CHỈNH FONT SIZE VỀ 14px ---
+                          fontSize: "14px", 
+                          
                           fontWeight: isActive ? 700 : 300,
-                          transition: "color 0.3s ease",
-
+                          transition: "font-weight 0s",
+                          
                           "&::before": {
+                            display: "block",
                             content: "attr(data-text)",
                             fontWeight: 700,
                             height: 0,
                             overflow: "hidden",
                             visibility: "hidden",
-                            display: "block", 
                           },
-
-                          "&:hover": { 
-                            fontWeight: 700,
-                            color: "text.primary" 
-                          },
-
+                          
                           "&::after": {
                             content: '""',
                             position: "absolute",
-                            width: isActive ? "100%" : "0%", 
+                            width: isActive ? "100%" : "0%",
                             height: "2px",
-                            bottom: -4,
+                            bottom: -4, 
                             left: 0,
                             backgroundColor: TIFFANY_BLUE,
                             transition: "width 0.3s ease-in-out",
                           },
-
-                          "&:hover::after": { 
-                            width: "100%" 
-                          },
+                          
+                          "&:hover": {
+                            fontWeight: 700,
+                            color: "text.primary",
+                            "&::after": {
+                              width: "100%",
+                            }
+                          }
                         }}
                       >
                         {link.label}
@@ -341,7 +466,8 @@ const Header = (props) => {
             </Box>
           </Slide>
         </AppBar>
-      </ElevationScroll>
+      </HideOnScroll>
+      
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -354,7 +480,9 @@ const Header = (props) => {
       >
         {drawerContent}
       </Drawer>
-      <Toolbar sx={{ height: isDesktop ? 120 : 70 }} />
+      
+      {/* Cập nhật chiều cao Toolbar đệm: Desktop = 96px (50 + menu), Mobile = 50px */}
+      <Toolbar sx={{ height: isDesktop ? 96 : 50 }} />
     </>
   );
 };
