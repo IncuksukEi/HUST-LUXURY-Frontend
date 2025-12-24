@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
-  Container,
   Box,
   Typography,
   TextField,
@@ -9,88 +8,51 @@ import {
   Link,
   Alert,
   CircularProgress,
-  Paper,
-  InputAdornment,
   IconButton,
-  Divider,
-  Checkbox,
-  FormControlLabel,
 } from '@mui/material';
-import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 
 function Register() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: '',
+  
+  // Register form state
+  const [registerData, setRegisterData] = useState({
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
   });
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleChange = (e) => {
+  const handleRegisterChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setRegisterData((prev) => ({ ...prev, [name]: value }));
     setError('');
   };
 
-  const validateForm = () => {
-    if (!formData.fullName.trim()) {
-      setError('Vui lòng nhập họ tên');
-      return false;
-    }
-    if (!formData.email.trim()) {
-      setError('Vui lòng nhập email');
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError('Email không hợp lệ');
-      return false;
-    }
-    if (formData.password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự');
-      return false;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp');
-      return false;
-    }
-    if (!agreeTerms) {
-      setError('Vui lòng đồng ý với điều khoản sử dụng');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
-
+    if (registerData.password !== registerData.confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+    
     setLoading(true);
     setError('');
 
     try {
-      const response = await axiosClient.post('/auth/register', {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
+      await axiosClient.post('/auth/register', {
+        email: registerData.email,
+        password: registerData.password,
       });
 
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
-      
-      // Chuyển hướng đến trang đăng nhập sau 2 giây
       setTimeout(() => {
         navigate('/login');
       }, 2000);
@@ -105,201 +67,212 @@ function Register() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        py: 4,
-      }}
-    >
-      <Container maxWidth="sm">
-        <Paper
-          elevation={6}
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          bgcolor: '#fff',
+        }}
+      >
+        {/* Left Side - Image */}
+        <Box
           sx={{
-            p: { xs: 3, md: 5 },
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
+            width: { xs: '0%', md: '50%' },
+            display: { xs: 'none', md: 'flex' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: '#E8F5F4',
+            p: { md: 4, lg: 6 },
           }}
         >
-          {/* Logo & Title */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box
+            sx={{
+              maxWidth: 500,
+              textAlign: 'center',
+            }}
+          >
+            {/* Tiffany-style gift boxes image placeholder */}
+            <Box
+              sx={{
+                width: '100%',
+                height: 500,
+                background: 'linear-gradient(135deg, #81D8D0 0%, #0ABAB5 100%)',
+                borderRadius: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 20px 60px rgba(10, 186, 181, 0.3)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Decorative ribbon */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: 40,
+                  bgcolor: 'rgba(255,255,255,0.9)',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                }}
+              />
+              <Box
+                sx={{
+                  position: 'absolute',
+                  width: 40,
+                  height: '100%',
+                  bgcolor: 'rgba(255,255,255,0.9)',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                }}
+              />
+              {/* Bow */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '45%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 80,
+                  height: 80,
+                  bgcolor: 'rgba(255,255,255,0.95)',
+                  borderRadius: '50%',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                }}
+              />
+              <Typography
+                variant="h4"
+                sx={{
+                  position: 'absolute',
+                  bottom: 60,
+                  color: 'white',
+                  fontFamily: '"Times New Roman", Times, serif',
+                  fontWeight: 600,
+                  letterSpacing: '0.15em',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                }}
+              >
+                HUST LUXURY
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Right Side - Form */}
+        <Box
+          sx={{
+            width: { xs: '100%', md: '50%' },
+            display: 'flex',
+            flexDirection: 'column',
+            p: { xs: 2, sm: 4, md: 6 },
+            position: 'relative',
+          }}
+        >
+          {/* Title */}
+          <Box sx={{ mb: { xs: 3, md: 4 } }}>
             <Typography
               variant="h4"
               sx={{
-                fontFamily: 'var(--font-serif)',
-                fontWeight: 700,
-                color: '#0ABAB5',
-                letterSpacing: '0.1em',
-                mb: 1,
+                fontFamily: '"Times New Roman", Times, serif',
+                fontSize: { xs: '1.25rem', md: '1.5rem' },
+                fontWeight: 400,
+                color: '#000',
+                pb: 1.5,
+                borderBottom: '2px solid #000',
+                display: 'inline-block',
               }}
             >
-              HUST LUXURY
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Tạo tài khoản mới
+              Create an account
             </Typography>
           </Box>
 
-          {/* Error Alert */}
+          {/* Alerts */}
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
-
-          {/* Success Alert */}
           {success && (
             <Alert severity="success" sx={{ mb: 3 }}>
               {success}
             </Alert>
           )}
 
-          {/* Register Form */}
-          <Box component="form" onSubmit={handleSubmit}>
-            {/* Full Name */}
+          {/* Create Account Form */}
+          <Box 
+            component="form" 
+            onSubmit={handleRegisterSubmit}
+          >
             <TextField
               fullWidth
-              label="Họ và tên"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <User size={20} color="#0ABAB5" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            {/* Email */}
-            <TextField
-              fullWidth
-              label="Email"
+              label="Email address"
               name="email"
               type="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={registerData.email}
+              onChange={handleRegisterChange}
               required
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Mail size={20} color="#0ABAB5" />
-                  </InputAdornment>
-                ),
+              variant="standard"
+              sx={{ mb: 4 }}
+              InputLabelProps={{
+                sx: { color: '#666' },
               }}
             />
 
-            {/* Phone */}
-            <TextField
-              fullWidth
-              label="Số điện thoại"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Phone size={20} color="#0ABAB5" />
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Box sx={{ position: 'relative', mb: 4 }}>
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={registerData.password}
+                onChange={handleRegisterChange}
+                required
+                variant="standard"
+                InputLabelProps={{
+                  sx: { color: '#666' },
+                }}
+              />
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                sx={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 16,
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            </Box>
 
-            {/* Password */}
-            <TextField
-              fullWidth
-              label="Mật khẩu"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock size={20} color="#0ABAB5" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+            <Box sx={{ position: 'relative', mb: 4 }}>
+              <TextField
+                fullWidth
+                label="Confirm Password"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={registerData.confirmPassword}
+                onChange={handleRegisterChange}
+                required
+                variant="standard"
+                InputLabelProps={{
+                  sx: { color: '#666' },
+                }}
+              />
+              <IconButton
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                sx={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 16,
+                }}
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            </Box>
 
-            {/* Confirm Password */}
-            <TextField
-              fullWidth
-              label="Xác nhận mật khẩu"
-              name="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock size={20} color="#0ABAB5" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      edge="end"
-                    >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            {/* Terms Checkbox */}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={agreeTerms}
-                  onChange={(e) => setAgreeTerms(e.target.checked)}
-                  sx={{
-                    color: '#0ABAB5',
-                    '&.Mui-checked': { color: '#0ABAB5' },
-                  }}
-                />
-              }
-              label={
-                <Typography variant="body2">
-                  Tôi đồng ý với{' '}
-                  <Link href="#" sx={{ color: '#0ABAB5' }}>
-                    Điều khoản sử dụng
-                  </Link>{' '}
-                  và{' '}
-                  <Link href="#" sx={{ color: '#0ABAB5' }}>
-                    Chính sách bảo mật
-                  </Link>
-                </Typography>
-              }
-              sx={{ mb: 3 }}
-            />
-
-            {/* Submit Button */}
             <Button
               type="submit"
               fullWidth
@@ -307,63 +280,68 @@ function Register() {
               size="large"
               disabled={loading}
               sx={{
-                py: 1.5,
-                bgcolor: '#0ABAB5',
-                '&:hover': { bgcolor: '#008F8A' },
-                fontWeight: 600,
-                fontSize: '1rem',
-                borderRadius: 2,
+                py: 2,
+                bgcolor: '#000',
+                color: '#fff',
+                borderRadius: 0,
+                fontSize: '0.875rem',
+                letterSpacing: '0.1em',
+                '&:hover': { bgcolor: '#333' },
               }}
             >
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                'Đăng ký'
+                'CREATE ACCOUNT'
               )}
             </Button>
-          </Box>
 
-          {/* Divider */}
-          <Divider sx={{ my: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              hoặc
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              *Required Fields
             </Typography>
-          </Divider>
 
-          {/* Login Link */}
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="body1">
-              Đã có tài khoản?{' '}
-              <Link
+            <Typography variant="body2" sx={{ mt: 3, color: '#666' }}>
+              By creating an account, you agree to our{' '}
+              <Link href="#" sx={{ color: '#000' }}>
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="#" sx={{ color: '#000' }}>
+                Privacy Policy
+              </Link>
+              .
+            </Typography>
+
+            {/* Sign In Link */}
+            <Box sx={{ mt: 6, pt: 4, borderTop: '1px solid #eee' }}>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Already have an account?
+              </Typography>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
                 component={RouterLink}
                 to="/login"
                 sx={{
-                  color: '#0ABAB5',
-                  fontWeight: 600,
-                  '&:hover': { textDecoration: 'underline' },
+                  py: 2,
+                  borderColor: '#000',
+                  color: '#000',
+                  borderRadius: 0,
+                  fontSize: '0.875rem',
+                  letterSpacing: '0.1em',
+                  '&:hover': {
+                    borderColor: '#0ABAB5',
+                    bgcolor: 'transparent',
+                  },
                 }}
               >
-                Đăng nhập
-              </Link>
-            </Typography>
+                SIGN IN
+              </Button>
+            </Box>
           </Box>
-
-          {/* Back to Home */}
-          <Box sx={{ textAlign: 'center', mt: 3 }}>
-            <Link
-              component={RouterLink}
-              to="/"
-              sx={{
-                color: 'text.secondary',
-                fontSize: '0.875rem',
-                '&:hover': { color: '#0ABAB5' },
-              }}
-            >
-              ← Quay về trang chủ
-            </Link>
-          </Box>
-        </Paper>
-      </Container>
+        </Box>
+      </Box>
     </Box>
   );
 }
