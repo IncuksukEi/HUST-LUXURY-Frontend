@@ -103,7 +103,7 @@ const LinkList = ({ links }) => (
             height: "1px",
             bottom: 0,
             left: 0,
-            backgroundColor: "text.primary",
+            backgroundColor: "#81d8d0",
             transition: "width 0.3s",
           },
           "&:hover::after": { width: "100%" },

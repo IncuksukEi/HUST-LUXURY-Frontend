@@ -10,16 +10,12 @@ import Experience from '../../components/home/Experience';
 const HomePage = () => {
   return (
     <Box sx={{ bgcolor: '#fff', minHeight: '100vh', pb: 0 }}>
-      {/* 1. Video Teaser Section */}
       <VideoTeaser />
 
-      {/* 2. Highlight Categories Section */}
       <HighlightCategories />
 
-      {/* 3. Service Banner Section */}
       <ServiceBanner />
 
-      {/* 4. Experience Section */}
       <Experience />
     </Box>
   );

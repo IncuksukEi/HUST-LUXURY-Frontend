@@ -25,7 +25,7 @@ const ITEMS = [
 const HighlightCategories = () => {
   return (
     <Container maxWidth="xl" sx={{ mb: 10, mt: 8 }}>
-      <Typography variant="h4" align="center" sx={{ mb: 6 }}>
+      <Typography variant="h4" align="center" sx={{ mb: 6, fontWeight: 600, fontSize: { xs: '1rem', sm: '1.5rem' } }}>
         Find the Perfect Gift
       </Typography>
       
@@ -40,19 +40,13 @@ const HighlightCategories = () => {
                 display: 'block', 
                 color: 'text.primary',
                 
-                // --- HOVER EFFECTS ---
-                
-                // 1. Zoom ảnh
                 '&:hover .category-image': { transform: 'scale(1.05)' },
                 
-                // 2. Đổi màu mũi tên sang TIFFANY_BLUE (Thay vì GOLD_COLOR)
                 '&:hover .arrow-icon': { color: TIFFANY_BLUE },
                 
-                // 3. Kích hoạt gạch chân chạy ra
                 '&:hover .title-text::after': { width: '100%' }
               }}
             >
-              {/* Khung chứa ảnh */}
               <Box 
                 sx={{ 
                   position: 'relative', 
@@ -84,7 +78,8 @@ const HighlightCategories = () => {
                   className="title-text" 
                   variant="h6" 
                   sx={{
-                    fontWeight: 500, 
+                    fontWeight: 400,
+                    fontSize: { xs: '0.5rem', sm: '0.875rem' },
                     letterSpacing: 1,
                     position: 'relative', 
                     width: 'fit-content', 

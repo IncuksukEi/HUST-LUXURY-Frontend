@@ -1,21 +1,19 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, Link } from '@mui/material';
+import { Box, Container, Grid, Typography, Stack } from '@mui/material'; // Thêm Stack
 import { Link as RouterLink } from 'react-router-dom';
 
 import { 
-  Inventory2Outlined,      
+  Inventory2Outlined,       
   RoomServiceOutlined,     
   CalendarTodayOutlined,   
   CardGiftcardOutlined     
 } from '@mui/icons-material';
 
-// --- FIX 1: Dùng Named Import từ @mui/icons-material ---
-// Cách này đảm bảo lấy đúng Component function, tránh lỗi "got: object"
 const TIFFANY_BLUE = '#81d8d0'; 
 
 // Icon mũi tên nhỏ
 const ArrowIcon = () => (
-  <Box component="span" sx={{ fontSize: '0.8em', ml: 0.5 }}>›</Box>
+  <Box component="span" sx={{ fontSize: '1.2em', ml: 0.5, lineHeight: 1 }}>›</Box>
 );
 
 const EXPERIENCES = [
@@ -51,127 +49,121 @@ const EXPERIENCES = [
 
 const Experience = () => {
   return (
-    <Box sx={{ py: 10, bgcolor: '#ffffff' }}>
+    // 1. GIẢM MARGIN: Giảm py từ 10 xuống 6 (hoặc 5 nếu muốn nhỏ hơn nữa)
+    <Box component="section" sx={{ py: { xs: 5, md: 6 }, bgcolor: 'rgb(250, 250, 250)' }}>
       <Container maxWidth="xl">
         <Typography 
           variant="h4" 
           align="center" 
           sx={{
-            mb: 8,
-            fontFamily: 'Santral W01, sans-serif',
-            fontSize: { xs: '1rem', md: '1.5rem' },
+            mb: 6, // Giảm margin-bottom của tiêu đề cho gần nội dung hơn (cũ là 8)
+            fontFamily: 'serif',
+            fontSize: { xs: '1.5rem', md: '2rem' },
             fontWeight: 600,
-            fontStyle: 'normal'
+            letterSpacing: 1
           }}
         >
           The MAJewelry Experience
         </Typography>
 
-        <Grid container spacing={4} justifyContent="center">
+        {/* 2. CÂN BẰNG KHOẢNG CÁCH: spacing={4} giúp khoảng cách giữa 4 cột đều nhau */}
+        <Grid container spacing={4} justifyContent="center" alignItems="stretch">
           {EXPERIENCES.map((exp, index) => {
             const IconComponent = exp.icon;
             
             return (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+              <Grid item xs={12} sm={6} md={3} key={index} sx={{ display: 'flex' }}>
                 <Box
                   component={RouterLink}
                   to={exp.path}
                   sx={{
                     textDecoration: 'none', 
                     color: 'text.primary',
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'pointer',
+                    
+                    // Sử dụng Flex column để canh chỉnh
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     textAlign: 'center',
-                    cursor: 'pointer',
-                    height: '100%',
-                    px: 2,
                     
-                    // --- PARENT HOVER EFFECTS ---
-                    // Khi hover vào khối cha (Box này):
-                    transition: 'all 0.3s ease',
+                    // Padding trong để nội dung không bị sát
+                    p: 2, 
                     
-                    // 1. Icon nhảy lên
-                    '&:hover .experience-icon': { 
-                      transform: 'translateY(-5px)', 
-                      color: TIFFANY_BLUE // (Tuỳ chọn) Đổi màu icon luôn nếu thích
-                    },
-                    
-                    // 2. Kích hoạt hiệu ứng gạch chân của .link-text
-                    '&:hover .link-text::after': { 
-                      width: '100%', // Dãn ra toàn bộ
-                    }
+                    '&:hover .link-text::after': { width: '100%' }
                   }}
                 >
-                  {/* Icon */}
-                  <Box sx={{ mb: 3, height: 60, display: 'flex', alignItems: 'center' }}>
-                    {IconComponent && (
-                      <IconComponent 
-                        className="experience-icon"
-                        sx={{ 
-                          fontSize: 50, 
+                  {/* Sử dụng Stack để kiểm soát khoảng cách dọc đều nhau */}
+                  <Stack spacing={2} alignItems="center" sx={{ height: '100%', width: '100%' }}>
+                    
+                    {/* ICON: Cố định chiều cao để thẳng hàng */}
+                    <Box sx={{ height: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {IconComponent && (
+                        <IconComponent sx={{ fontSize: 32, color: 'text.primary' }} />
+                      )}
+                    </Box>
+                    
+                    {/* TITLE */}
+                    <Typography 
+                      variant="h6" 
+                      sx={{
+                        fontWeight: 600, 
+                        fontSize: '1rem', 
+                        letterSpacing: 0.5,
+                        minHeight: '2.5rem', // Giữ chỗ cho tiêu đề 2 dòng
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {exp.title}
+                    </Typography>
+
+                    {/* DESCRIPTION */}
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      sx={{ 
+                        fontWeight: 400,
+                        lineHeight: 1.6,
+                        maxWidth: '280px', 
+                        flexGrow: 1, // Đẩy Link xuống đáy
+                      }}
+                    >
+                      {exp.desc}
+                    </Typography>
+
+                    {/* LINK TEXT */}
+                    <Box>
+                      <Typography 
+                        className="link-text"
+                        variant="body1"
+                        sx={{
+                          fontWeight: 400,
+                          fontSize: '0.875rem',
                           color: 'text.primary',
-                          transition: 'all 0.3s ease'
-                        }} 
-                      />
-                    )}
-                  </Box>
-                  
-                  {/* Title */}
-                  <Typography 
-                    variant="h6" 
-                    sx={{
-                      fontWeight: 600, 
-                      fontSize: '.875rem', 
-                      mb: 2,
-                      letterSpacing: 0.5
-                    }}
-                  >
-                    {exp.title}
-                  </Typography>
-
-                  {/* Description */}
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    sx={{ 
-                      mb: 3,
-                      maxWidth: '280px', 
-                      lineHeight: 1.6,
-                      flexGrow: 1 
-                    }}
-                  >
-                    {exp.desc}
-                  </Typography>
-
-                  {/* Link Text - Chứa hiệu ứng gạch chân */}
-                  <Typography 
-                    className="link-text"
-                    variant="body1"
-                    sx={{
-                      fontWeight: 500,
-                      fontSize: '0.95rem',
-                      color: 'text.primary',
-                      display: 'flex',
-                      alignItems: 'center',
-                      position: 'relative', // Bắt buộc để định vị đường gạch chân
-                      width: 'fit-content', // Chỉ gạch chân đúng độ dài chữ
-                      
-                      // Tạo đường gạch chân giả
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        width: '0%', // Ban đầu ẩn (độ rộng 0)
-                        height: '1px', // Độ dày
-                        bgcolor: TIFFANY_BLUE, // Màu #81d8d0
-                        transition: 'width 0.4s ease-in-out', // Chạy từ từ
-                      }
-                    }}
-                  >
-                    {exp.linkText} <ArrowIcon />
-                  </Typography>
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          position: 'relative',
+                          transition: 'color 0.3s',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: -2,
+                            left: 0,
+                            width: '0%', 
+                            height: '1px', 
+                            bgcolor: TIFFANY_BLUE, 
+                            transition: 'width 0.3s ease-in-out',
+                          }
+                        }}
+                      >
+                        {exp.linkText} <ArrowIcon />
+                      </Typography>
+                    </Box>
+                  </Stack>
                 </Box>
               </Grid>
             )
