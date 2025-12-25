@@ -3,7 +3,7 @@ import { Box, Grid, Typography, Button } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 const MEDIA = {
-  videoMp4: "//media.tiffany.com/is/content/tiffanydm/2025_HOLIDAY_ATJ_AnthemVideo_16x9_1-3",
+  videoMp4: "video/VCA_DIAMOND BREEZE_MAJEURE DESKTOP_TEMPS 2_4000x2000.mp4",
   videoPoster: "//media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_ATJ_AnthemVideo_16x9_1-2?$tile$&&hei=900",
 };
 
