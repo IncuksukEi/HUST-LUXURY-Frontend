@@ -24,14 +24,10 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      
-      {/* Layout Flexbox để Footer luôn ở dưới cùng */}
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         
-        {/* Header luôn hiển thị */}
         <Header />
 
-        {/* Phần nội dung thay đổi theo Router */}
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -40,7 +36,6 @@ function App() {
           </Routes>
         </Box>
 
-        {/* Footer luôn hiển thị */}
         <Footer />
         
       </Box>
