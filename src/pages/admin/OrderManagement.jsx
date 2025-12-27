@@ -16,7 +16,8 @@ const OrderManagement = () => {
         try {
             setLoading(true);
             const response = await axiosClient.get('/adorders');
-            setOrders(response.data);
+            console.log("Orders Data:", response.data);
+            setOrders(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("Failed to fetch orders:", error);
             // message.error("Failed to fetch orders");

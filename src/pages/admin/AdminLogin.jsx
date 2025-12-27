@@ -32,7 +32,9 @@ const AdminLogin = () => {
             }
         } catch (err) {
             console.error("Login failed:", err);
-            setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+            const status = err.response?.status;
+            const msg = err.response?.data?.message || err.message || 'Login failed.';
+            setError(`Error ${status || ''}: ${msg}`);
         } finally {
             setLoading(false);
         }

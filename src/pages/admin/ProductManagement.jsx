@@ -13,7 +13,8 @@ const ProductManagement = () => {
         try {
             setLoading(true);
             const response = await axiosClient.get('/admin/products');
-            setProducts(response.data);
+            console.log("Product Data:", response.data);
+            setProducts(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("Failed to fetch products:", error);
             // message.error("Failed to fetch products."); // Optional: Don't show error on 404/empty

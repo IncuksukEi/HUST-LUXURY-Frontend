@@ -10,7 +10,6 @@ const ProtectedRoute = () => {
     const isAuthenticated = token && role === 'ADMIN';
 
     if (!isAuthenticated) {
-        // Redirect to login page, but save the current location to redirect back after login
         return <Navigate to="/admin/login" state={{ from: location }} replace />;
     }
 
