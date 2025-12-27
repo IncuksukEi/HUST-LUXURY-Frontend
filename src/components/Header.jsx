@@ -23,7 +23,6 @@ import {
   Popper,
   Paper,
   Fade,
-  Grid,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -38,7 +37,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// --- CẤU HÌNH MENU ---
+// --- CẤU HÌNH MENU CHÍNH ---
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
@@ -49,30 +48,30 @@ const navLinks = [
 
 const TIFFANY_BLUE = "#81d8d0";
 
-// --- MOCK DATA ---
+// --- MOCK DATA (Đã refactor sang dạng Object) ---
 const JEWELRY_MENU_DATA = {
   categories: [
-    "Necklaces & Pendants",
-    "Earrings",
-    "Bracelets",
-    "Rings",
-    "Brooches",
-    "Explore All Jewelry >"
+    { label: "Necklaces & Pendants", href: "/jewelry/shop/necklaces-pendants" },
+    { label: "Earrings", href: "/jewelry/shop/earrings" },
+    { label: "Bracelets", href: "/jewelry/shop/bracelets" },
+    { label: "Rings", href: "/jewelry/shop/rings" },
+    { label: "Brooches", href: "/jewelry/shop/brooches" },
+    { label: "Explore All Jewelry >", href: "/jewelry" }
   ],
   collections: [
-    "Tiffany HardWear",
-    "Tiffany Lock",
-    "Tiffany Knot",
-    "Tiffany T",
-    "Bird on a Rock",
-    "Sixteen Stone",
-    "Elsa Peretti™",
-    "Return to Tiffany™",
-    "Explore All Jewelry Collections >"
+    { label: "Tiffany HardWear", href: "/jewelry/shop/tiffany-hardwear" },
+    { label: "Tiffany Lock", href: "/jewelry/shop/tiffany-lock" },
+    { label: "Tiffany Knot", href: "/jewelry/shop/tiffany-knot" },
+    { label: "Tiffany T", href: "/jewelry/shop/tiffany-t" },
+    { label: "Bird on a Rock", href: "/jewelry/shop/bird-on-a-rock" },
+    { label: "Sixteen Stone", href: "/jewelry/shop/sixteen-stone" },
+    { label: "Elsa Peretti™", href: "/jewelry/shop/elsa-peretti" },
+    { label: "Return to Tiffany™", href: "/jewelry/shop/return-to-tiffany" },
+    { label: "Explore All Jewelry Collections >", href: "/collections" }
   ],
   featured: [
-    "New Arrivals",
-    "Most Popular Jewelry",
+    { label: "New Arrivals", href: "/jewelry/shop/new-jewelry/" },
+    { label: "Most Popular Jewelry", href: "/jewelry/shop/most-popular-jewelry/" },
   ],
   image: "https://media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_NAV_Gifts?$tile$&wid=544&hei=368&fmt=webp"
 };
@@ -155,7 +154,7 @@ const Header = (props) => {
   };
 
   const drawerContent = (
-    <Box sx={{ width: 300, pt: 2, height: "100%", position: "relative" }} role="presentation">
+    <Box sx={{ width: 300, pt: 2, pb: 2, height: "100%", position: "relative" }} role="presentation">
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 3, pb: 2, borderBottom: 1, borderColor: "divider" }}>
         <Typography variant="h6" sx={{ textTransform: "uppercase", letterSpacing: 1 }}>
           Menu
@@ -223,6 +222,8 @@ const Header = (props) => {
             boxShadow: "none",
             borderBottom: "none",
             zIndex: 1300,
+            pt: 2,
+            pb: 2
           }}
         >
           <Container maxWidth="xl">
@@ -491,38 +492,33 @@ const Header = (props) => {
                         <Link
                           key={index}
                           component={RouterLink}
-                          to="#"
-                          underline="none" // Tắt gạch chân mặc định
+                          to={item.href} // Dùng trực tiếp href từ object
+                          underline="none"
                           sx={{
                             color: "text.secondary",
                             fontSize: "0.85rem",
-                            fontWeight: item.includes("Explore") ? 600 : 400,
+                            fontWeight: item.label.includes("Explore") ? 600 : 400,
                             display: "block",
-                            width: "fit-content", // Quan trọng: Để gạch chân vừa khít chữ
-                            position: "relative", // Để định vị gạch chân
+                            width: "fit-content",
+                            position: "relative",
                             whiteSpace: "normal",
                             wordWrap: "break-word",
                             transition: "color 0.3s",
-
-                            // Hiệu ứng gạch chân
                             "&::after": {
                               content: '""',
                               position: "absolute",
-                              bottom: -2, // Khoảng cách gạch chân so với chữ
+                              bottom: -2,
                               left: 0,
                               width: "0%",
                               height: "1px",
-                              backgroundColor: "#81d8d0", // Màu Tiffany Blue
+                              backgroundColor: "#81d8d0",
                               transition: "width 0.3s ease-in-out",
                             },
-                            "&:hover::after": {
-                              width: "100%",
-                            },
-                            // Đảm bảo không đổi màu chữ khi hover
+                            "&:hover::after": { width: "100%" },
                             "&:hover": { color: "text.secondary" }
                           }}
                         >
-                          {item}
+                          {item.label}
                         </Link>
                       ))}
                     </Stack>
@@ -538,18 +534,17 @@ const Header = (props) => {
                         <Link
                           key={index}
                           component={RouterLink}
-                          to="#"
+                          to={item.href} // Dùng trực tiếp href từ object
                           underline="none"
                           sx={{
                             color: "text.secondary",
                             fontSize: "0.85rem",
-                            fontWeight: item.includes("Explore") ? 600 : 400,
+                            fontWeight: item.label.includes("Explore") ? 600 : 400,
                             display: "block",
                             width: "fit-content",
                             position: "relative",
                             whiteSpace: "normal",
                             wordWrap: "break-word",
-
                             "&::after": {
                               content: '""',
                               position: "absolute",
@@ -560,13 +555,11 @@ const Header = (props) => {
                               backgroundColor: "#81d8d0",
                               transition: "width 0.3s ease-in-out",
                             },
-                            "&:hover::after": {
-                              width: "100%",
-                            },
+                            "&:hover::after": { width: "100%" },
                             "&:hover": { color: "text.secondary" }
                           }}
                         >
-                          {item}
+                          {item.label}
                         </Link>
                       ))}
                     </Stack>
@@ -582,7 +575,7 @@ const Header = (props) => {
                         <Link
                           key={index}
                           component={RouterLink}
-                          to="#"
+                          to={item.href} // Dùng trực tiếp href từ object
                           underline="none"
                           sx={{
                             color: "text.secondary",
@@ -594,7 +587,6 @@ const Header = (props) => {
                             overflowWrap: "break-word",
                             wordWrap: "break-word",
                             lineHeight: 1.5,
-
                             "&::after": {
                               content: '""',
                               position: "absolute",
@@ -605,19 +597,17 @@ const Header = (props) => {
                               backgroundColor: "#81d8d0",
                               transition: "width 0.3s ease-in-out",
                             },
-                            "&:hover::after": {
-                              width: "100%",
-                            },
+                            "&:hover::after": { width: "100%" },
                             "&:hover": { color: "text.secondary" }
                           }}
                         >
-                          {item}
+                          {item.label}
                         </Link>
                       ))}
                     </Stack>
                   </Box>
 
-                  {/* --- CỘT 4: IMAGE (GIỮ NGUYÊN NHƯ ĐÃ SỬA TRƯỚC ĐÓ) --- */}
+                  {/* --- CỘT 4: IMAGE (Không đổi) --- */}
                   <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column" }}>
                     <Box
                       sx={{
@@ -700,7 +690,7 @@ const Header = (props) => {
         {drawerContent}
       </Drawer>
 
-      <Toolbar sx={{ height: isDesktop ? 96 : 50 }} />
+      <Toolbar sx={{ height: isDesktop ? 128 : 82 }} />
     </>
   );
 };

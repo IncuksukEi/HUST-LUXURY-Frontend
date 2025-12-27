@@ -21,6 +21,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Sterling Display A';
+  src: url('fonts/SterlingDisplay Roman.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 @theme {
   --color-tiffany: #0ABAB5;
   --color-tiffany-light: #81D8D0;
@@ -81,13 +88,11 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   font-weight: 600;
   color: #000000;
-  letter-spacing: 0.05em;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-  text-transform: uppercase;
 }
 
 a {
