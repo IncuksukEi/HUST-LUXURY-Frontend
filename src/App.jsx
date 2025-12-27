@@ -8,6 +8,8 @@ import Footer from './components/Footer';
 import HomePage from './pages/home/HomePage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import JewelryPage from './pages/jewelry/JewelryPage';
+import JewelryShopPage from './pages/jewelry/shop/JewelryShopPage';
 
 // Tạo theme (Font chữ bạn đã cài)
 const theme = createTheme({
@@ -31,6 +33,8 @@ function App() {
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/jewelry" element={<JewelryPage />} />
+            <Route path="/jewelry/shop/:slug" element={<JewelryShopPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>
