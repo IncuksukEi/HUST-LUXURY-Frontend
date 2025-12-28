@@ -21,6 +21,8 @@ function Register() {
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
+    fullName: ''
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -47,9 +49,11 @@ function Register() {
     setError('');
 
     try {
-      await axiosClient.post('/auth/register', {
+      await axiosClient.post('/auth/signup', {
         email: registerData.email,
         password: registerData.password,
+        phone: registerData.phone,
+        fullName: registerData.fullName,
       });
 
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
@@ -208,10 +212,40 @@ function Register() {
           >
             <TextField
               fullWidth
+              label="Full Name"
+              name="fullName"
+              type="text"
+              value={registerData.fullName}
+              onChange={handleRegisterChange}
+              required
+              variant="standard"
+              sx={{ mb: 4 }}
+              InputLabelProps={{
+                sx: { color: '#666' },
+              }}
+            />
+
+            <TextField
+              fullWidth
               label="Email address"
               name="email"
               type="email"
               value={registerData.email}
+              onChange={handleRegisterChange}
+              required
+              variant="standard"
+              sx={{ mb: 4 }}
+              InputLabelProps={{
+                sx: { color: '#666' },
+              }}
+            />
+
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              type="tel"
+              value={registerData.phone}
               onChange={handleRegisterChange}
               required
               variant="standard"
