@@ -116,6 +116,14 @@ const Header = (props) => {
     else navigate('/login');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUserAnchorEl(null);
+    navigate('/');
+    window.location.reload(); // Reload để cập nhật isLoggedIn state
+  };
+
   // User Hover Logic
   const handleUserMouseEnter = (event) => {
     if (userTimeoutRef.current) clearTimeout(userTimeoutRef.current);
@@ -336,20 +344,86 @@ const Header = (props) => {
                               display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left'
                             }}
                           >
-                            <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2, fontSize: '1.25rem' }}>
-                              Sign in or create an account
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-                              With an account you can check out faster, view your online order history and access your shopping bag or saved items from any device.
-                            </Typography>
-                            <Stack spacing={2} width="100%">
-                              <Link component={RouterLink} to="/register" underline="hover" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: 'text.primary', fontSize: '0.95rem', '&:hover': { color: TIFFANY_BLUE } }}>
-                                Create an Account <ChevronRight size={16} style={{ marginLeft: 4 }} />
-                              </Link>
-                              <Link component={RouterLink} to="/login" underline="hover" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: 'text.primary', fontSize: '0.95rem', '&:hover': { color: TIFFANY_BLUE } }}>
-                                Sign In <ChevronRight size={16} style={{ marginLeft: 4 }} />
-                              </Link>
-                            </Stack>
+                            {isLoggedIn ? (
+                              <>
+                                <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 3, fontSize: '1.25rem' }}>
+                                  My Account
+                                </Typography>
+                                <Stack spacing={2} width="100%">
+                                  <Link 
+                                    component={RouterLink} 
+                                    to="/account" 
+                                    underline="hover" 
+                                    onClick={() => setUserAnchorEl(null)}
+                                    sx={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      fontWeight: 600, 
+                                      color: 'text.primary', 
+                                      fontSize: '0.95rem', 
+                                      cursor: 'pointer',
+                                      '&:hover': { color: TIFFANY_BLUE } 
+                                    }}
+                                  >
+                                    Xem thông tin cá nhân <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                  </Link>
+                                  <Link 
+                                    component={RouterLink} 
+                                    to="/account/change-password" 
+                                    underline="hover" 
+                                    onClick={() => setUserAnchorEl(null)}
+                                    sx={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      fontWeight: 600, 
+                                      color: 'text.primary', 
+                                      fontSize: '0.95rem', 
+                                      cursor: 'pointer',
+                                      '&:hover': { color: TIFFANY_BLUE } 
+                                    }}
+                                  >
+                                    Đổi mật khẩu <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                  </Link>
+                                  <Link 
+                                    component="button"
+                                    onClick={handleLogout}
+                                    underline="hover" 
+                                    sx={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      fontWeight: 600, 
+                                      color: 'text.primary', 
+                                      fontSize: '0.95rem', 
+                                      cursor: 'pointer',
+                                      border: 'none',
+                                      background: 'none',
+                                      padding: 0,
+                                      textAlign: 'left',
+                                      '&:hover': { color: TIFFANY_BLUE } 
+                                    }}
+                                  >
+                                    Đăng xuất <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                  </Link>
+                                </Stack>
+                              </>
+                            ) : (
+                              <>
+                                <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2, fontSize: '1.25rem' }}>
+                                  Sign in or create an account
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+                                  With an account you can check out faster, view your online order history and access your shopping bag or saved items from any device.
+                                </Typography>
+                                <Stack spacing={2} width="100%">
+                                  <Link component={RouterLink} to="/register" underline="hover" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: 'text.primary', fontSize: '0.95rem', '&:hover': { color: TIFFANY_BLUE } }}>
+                                    Create an Account <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                  </Link>
+                                  <Link component={RouterLink} to="/login" underline="hover" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: 'text.primary', fontSize: '0.95rem', '&:hover': { color: TIFFANY_BLUE } }}>
+                                    Sign In <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                  </Link>
+                                </Stack>
+                              </>
+                            )}
                           </Paper>
                         </Fade>
                       )}
