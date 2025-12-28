@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import JewelryPage from './pages/jewelry/JewelryPage';
 import JewelryShopPage from './pages/jewelry/shop/JewelryShopPage';
+import AccountPage from './pages/AccountPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 
 // Tạo theme (Font chữ bạn đã cài)
 const theme = createTheme({
@@ -37,6 +39,8 @@ function App() {
             <Route path="/jewelry/shop/:slug" element={<JewelryShopPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/account/change-password" element={<ChangePasswordPage />} />
           </Routes>
         </Box>
 
