@@ -1,183 +1,189 @@
-import React, { useEffect } from 'react'; // Bỏ useState
-import { useParams, Link as RouterLink } from 'react-router-dom';
-import {
-    Box,
-    Container,
-    Typography,
-    Grid,
-    Breadcrumbs,
-    Link,
-    Button
-} from '@mui/material';
-import { ChevronRight, SlidersHorizontal } from 'lucide-react';
+import React from 'react';
+import { useParams } from 'react-router-dom'; 
+import { Box, Container, Typography } from '@mui/material';
+import JewelryCategorySection from '../../../components/jewelry/JewelryCategorySection';
+import JewelryProduct from '../../../components/jewelry/JewelryProduct';
+import JewelryCategoryGrid from '../../../components/jewelry/JewelryCategoryGrid';
+import JewelryCategoryDescription from '../../../components/jewelry/JewelryCategoryDescription';
 
-// --- MOCK DATA GIỮ NGUYÊN ---
-const CATEGORY_INFO = {
+// --- CONSTANTS ĐỂ GENERATE DATA CHUẨN ---
+const COLLECTIONS = ['Tiffany T', 'Tiffany HardWear', 'Elsa Peretti', 'Tiffany Lock', 'Tiffany Knot'];
+const MATERIALS = ['Yellow Gold', 'Rose Gold', 'White Gold', 'Sterling Silver', 'Platinum'];
+const GEMSTONES = ['Diamond', 'Sapphire', 'Ruby', 'Mother-of-pearl', 'No Gemstones'];
+
+// Hàm hỗ trợ lấy ảnh dựa trên category
+const getBaseImageName = (slug) => {
+    if (slug.includes('necklace')) return 'necklaces';
+    if (slug.includes('earring')) return 'earrings'; // Lưu ý: cần đảm bảo file ảnh tồn tại
+    if (slug.includes('bracelet')) return 'necklaces'; // Tạm dùng necklaces nếu chưa có ảnh bracelet đủ bộ
+    if (slug.includes('ring')) return 'hero-ring'; // Tạm dùng hero-ring
+    return 'necklaces'; // Fallback
+};
+
+// --- HÀM GENERATE DATA MỚI ---
+const GENERATE_PRODUCTS = (categoryName, slug, count) => {
+    const baseImg = getBaseImageName(slug);
+    
+    return Array.from({ length: count }, (_, i) => {
+        // Chọn random thuộc tính
+        const collection = COLLECTIONS[i % COLLECTIONS.length];
+        const material = MATERIALS[i % MATERIALS.length];
+        const gemstone = GEMSTONES[i % GEMSTONES.length];
+        
+        // Mỗi sản phẩm chỉ có 1 ảnh
+        const imageIndex = (i % 4) + 1; // Lặp lại ảnh 1-4
+        const image = `/image/${baseImg}-${imageIndex}.webp`;
+
+        return {
+            id: i + 1,
+            name: `${collection} ${categoryName} ${i + 1}`,
+            description: `${collection} design in ${material} ${gemstone !== 'No Gemstones' ? `with ${gemstone}` : ''}. A bold statement of modern love.`,
+            price: `$${(Math.random() * 10000 + 2000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+            category: categoryName,
+            
+            // Các trường quan trọng cho Filter & UI mới
+            collection: collection,
+            material: material,
+            gemstone: gemstone,
+            isNew: i < 4, // 4 sản phẩm đầu tiên là New
+            image: image // Chỉ 1 ảnh
+        };
+    });
+};
+
+const CATEGORY_DATA_MAP = {
+    // URL: /jewelry/shop/necklaces-pendants
     "necklaces-pendants": {
-        title: "Necklaces & Pendants",
-        description: "Discover Tiffany necklaces and pendants, from diamond designs to silver chains.",
-        bannerImage: "/image/pearl-necklace.webp"
+        label: 'Necklaces & Pendants',
+        description: "Merging striking design with exceptional craftsmanship, explore our collection of necklaces and pendants that only Tiffany artisans could imagine. From sterling silver and gold chain necklaces to elegant lariat necklaces and short and long pendants—perfect for layering—featuring diamonds, symbols of love and signature House motifs. Discover the House's iconic link jewelry, as well as iconic lock, knot and T motifs. Our pearl necklace collection features classic styles and modern designs that push the boundaries of creativity. Tiffany's master craftspeople meticulously choose and place the world's most beautiful pearls in our timeless designs. For the ultimate statement, explore the House's coveted diamond necklaces, from solitaire diamond pendants or pavé designs that can be worn every day to elegant styles for your most special occasions. Looking for a meaningful gift? A personalized necklace is a memorable gift that will be worn for years to come. Add an engraving, such as a monogram, significant date or message for a special touch. From contemporary to classic designs, a Tiffany necklace is an expression of love to be treasured for generations.",
+        browseLinks: [
+            { label: 'Browse Earrings', href: '/jewelry/shop/earrings' },
+            { label: 'Browse Bracelets', href: '/jewelry/shop/bracelets' },
+            { label: 'Browse Rings', href: '/jewelry/shop/rings' }
+        ],
+        products: GENERATE_PRODUCTS('Pendant', 'necklaces-pendants', 24),
+        subItems: [ 
+            { name: 'Everyday Diamonds', image: '/image/necklaces-1.webp', href: '/jewelry/shop/necklaces-pendants/everyday' },
+            { name: 'Chain', image: '/image/necklaces-2.webp', href: '/jewelry/shop/necklaces-pendants/chain' },
+            { name: 'Layering', image: '/image/necklaces-3.webp', href: '/jewelry/shop/necklaces-pendants/layering' },
+            { name: 'Bold', image: '/image/necklaces-4.webp', href: '/jewelry/shop/necklaces-pendants/bold' },
+        ]
     },
+
+    // URL: /jewelry/shop/earrings
     "earrings": {
-        title: "Earrings",
-        description: "Explore diamond studs, hoop earrings and more.",
-        bannerImage: "/image/sapphire-earrings.webp"
+        label: 'Earrings',
+        description: "Defined by the House's signature motifs, our earrings capture the inventiveness and creativity for which we're known. From timeless to bold designs, each set of earrings is expertly crafted by our world-renowned artisans using time-honored techniques. Start with our striking collection of stud earrings that bring elegance to everyday style and special occasions. Discover diamond studs, pearl studs and colored gemstone studs that will be treasured for generations. For striking style, explore drop earrings or statement earrings in distinctive shapes you can only find here, from our knot and lock-inspired House motifs to sculptural waves to modern florals. Our diverse collection of heart earrings features sophisticated and playful designs in stud, hoop and drop styles. Explore our coveted collection of diamond earrings, including pavé diamond hoops, solitaire diamond earrings and diamond drop earrings imagined by our artisans. To create the perfect earring stack, pair an unexpected combination of metals, shapes or lengths, such as diamond studs, drop earrings and small hoops. Presented in our iconic Blue Box, Tiffany earrings are extraordinary pieces that will be loved from generation to generation.",
+        browseLinks: [
+            { label: 'Browse Necklaces & Pendants', href: '/jewelry/shop/necklaces-pendants' },
+            { label: 'Browse Rings', href: '/jewelry/shop/rings' },
+            { label: 'Browse Bracelets', href: '/jewelry/shop/bracelets' }
+        ],
+        products: GENERATE_PRODUCTS('Earrings', 'earrings', 20),
+        subItems: [ 
+            { name: 'Stud', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/stud' },
+            { name: 'Hoop', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/hoop' },
+            { name: 'Drop & Dangle', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/drop' },
+            { name: 'Wedding', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/wedding' },
+            { name: 'Statement', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/statement' },
+        ]
     },
+
+    // URL: /jewelry/shop/bracelets
     "bracelets": {
-        title: "Bracelets",
-        description: "Classic chain bracelets, diamond tennis bracelets and bangles.",
-        bannerImage: "/image/emerald-bracelet.webp"
+        label: 'Bracelets',
+        description: "Discover Tiffany's renowned collection of bracelets. From chain bracelets to cuffs to sleek bangles, each design is meticulously crafted by the House's world-renowned artisans who use time-honored techniques and the finest precious metals. Start with our gold and sterling silver bracelets distinguished with signature motifs and captivating details, such as our iconic T, elegant gauge link and lock-inspired symbol. Our bangles are designed in wide or narrow styles and make a bold statement whether worn on their own or combined as a set. Explore stacking bracelets to create the perfect combination. Among our favorite styles to bring together are a diamond tennis bracelet, narrow bangle and link bracelet for a striking contrast of texture. Looking for a meaningful birthday gift? Explore birthstone bracelets for a gift they'll treasure for years to come. Our collection of timeless designs reflects the House's legendary inventiveness and creativity with bracelets only our artisans could imagine.",
+        browseLinks: [
+            { label: 'Browse Necklaces & Pendants', href: '/jewelry/shop/necklaces-pendants' },
+            { label: 'Browse Earrings', href: '/jewelry/shop/earrings' },
+            { label: 'Browse Rings', href: '/jewelry/shop/rings' }
+        ],
+        products: GENERATE_PRODUCTS('Bracelet', 'bracelets', 16),
+        subItems: [
+            { name: 'Chain', image: '/image/emerald-bracelet.webp' },
+            { name: 'Bangle', image: '/image/emerald-bracelet.webp' },
+            { name: 'Tennis', image: '/image/emerald-bracelet.webp' },
+            { name: 'Stacking', image: '/image/emerald-bracelet.webp' },
+            { name: 'Cuff', image: '/image/emerald-bracelet.webp' },
+        ]
     },
+
+    // URL: /jewelry/shop/rings
     "rings": {
-        title: "Rings",
-        description: "Discover engagement rings, wedding bands and fashion rings.",
-        bannerImage: "/image/hero-ring.webp"
-    },
-    "sixteen-stone": {
-        title: "Sixteen Stone",
-        description: "Jean Schlumberger’s masterpiece of love and connection.",
-        bannerImage: "https://media.tiffany.com/is/image/tiffanydm/2025_BOR_JLP_1_Desktop?$tile$&wid=2992&fmt=webp"
-    },
-    "bird-on-a-rock": {
-        title: "Bird on a Rock",
-        description: "Jean Schlumberger’s iconic bird perched on a gemstone.",
-        bannerImage: "https://media.tiffany.com/is/image/tiffanydm/2025_BOR_HP_3_ALT_Desktop?$tile$&wid=2992&fmt=webp"
-    },
-    "collections": {
-        title: "All Collections",
-        description: "Tiffany’s most iconic designs and jewelry collections.",
-        bannerImage: "https://media.tiffany.com/is/image/tiffanydm/2024_Tiffany_Collections_HP_Desktop?$tile$&wid=2992&fmt=webp"
+        label: 'Rings',
+        description: "Explore Tiffany's exceptional collection of rings, where timeless elegance meets contemporary design. From classic solitaire diamond engagement rings to bold statement pieces, each ring is meticulously crafted by our master artisans using the finest materials and time-honored techniques. Discover our iconic collections featuring signature motifs including the T, lock, and knot designs. Whether you're seeking a delicate stacking ring, a striking statement piece, or a meaningful band, our rings are designed to be treasured for generations. Our collection includes everything from everyday elegance to pieces for your most special occasions, all presented in our iconic Blue Box.",
+        browseLinks: [
+            { label: 'Browse Necklaces & Pendants', href: '/jewelry/shop/necklaces-pendants' },
+            { label: 'Browse Earrings', href: '/jewelry/shop/earrings' },
+            { label: 'Browse Bracelets', href: '/jewelry/shop/bracelets' }
+        ],
+        products: GENERATE_PRODUCTS('Ring', 'rings', 16),
+        subItems: [
+            { name: 'Stacking', image: '/image/hero-ring.webp' },
+            { name: 'Statement', image: '/image/hero-ring.webp' },
+            { name: 'Bands', image: '/image/hero-ring.webp' },
+            { name: 'Signet', image: '/image/hero-ring.webp' },
+        ]
     }
 };
 
-const MOCK_PRODUCTS = [
-    { id: 1, name: "T1 Circle Pendant", price: "$6,500", image: "/image/pearl-necklace.webp", category: "necklaces-pendants" },
-    { id: 2, name: "HardWear Link Earrings", price: "$18,000", image: "/image/sapphire-earrings.webp", category: "earrings" },
-    { id: 3, name: "Lock Bangle", price: "$12,000", image: "/image/emerald-bracelet.webp", category: "bracelets" },
-    { id: 4, name: "T True Ring", price: "$2,500", image: "/image/hero-ring.webp", category: "rings" },
-    { id: 5, name: "Bird on a Rock Brooch", price: "$75,000", image: "https://media.tiffany.com/is/image/tiffanydm/2025_BOR_HP_3_ALT_Desktop?$tile$&wid=2992&fmt=webp", category: "bird-on-a-rock" },
-    { id: 6, name: "Diamond Pendant", price: "$4,200", image: "/image/pearl-necklace.webp", category: "necklaces-pendants" },
-    { id: 7, name: "Gold Hoop Earrings", price: "$3,100", image: "/image/sapphire-earrings.webp", category: "earrings" },
-    { id: 8, name: "Wire Bracelet", price: "$5,600", image: "/image/emerald-bracelet.webp", category: "bracelets" },
+// Categories data cho Browse by Category section
+const BROWSE_CATEGORIES = [
+    {
+        label: "Necklaces & Pendants",
+        href: "/jewelry/shop/necklaces-pendants",
+        image: "/image/pearl-necklace.webp"
+    },
+    {
+        label: "Earrings",
+        href: "/jewelry/shop/earrings",
+        image: "/image/sapphire-earrings.webp"
+    },
+    {
+        label: "Bracelets",
+        href: "/jewelry/shop/bracelets",
+        image: "/image/emerald-bracelet.webp"
+    },
+    {
+        label: "Rings",
+        href: "/jewelry/shop/rings",
+        image: "/image/hero-ring.webp"
+    },
 ];
 
 const JewelryShopPage = () => {
     const { slug } = useParams();
+    const currentCategoryData = CATEGORY_DATA_MAP[slug];
 
-    // --- 1. TÍNH TOÁN DỮ LIỆU TRỰC TIẾP (DERIVED STATE) ---
-    // Không cần useEffect vì data có sẵn
-    
-    // Tìm thông tin Category
-    const currentCategory = CATEGORY_INFO[slug] || { 
-        title: "Collection", 
-        description: "Explore our jewelry.", 
-        bannerImage: "/image/hero-ring.webp" 
-    };
-
-    // Lọc sản phẩm
-    let productList = [];
-    if (slug === 'collections') {
-        productList = MOCK_PRODUCTS;
-    } else {
-        const filtered = MOCK_PRODUCTS.filter(p => p.category === slug || slug === 'sixteen-stone');
-        // Nhân bản để demo grid đầy đặn (Logic demo cũ của bạn)
-        productList = [...filtered, ...filtered, ...filtered].slice(0, 8);
+    if (!currentCategoryData) {
+        return (
+            <Container sx={{ py: 10, textAlign: 'center' }}>
+                <Typography variant="h5">Danh mục không tồn tại</Typography>
+                <Typography variant="body1" sx={{mt: 2}}>Vui lòng quay lại trang chủ.</Typography>
+            </Container>
+        );
     }
 
-    // --- 2. SIDE EFFECTS ---
-    // Chỉ dùng useEffect cho các việc tác động bên ngoài React (như scroll window)
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [slug]);
-
-    if (!currentCategory) return <Box sx={{ p: 5, textAlign: 'center' }}>Loading...</Box>;
-
     return (
-        <Box sx={{ pb: 10 }}>
-            {/* --- BREADCRUMBS --- */}
-            <Container maxWidth="xl" sx={{ py: 2, px: { xs: 2, sm: 6.5, md: 6.5 } }}>
-                <Breadcrumbs separator={<ChevronRight size={16} />} aria-label="breadcrumb">
-                    <Link component={RouterLink} to="/" underline="hover" color="inherit" sx={{ fontSize: '0.875rem' }}>
-                        Home
-                    </Link>
-                    <Link component={RouterLink} to="/jewelry" underline="hover" color="inherit" sx={{ fontSize: '0.875rem' }}>
-                        Jewelry
-                    </Link>
-                    <Typography color="text.primary" sx={{ fontSize: '0.875rem', fontWeight: 600 }}>
-                        {currentCategory.title}
-                    </Typography>
-                </Breadcrumbs>
+        <Box>
+            <Container maxWidth="xl" sx={{ py: 8, px: { xs: 2, md: 4 } }}>
+                {/* Header Categories */}
+                <JewelryCategorySection data={currentCategoryData} />
+
+                {/* Product Grid & Filter */}
+                {/* Truyền key=slug để React remount component khi chuyển category, reset state filter */}
+                <JewelryProduct key={slug} products={currentCategoryData.products} />
             </Container>
 
-            {/* --- HERO HEADER --- */}
-            <Box sx={{ textAlign: 'center', mb: 6, pt: 4, px: 2 }}>
-                <Typography variant="h3" component="h1" sx={{ fontFamily: 'Sterling Display A', fontSize: { xs: '2rem', md: '3rem' }, mb: 2 }}>
-                    {currentCategory.title}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '600px', mx: 'auto' }}>
-                    {currentCategory.description}
-                </Typography>
-            </Box>
+            {/* Browse by Category Section */}
+            <JewelryCategoryGrid 
+                categories={BROWSE_CATEGORIES}
+                title="Browse by Category"
+                description="Explore our iconic jewelry designs."
+            />
 
-            {/* --- TOOLBAR --- */}
-            <Box sx={{ borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', mb: 4 }}>
-                <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 6.5, md: 6.5 } }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.5 }}>
-                        <Button startIcon={<SlidersHorizontal size={18} />} color="inherit" sx={{ textTransform: 'none', fontSize: '0.9rem' }}>
-                            Filter
-                        </Button>
-                        <Typography variant="body2" color="text.secondary">
-                            {productList.length} Results
-                        </Typography>
-                        <Button color="inherit" sx={{ textTransform: 'none', fontSize: '0.9rem' }}>
-                            Sort by: Featured
-                        </Button>
-                    </Box>
-                </Container>
-            </Box>
-
-            {/* --- PRODUCT GRID --- */}
-            <Box sx={{ px: { xs: 2, sm: 6.5, md: 6.5 } }}>
-                <Grid container spacing={3}>
-                    {productList.map((product, index) => (
-                        <Grid item key={`${product.id}-${index}`} xs={6} sm={4} md={3}>
-                            <Box sx={{ cursor: 'pointer', group: 'true' }}>
-                                {/* Product Image */}
-                                <Box sx={{ position: 'relative', width: '100%', paddingBottom: '100%', bgcolor: '#f5f5f5', mb: 2, overflow: 'hidden' }}>
-                                    <Box 
-                                        component="img"
-                                        src={product.image}
-                                        alt={product.name}
-                                        sx={{
-                                            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                                            objectFit: 'cover',
-                                            transition: 'transform 0.3s ease',
-                                            '&:hover': { transform: 'scale(1.05)' }
-                                        }}
-                                    />
-                                </Box>
-                                {/* Product Info */}
-                                <Box sx={{ textAlign: 'center' }}>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '0.9rem', md: '1rem' } }}>
-                                        {product.name}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.9rem' }}>
-                                        {product.price}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    ))}
-                </Grid>
-
-                {productList.length === 0 && (
-                    <Box sx={{ textAlign: 'center', py: 10 }}>
-                        <Typography variant="h6" color="text.secondary">
-                            No products found in this collection.
-                        </Typography>
-                    </Box>
-                )}
-            </Box>
+            {/* Category Description Section - Ở cuối trang */}
+            <JewelryCategoryDescription categoryData={currentCategoryData} />
         </Box>
     );
 };
