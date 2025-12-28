@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/home/HomePage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Cart from './pages/Cart';
 import JewelryPage from './pages/jewelry/JewelryPage';
 import JewelryShopPage from './pages/jewelry/shop/JewelryShopPage';
 import AccountPage from './pages/AccountPage';
@@ -29,7 +30,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        
+
         <Header />
 
         <Box component="main" sx={{ flexGrow: 1 }}>
@@ -41,11 +42,12 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/change-password" element={<ChangePasswordPage />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         </Box>
 
         <Footer />
-        
+
       </Box>
     </ThemeProvider>
   );
