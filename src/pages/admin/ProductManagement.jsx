@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Space, message, Image, Modal, Form, Input, InputNumber, Popconfirm } from 'antd';
+import { Table, Button, Space, message, Image, Modal, Form, Input, InputNumber, Popconfirm, Upload } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import axiosClient from '../../api/axiosClient';
 
 const ProductManagement = () => {
@@ -7,6 +8,7 @@ const ProductManagement = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [fileList, setFileList] = useState([]);
     const [form] = Form.useForm();
 
     const fetchProducts = async () => {
@@ -17,7 +19,6 @@ const ProductManagement = () => {
             setProducts(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("Failed to fetch products:", error);
-            // message.error("Failed to fetch products."); // Optional: Don't show error on 404/empty
         } finally {
             setLoading(false);
         }
@@ -29,12 +30,14 @@ const ProductManagement = () => {
 
     const handleAdd = () => {
         setEditingProduct(null);
+        setFileList([]);
         form.resetFields();
         setIsModalOpen(true);
     };
 
     const handleEdit = (record) => {
         setEditingProduct(record);
+        setFileList([]); // Clear file list on edit open
         form.setFieldsValue(record);
         setIsModalOpen(true);
     };
@@ -53,13 +56,33 @@ const ProductManagement = () => {
     const handleOk = () => {
         form.validateFields().then(async (values) => {
             try {
+                const formData = new FormData();
+                formData.append('name', values.name);
+                formData.append('price', values.price);
+                formData.append('stock', values.stock);
+                formData.append('categoryId', values.categoryId);
+
+                if (values.description) formData.append('description', values.description);
+                if (values.category_id_combo) formData.append('category_id_combo', values.category_id_combo);
+                if (values.category_id_uu_dai) formData.append('category_id_uu_dai', values.category_id_uu_dai);
+                if (values.materialId) formData.append('materialId', values.materialId);
+                if (values.collectionId) formData.append('collectionId', values.collectionId);
+
+                if (fileList.length > 0) {
+                    formData.append('file', fileList[0].originFileObj);
+                }
+
                 if (editingProduct) {
-                    // Update
-                    await axiosClient.put(`/admin/products/${editingProduct.productId}`, values);
+                    // Update: POST /api/admin/products/update/{id}
+                    await axiosClient.post(`/admin/products/update/${editingProduct.productId}`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    });
                     message.success('Product updated successfully');
                 } else {
-                    // Create
-                    await axiosClient.post('/admin/products', values);
+                    // Create: POST /api/admin/products
+                    await axiosClient.post('/admin/products', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    });
                     message.success('Product created successfully');
                 }
                 setIsModalOpen(false);
@@ -73,6 +96,14 @@ const ProductManagement = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
+    };
+
+    const onUploadChange = ({ fileList: newFileList }) => {
+        setFileList(newFileList);
+    };
+
+    const beforeUpload = (file) => {
+        return false; // Prevent auto upload
     };
 
     const columns = [
@@ -142,22 +173,43 @@ const ProductManagement = () => {
                     <Form.Item name="price" label="Price" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
-                    <Form.Item name="urlImg" label="Image URL">
-                        <Input />
+
+                    <Form.Item label="Image">
+                        <Upload
+                            listType="picture"
+                            fileList={fileList}
+                            onChange={onUploadChange}
+                            beforeUpload={beforeUpload}
+                            maxCount={1}
+                        >
+                            <Button icon={<UploadOutlined />}>Select Image</Button>
+                        </Upload>
                     </Form.Item>
+
                     <Form.Item name="categoryId" label="Category ID" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
                     <Form.Item name="stock" label="Stock" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
-                    {/* Optional fields based on screenshot */}
-                    <Form.Item name="category_id_uu_dai" label="Category Uu Dai ID">
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
-                    <Form.Item name="category_id_combo" label="Category Combo ID">
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <Form.Item name="materialId" label="Material ID" style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item name="collectionId" label="Collection ID" style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <Form.Item name="category_id_uu_dai" label="Category Uu Dai ID" style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item name="category_id_combo" label="Category Combo ID" style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                    </div>
                 </Form>
             </Modal>
         </div>
