@@ -15,14 +15,16 @@ import axiosClient from '../api/axiosClient';
 
 function Register() {
   const navigate = useNavigate();
-  
+
   // Register form state
   const [registerData, setRegisterData] = useState({
     email: '',
+    fullName: '',
+    phone: '',
     password: '',
     confirmPassword: '',
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,19 +39,21 @@ function Register() {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (registerData.password !== registerData.confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
       return;
     }
-    
+
     setLoading(true);
     setError('');
 
     try {
-      await axiosClient.post('/auth/register', {
+      await axiosClient.post('/auth/signup', {
         email: registerData.email,
         password: registerData.password,
+        phone: registerData.phone,
+        fullName: registerData.fullName,
       });
 
       setSuccess('Đăng ký thành công! Đang chuyển hướng...');
@@ -206,6 +210,34 @@ function Register() {
             component="form" 
             onSubmit={handleRegisterSubmit}
           >
+            <TextField
+              fullWidth
+              label="Full Name"
+              name="fullName"
+              type="text"
+              value={registerData.fullName}
+              onChange={handleRegisterChange}
+              required
+              variant="standard"
+              sx={{ mb: 4 }}
+              InputLabelProps={{
+                sx: { color: '#666' },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Phone"
+              name="phone"
+              type="tel"
+              value={registerData.phone}
+              onChange={handleRegisterChange}
+              required
+              variant="standard"
+              sx={{ mb: 4 }}
+              InputLabelProps={{
+                sx: { color: '#666' },
+              }}
+            />
             <TextField
               fullWidth
               label="Email address"
