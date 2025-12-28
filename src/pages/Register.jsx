@@ -15,16 +15,16 @@ import axiosClient from '../api/axiosClient';
 
 function Register() {
   const navigate = useNavigate();
-  
+
   // Register form state
   const [registerData, setRegisterData] = useState({
     email: '',
+    fullName: '',
+    phone: '',
     password: '',
     confirmPassword: '',
-    phone: '',
-    fullName: ''
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,12 +39,12 @@ function Register() {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (registerData.password !== registerData.confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
       return;
     }
-    
+
     setLoading(true);
     setError('');
 
@@ -224,13 +224,12 @@ function Register() {
                 sx: { color: '#666' },
               }}
             />
-
             <TextField
               fullWidth
-              label="Email address"
-              name="email"
-              type="email"
-              value={registerData.email}
+              label="Phone"
+              name="phone"
+              type="tel"
+              value={registerData.phone}
               onChange={handleRegisterChange}
               required
               variant="standard"
@@ -239,13 +238,12 @@ function Register() {
                 sx: { color: '#666' },
               }}
             />
-
             <TextField
               fullWidth
-              label="Phone"
-              name="phone"
-              type="tel"
-              value={registerData.phone}
+              label="Email address"
+              name="email"
+              type="email"
+              value={registerData.email}
               onChange={handleRegisterChange}
               required
               variant="standard"
