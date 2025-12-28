@@ -15,8 +15,6 @@ target/
 *.ipr
 out/
 
-node_modules/
-
 # --- 3. ECLIPSE / VS CODE (Nếu dùng) ---
 .settings/
 .classpath
