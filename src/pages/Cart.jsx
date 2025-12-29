@@ -35,8 +35,6 @@ import {
   Wrench,
   Info,
 } from 'lucide-react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 
 // Mock data cho recommended products
 const recommendedProducts = [
@@ -858,15 +856,10 @@ function Cart() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
+        minHeight: '60vh',
         bgcolor: '#fff',
       }}
     >
-      <Header />
-
-      <Box component="main" sx={{ flex: 1 }}>
         {loading ? (
           <Box
             sx={{
@@ -950,9 +943,6 @@ function Cart() {
             {isLoggedIn && <RecommendedSection />}
           </>
         )}
-      </Box>
-
-      <Footer />
     </Box>
   );
 }
