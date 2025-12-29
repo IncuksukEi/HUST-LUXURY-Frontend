@@ -15,7 +15,7 @@ const JewelryShopPage = lazy(() => import('./pages/jewelry/shop/JewelryShopPage'
 const AllProductsPage = lazy(() => import('./pages/jewelry/shop/AllProductsPage'));
 const ProductDetailPage = lazy(() => import('./pages/jewelry/ProductDetailPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
-const CartPage = lazy(() => import('./pages/CartPage'));
+const Cart = lazy(() => import('./pages/Cart'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderHistoryPage = lazy(() => import('./pages/OrderHistoryPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
@@ -58,7 +58,7 @@ function App() {
                 <Route path="/jewelry/shop/:slug" element={<JewelryShopPage />} />
                 <Route path="/jewelry/product/:productId" element={<ProductDetailPage />} />
                 <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/cart" element={<CartPage />} />
+                <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/orders" element={<OrderHistoryPage />} />
                 <Route path="/login" element={<Login />} />
