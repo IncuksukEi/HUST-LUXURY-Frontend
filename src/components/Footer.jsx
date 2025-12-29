@@ -95,6 +95,7 @@ const LinkList = ({ links }) => (
           position: "relative",
           transition: "color 0.3s",
           py: 0.2,
+          pl: { xs: 2, lg: 0 }, // Thụt đầu dòng ở mobile, không thụt ở desktop
           "&:hover": { color: "text.primary" },
           "&::after": {
             content: '""',
@@ -102,7 +103,7 @@ const LinkList = ({ links }) => (
             width: "0%",
             height: "1px",
             bottom: 0,
-            left: 0,
+            left: { xs: 2, lg: 0 }, // Thụt đầu dòng ở mobile, không thụt ở desktop
             backgroundColor: "#81d8d0",
             transition: "width 0.3s",
           },
@@ -200,33 +201,6 @@ const SocialIconsStack = ({ mobileJustify = false }) => (
     </Stack>
   );
 
-const ChangeLocationButton = ({ mobile }) => (
-  <Button
-      startIcon={!mobile && <ChevronDown size={16} />}
-      endIcon={mobile && <ChevronDown size={16} />}
-      fullWidth={mobile}
-      sx={{
-          color: "text.primary",
-          fontWeight: "bold",
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          fontSize: "0.75rem",
-          p: mobile ? "12px 16px" : 0,
-          justifyContent: mobile ? "space-between" : "flex-start",
-          minWidth: 0,
-          border: "none",
-          borderRadius: 0,
-          bgcolor: "transparent",
-          "&:hover": {
-              bgcolor: "transparent",
-              color: "primary.main"
-          },
-      }}
-      disableRipple
-  >
-      Change Location: International
-  </Button>
-);
 
 // --- MAIN FOOTER ---
 const Footer = () => {
@@ -261,9 +235,6 @@ const Footer = () => {
                  </AccordionDetails>
                </Accordion>
              ))}
-             <Box sx={{ mt: 1, mx: -2 }}>
-                 <ChangeLocationButton mobile={true} />
-             </Box>
            </Box>
         ) : (
           // --- DESKTOP VIEW ---
@@ -283,7 +254,7 @@ const Footer = () => {
                     display: 'flex', 
                     flexDirection: 'row',
                     justifyContent: 'flex-start',
-                    gap: 15
+                    gap: { md: 8, lg: 12, xl: 15 }
                 }}
             >
                 {Object.values(footerLinks).map((section) => (
@@ -292,7 +263,7 @@ const Footer = () => {
                     sx={{ 
                         width: '15%', 
                         flexShrink: 0,
-                        minWidth: 0 
+                        minWidth: 0
                     }}
                   >
                     <SectionTitle>{section.title}</SectionTitle>
@@ -342,16 +313,13 @@ const Footer = () => {
               <Box 
                 sx={{ 
                     display: 'flex', 
-                    justifyContent: 'space-between', 
+                    justifyContent: 'center', 
                     alignItems: 'center',
                     width: '100%',
                     mt: 8
                 }}
               >
-                  {/* Change Location Button (Left) */}
-                  <ChangeLocationButton mobile={false} />
-
-                  {/* Copyright (Right) */}
+                  {/* Copyright (Center) */}
                   <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, fontSize: "0.7rem" }}>
                      © MAJEWELRY. 2025
                   </Typography>

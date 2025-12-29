@@ -10,28 +10,44 @@ const TIFFANY_BLUE = '#81d8d0'; // Màu xanh chủ đạo cho hover
 const ITEMS = [
   { 
     title: 'Gifts for Her', 
-    image: 'https://media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_STILL_1x1_37-1?$tile$&wid=988&hei=988&fmt=webp' 
+    image: '/image/gfh-hp.webp' 
   },
   { 
     title: 'Diamond Jewelry', 
-    image: 'https://media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_STILL_1x1_11-2?$tile$&wid=988&hei=988&fmt=webp' 
+    image: '/image/diamond-hp.webp' 
   },
   { 
     title: 'Gold Jewelry', 
-    image: 'https://media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_STILL_1x1_4-3?$tile$&wid=988&hei=988&fmt=webp' 
+    image: '/image/gold-hp.webp' 
   },
 ];
 
 const HighlightCategories = () => {
   return (
-    <Container maxWidth="xl" sx={{ mb: 10, mt: 8 }}>
-      <Typography variant="h4" align="center" sx={{ mb: 6, fontWeight: 600, fontSize: { xs: '1rem', sm: '1.5rem' } }}>
+    <Container 
+      maxWidth="xl" 
+      sx={{ 
+        mb: { xs: 6, md: 10 }, 
+        mt: { xs: 4, md: 8 },
+        px: { xs: 2, sm: 3, md: 4 }
+      }}
+    >
+      <Typography 
+        variant="h4" 
+        align="center" 
+        sx={{ 
+          mb: { xs: 4, md: 6 }, 
+          fontWeight: 600, 
+          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
+          fontFamily: '"Times New Roman", Times, serif'
+        }}
+      >
         Find the Perfect Gift
       </Typography>
       
-      <Grid container spacing={4}>
+      <Grid container spacing={{ xs: 3, sm: 4, md: 4 }}>
         {ITEMS.map((item) => (
-          <Grid size={{ xs: 12, md: 4 }} key={item.title}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.title}>
             <Link 
               component={RouterLink} 
               to="/shop" 
@@ -50,7 +66,7 @@ const HighlightCategories = () => {
               <Box 
                 sx={{ 
                   position: 'relative', 
-                  mb: 2,
+                  mb: { xs: 1.5, md: 2 },
                   width: '100%',
                   aspectRatio: '1/1', 
                   overflow: 'hidden', 
@@ -62,28 +78,36 @@ const HighlightCategories = () => {
                   src={item.image}
                   alt={item.title}
                   className="category-image"
+                  loading="lazy"
+                  decoding="async"
                   sx={{ 
                     width: '100%', 
                     height: '100%', 
                     objectFit: 'cover', 
                     display: 'block',
-                    transition: 'transform 0.6s ease', 
+                    transition: 'transform 0.6s ease',
                   }} 
                 />
               </Box>
               
               {/* Tiêu đề và mũi tên */}
-              <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
+              <Stack 
+                direction="row" 
+                justifyContent="center" 
+                alignItems="center" 
+                spacing={{ xs: 0.5, sm: 1 }}
+              >
                 <Typography 
                   className="title-text" 
                   variant="h6" 
                   sx={{
                     fontWeight: 400,
-                    fontSize: { xs: '0.5rem', sm: '0.875rem' },
-                    letterSpacing: 1,
+                    fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                    letterSpacing: { xs: 0.5, sm: 1 },
                     position: 'relative', 
                     width: 'fit-content', 
                     pb: 0.5,
+                    textAlign: 'center',
                     
                     // Đường gạch chân giả
                     '&::after': {
@@ -104,7 +128,10 @@ const HighlightCategories = () => {
                 {/* Icon mũi tên */}
                 <ChevronRightIcon 
                   className="arrow-icon" 
-                  sx={{ transition: 'color 0.3s' }} 
+                  sx={{ 
+                    transition: 'color 0.3s',
+                    fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+                  }} 
                 />
               </Stack>
             </Link>

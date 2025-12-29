@@ -36,6 +36,8 @@ import {
   ShoppingBag,
   ChevronRight,
 } from "lucide-react";
+import { useWishlist } from "../hooks/useWishlist";
+import { useCart } from "../contexts/CartContext";
 
 // --- CẤU HÌNH MENU CHÍNH ---
 const navLinks = [
@@ -73,7 +75,7 @@ const JEWELRY_MENU_DATA = {
     { label: "New Arrivals", href: "/jewelry/shop/new-jewelry/" },
     { label: "Most Popular Jewelry", href: "/jewelry/shop/most-popular-jewelry/" },
   ],
-  image: "https://media.tiffany.com/is/image/tiffanydm/2025_HOLIDAY_NAV_Gifts?$tile$&wid=544&hei=368&fmt=webp"
+  image: "/image/NAV_Gifts.webp"
 };
 
 function HideOnScroll(props) {
@@ -107,6 +109,13 @@ const Header = (props) => {
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
   const isLoggedIn = !!localStorage.getItem('token');
+  const { wishlistCount, wishlist } = useWishlist();
+  const { cartCount } = useCart();
+
+  // --- STATE FOR WISHLIST MENU ---
+  const [wishlistAnchorEl, setWishlistAnchorEl] = useState(null);
+  const wishlistTimeoutRef = useRef(null);
+  const isWishlistOpen = Boolean(wishlistAnchorEl);
 
   // --- HANDLERS ---
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -114,6 +123,21 @@ const Header = (props) => {
   const handleUserClick = () => {
     if (isLoggedIn) navigate('/account');
     else navigate('/login');
+  };
+
+  // Wishlist Hover Logic
+  const handleWishlistMouseEnter = (event) => {
+    if (wishlistTimeoutRef.current) clearTimeout(wishlistTimeoutRef.current);
+    setWishlistAnchorEl(event.currentTarget);
+  };
+  const handleWishlistMouseLeave = () => {
+    wishlistTimeoutRef.current = setTimeout(() => setWishlistAnchorEl(null), 200);
+  };
+  const handleWishlistMenuEnter = () => {
+    if (wishlistTimeoutRef.current) clearTimeout(wishlistTimeoutRef.current);
+  };
+  const handleWishlistMenuLeave = () => {
+    wishlistTimeoutRef.current = setTimeout(() => setWishlistAnchorEl(null), 200);
   };
 
   const handleLogout = () => {
@@ -246,33 +270,39 @@ const Header = (props) => {
               }}
             >
               {/* LEFT */}
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
+              <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, md: 1 }} sx={{ flex: 1, minWidth: 0 }}>
                 <IconButton
                   edge="start"
                   color="inherit"
                   aria-label="menu"
                   onClick={handleDrawerToggle}
-                  sx={{ display: { lg: "none" } }}
+                  sx={{ display: { lg: "none" }, p: { xs: 0.75 } }}
                 >
-                  <MenuIcon size={24} strokeWidth={1.5} />
+                  <MenuIcon size={20} strokeWidth={1.5} />
                 </IconButton>
-                <IconButton color="inherit" onClick={() => setSearchOpen(!searchOpen)}>
-                  <Search size={20} strokeWidth={1.5} />
+                <IconButton 
+                  color="inherit" 
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  sx={{ p: { xs: 0.75 } }}
+                >
+                  <Search size={18} strokeWidth={1.5} />
                 </IconButton>
-                <Box sx={{ display: { xs: "none", lg: "flex" }, alignItems: "center", gap: 2, ml: 1 }}>
-                  <IconButton component={RouterLink} to="/stores" color="inherit">
-                    <MapPin size={20} strokeWidth={1.5} />
+                <Box sx={{ display: { xs: "none", lg: "flex" }, alignItems: "center", gap: 1.5, ml: 1 }}>
+                  <IconButton component={RouterLink} to="/stores" color="inherit" sx={{ p: 0.75 }}>
+                    <MapPin size={18} strokeWidth={1.5} />
                   </IconButton>
                   <Button
                     component={RouterLink}
                     to="/contact"
-                    startIcon={<MessageCircle size={18} strokeWidth={1.5} />}
+                    startIcon={<MessageCircle size={16} strokeWidth={1.5} />}
                     sx={{
                       display: { xs: "none", xl: "flex" },
                       color: "text.primary",
-                      fontSize: "0.75rem",
+                      fontSize: "0.7rem",
                       fontWeight: 600,
-                      letterSpacing: 1,
+                      letterSpacing: 0.5,
+                      px: 1,
+                      py: 0.5,
                       "&:hover": { color: TIFFANY_BLUE, bgcolor: "transparent" },
                     }}
                   >
@@ -291,12 +321,13 @@ const Header = (props) => {
                   left: "50%",
                   transform: "translateX(-50%)",
                   fontWeight: "bold",
-                  letterSpacing: 4,
+                  letterSpacing: { xs: 2, md: 4 },
                   textTransform: "uppercase",
                   color: "text.primary",
                   textDecoration: "none",
-                  fontSize: { xs: "1.25rem", md: "1.5rem" },
+                  fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
                   whiteSpace: "nowrap",
+                  zIndex: 1,
                   "&:hover": { color: "text.primary" }
                 }}
               >
@@ -304,10 +335,10 @@ const Header = (props) => {
               </Typography>
 
               {/* RIGHT */}
-              <Stack direction="row" alignItems="center" spacing={{ xs: 0.5, lg: 2 }} sx={{ flex: 1, justifyContent: "flex-end" }}>
-                <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 2 }}>
-                  <IconButton component={RouterLink} to="/appointment" color="inherit">
-                    <Calendar size={20} strokeWidth={1.5} />
+              <Stack direction="row" alignItems="center" spacing={{ xs: 0, md: 1 }} sx={{ flex: 1, justifyContent: "flex-end", minWidth: 0 }}>
+                <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 1 }}>
+                  <IconButton component={RouterLink} to="/appointment" color="inherit" sx={{ p: 0.75 }}>
+                    <Calendar size={18} strokeWidth={1.5} />
                   </IconButton>
 
                   {/* User Icon */}
@@ -319,9 +350,9 @@ const Header = (props) => {
                     <IconButton
                       color={isUserOpen ? "primary" : "inherit"}
                       onClick={handleUserClick}
-                      sx={{ color: isUserOpen ? TIFFANY_BLUE : 'inherit' }}
+                      sx={{ color: isUserOpen ? TIFFANY_BLUE : 'inherit', p: 0.75 }}
                     >
-                      <User size={20} strokeWidth={1.5} />
+                      <User size={18} strokeWidth={1.5} />
                     </IconButton>
 
                     <Popper
@@ -385,6 +416,23 @@ const Header = (props) => {
                                     Đổi mật khẩu <ChevronRight size={16} style={{ marginLeft: 4 }} />
                                   </Link>
                                   <Link 
+                                    component={RouterLink} 
+                                    to="/orders" 
+                                    underline="hover" 
+                                    onClick={() => setUserAnchorEl(null)}
+                                    sx={{ 
+                                      display: 'flex', 
+                                      alignItems: 'center', 
+                                      fontWeight: 600, 
+                                      color: 'text.primary', 
+                                      fontSize: '0.95rem', 
+                                      cursor: 'pointer',
+                                      '&:hover': { color: TIFFANY_BLUE } 
+                                    }}
+                                  >
+                                    Lịch sử đơn hàng <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                  </Link>
+                                  <Link 
                                     component="button"
                                     onClick={handleLogout}
                                     underline="hover" 
@@ -430,9 +478,113 @@ const Header = (props) => {
                     </Popper>
                   </Box>
                 </Box>
-                <IconButton component={RouterLink} to="/wishlist" color="inherit">
-                  <Heart size={20} strokeWidth={1.5} />
-                </IconButton>
+                {/* Wishlist Icon with Dropdown */}
+                <Box
+                  sx={{ position: 'relative', display: 'inline-block' }}
+                  onMouseLeave={handleWishlistMouseLeave}
+                  onMouseEnter={handleWishlistMouseEnter}
+                >
+                  <IconButton
+                    color={isWishlistOpen ? "primary" : "inherit"}
+                    onClick={() => navigate('/wishlist')}
+                    sx={{ color: isWishlistOpen ? TIFFANY_BLUE : 'inherit' }}
+                  >
+                    <Badge badgeContent={wishlistCount} sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16, bgcolor: TIFFANY_BLUE, color: "#fff" } }}>
+                      <Heart size={20} strokeWidth={1.5} />
+                    </Badge>
+                  </IconButton>
+
+                  <Popper
+                    open={isWishlistOpen && wishlistCount > 0}
+                    anchorEl={wishlistAnchorEl}
+                    placement="bottom-end"
+                    transition
+                    sx={{ zIndex: 1300, pt: 1.5 }}
+                    onMouseEnter={handleWishlistMenuEnter}
+                    onMouseLeave={handleWishlistMenuLeave}
+                  >
+                    {({ TransitionProps }) => (
+                      <Fade {...TransitionProps} timeout={350}>
+                        <Paper
+                          elevation={4}
+                          sx={{
+                            width: 320, p: 4, borderRadius: 0,
+                            bgcolor: 'background.paper',
+                            borderTop: `3px solid ${TIFFANY_BLUE}`,
+                            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left'
+                          }}
+                        >
+                          <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 3, fontSize: '1.25rem' }}>
+                            Saved Items
+                          </Typography>
+                          {wishlistCount > 0 ? (
+                            <>
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
+                                You have {wishlistCount} {wishlistCount === 1 ? 'item' : 'items'} saved.
+                              </Typography>
+                              <Stack spacing={2} width="100%">
+                                {wishlist.slice(0, 3).map((item) => (
+                                  <Box key={item.id} sx={{ display: 'flex', gap: 2, alignItems: 'center', width: '100%' }}>
+                                    <Box
+                                      component="img"
+                                      src={item.image}
+                                      alt={item.name}
+                                      loading="lazy"
+                                      decoding="async"
+                                      width="60"
+                                      height="60"
+                                      sx={{
+                                        width: 60,
+                                        height: 60,
+                                        objectFit: 'cover',
+                                        bgcolor: '#f5f5f5',
+                                      }}
+                                    />
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                      <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {item.name}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                        {item.price}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                ))}
+                                {wishlistCount > 3 && (
+                                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', textAlign: 'center', width: '100%' }}>
+                                    +{wishlistCount - 3} more {wishlistCount - 3 === 1 ? 'item' : 'items'}
+                                  </Typography>
+                                )}
+                              </Stack>
+                              <Link
+                                component={RouterLink}
+                                to="/wishlist"
+                                underline="hover"
+                                onClick={() => setWishlistAnchorEl(null)}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  fontWeight: 600,
+                                  color: 'text.primary',
+                                  fontSize: '0.95rem',
+                                  cursor: 'pointer',
+                                  mt: 2,
+                                  '&:hover': { color: TIFFANY_BLUE }
+                                }}
+                              >
+                                View All Saved Items <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                              </Link>
+                            </>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
+                              You haven't saved any items yet.
+                            </Typography>
+                          )}
+                        </Paper>
+                      </Fade>
+                    )}
+                  </Popper>
+                </Box>
                 <IconButton
                   color="inherit"
                   onClick={handleUserClick}
@@ -440,9 +592,9 @@ const Header = (props) => {
                 >
                   <User size={20} strokeWidth={1.5} />
                 </IconButton>
-                <IconButton component={RouterLink} to="/cart" color="inherit">
-                  <Badge badgeContent={2} sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16, bgcolor: TIFFANY_BLUE, color: "#fff" } }}>
-                    <ShoppingBag size={20} strokeWidth={1.5} />
+                <IconButton component={RouterLink} to="/cart" color="inherit" sx={{ p: 0.75 }}>
+                  <Badge badgeContent={cartCount} sx={{ "& .MuiBadge-badge": { fontSize: 8, height: 14, minWidth: 14, bgcolor: TIFFANY_BLUE, color: "#fff" } }}>
+                    <ShoppingBag size={18} strokeWidth={1.5} />
                   </Badge>
                 </IconButton>
               </Stack>
@@ -691,34 +843,39 @@ const Header = (props) => {
                         cursor: "pointer",
                       }}
                     >
-                      <Box
-                        component="img"
-                        src={JEWELRY_MENU_DATA.image}
-                        alt="Featured Jewelry"
-                        sx={{
-                          width: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                          transition: "transform 0.5s ease",
-                          "&:hover": { transform: "scale(1.05)" },
-                        }}
-                      />
+                        <Box
+                          component="img"
+                          src={JEWELRY_MENU_DATA.image}
+                          alt="Featured Jewelry"
+                          loading="lazy"
+                          decoding="async"
+                          sx={{
+                            width: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                            transition: "transform 0.5s ease",
+                            "&:hover": { transform: "scale(1.05)" },
+                          }}
+                        />
                     </Box>
 
                     <Box sx={{ textAlign: "left", mt: 1 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 300, fontSize: ".875rem", letterSpacing: 0.5 }}>
                         Gifts for Her
                       </Typography>
-                      <Typography
-                        variant="body2"
+                      <Link
+                        component={RouterLink}
+                        to="/jewelry/shop"
+                        underline="none"
                         sx={{
                           display: "flex", alignItems: "center", width: "fit-content", mt: 0.5, fontWeight: 600, cursor: "pointer", position: "relative", color: "text.secondary",
                           "&::after": { content: '""', position: "absolute", bottom: -2, left: 0, width: "0%", height: "1px", backgroundColor: "#81d8d0", transition: "width 0.3s ease-in-out" },
                           "&:hover::after": { width: "100%" },
+                          "&:hover": { color: "text.secondary" },
                         }}
                       >
                         Shop Now <ChevronRight size={16} style={{ marginLeft: 4 }} />
-                      </Typography>
+                      </Link>
                     </Box>
                   </Box>
 

@@ -4,7 +4,8 @@ import { Box, Typography, Link } from '@mui/material';
 import { ChevronRight } from 'lucide-react';
 
 const JewelryHeroBanner = ({ data }) => {
-    const { title, subtitle, description, image, href } = data;
+    const { title, subtitle, description, image, imageMobile, href } = data;
+    const displayImage = imageMobile || image; // Fallback to image if imageMobile not provided
 
     return (
         <Box
@@ -18,14 +19,45 @@ const JewelryHeroBanner = ({ data }) => {
                 justifyContent: 'flex-start'
             }}
         >
-            {/* Hình nền */}
+            {/* Hình nền - Mobile */}
+            {imageMobile && (
+                <Box
+                    component="img"
+                    src={imageMobile}
+                    alt={subtitle}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    sx={{
+                        display: { xs: 'block', md: 'none' },
+                        position: 'absolute', 
+                        top: 0, 
+                        left: 0, 
+                        width: '100%', 
+                        height: '100%',
+                        objectFit: 'cover', 
+                        zIndex: 0
+                    }}
+                />
+            )}
+            
+            {/* Hình nền - Desktop */}
             <Box
                 component="img"
                 src={image}
                 alt={subtitle}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 sx={{
-                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                    objectFit: 'cover', zIndex: 0
+                    display: { xs: imageMobile ? 'none' : 'block', md: 'block' },
+                    position: 'absolute', 
+                    top: 0, 
+                    left: 0, 
+                    width: '100%', 
+                    height: '100%',
+                    objectFit: 'cover', 
+                    zIndex: 0
                 }}
             />
 
