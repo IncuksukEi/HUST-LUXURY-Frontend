@@ -74,22 +74,23 @@ const ProductManagement = () => {
 
                 if (editingProduct) {
                     // Update: POST /api/admin/products/update/{id}
-                    await axiosClient.post(`/admin/products/update/${editingProduct.productId}`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                    });
+                    await axiosClient.post(`/admin/products/update/${editingProduct.productId}`, formData);
                     message.success('Product updated successfully');
                 } else {
                     // Create: POST /api/admin/products
-                    await axiosClient.post('/admin/products', formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                    });
+                    await axiosClient.post('/admin/products', formData);
                     message.success('Product created successfully');
                 }
                 setIsModalOpen(false);
                 fetchProducts();
             } catch (error) {
                 console.error("Save failed:", error);
-                message.error("Failed to save product");
+                if (error.response) {
+                    console.log("Server Error Response:", error.response.data);
+                    message.error(`Failed: ${error.response.data.message || error.response.statusText}`);
+                } else {
+                    message.error("Failed to save product");
+                }
             }
         });
     };
