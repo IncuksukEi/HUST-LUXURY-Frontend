@@ -21,6 +21,7 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
+  Checkbox,
   useTheme,
   useMediaQuery,
   Fade,
@@ -36,40 +37,7 @@ import {
   Wrench,
   Info,
 } from 'lucide-react';
-
-// Mock data cho recommended products
-const recommendedProducts = [
-  {
-    id: 101,
-    name: 'Jewelry Care Kit',
-    price: 850000,
-    image: 'https://picsum.photos/seed/jewelry1/300/300',
-  },
-  {
-    id: 102,
-    name: 'Jewelry Polishing Cloth',
-    price: 450000,
-    image: 'https://picsum.photos/seed/jewelry2/300/300',
-  },
-  {
-    id: 103,
-    name: 'Leather Care Kit',
-    price: 1200000,
-    image: 'https://picsum.photos/seed/jewelry3/300/300',
-  },
-  {
-    id: 104,
-    name: 'Silver Polishing Cloth',
-    price: 550000,
-    image: 'https://picsum.photos/seed/jewelry4/300/300',
-  },
-  {
-    id: 105,
-    name: 'Premium Care Set',
-    price: 1500000,
-    image: 'https://picsum.photos/seed/jewelry5/300/300',
-  },
-];
+import axiosClient from '../api/axiosClient';
 
 // Component: Product Card cho recommended products - Enhanced with Tiffany-style animations
 const ProductCard = ({ product, index = 0, onAddToCart }) => {
@@ -191,9 +159,9 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
 };
 
 // Component: Recommended Products Section - Horizontal Scroll (5 products max)
-const RecommendedSection = ({ onAddToCart }) => {
+const RecommendedSection = ({ products = [], onAddToCart }) => {
   // Limit to 5 products
-  const displayProducts = recommendedProducts.slice(0, 5);
+  const displayProducts = products.slice(0, 5);
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 }, bgcolor: '#fafafa' }}>
@@ -257,8 +225,8 @@ const RecommendedSection = ({ onAddToCart }) => {
   );
 };
 
-// Component: Cart Item
-const CartItem = ({ item, onQuantityChange, onRemove, onEdit, onSaveForLater }) => {
+// Component: Cart Item with Checkbox
+const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove, onEdit, onSaveForLater }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -270,11 +238,25 @@ const CartItem = ({ item, onQuantityChange, onRemove, onEdit, onSaveForLater }) 
         borderColor: 'divider',
       }}
     >
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+        {/* Checkbox for selection */}
+        <Checkbox
+          checked={isSelected}
+          onChange={() => onToggleSelect(item.id)}
+          sx={{
+            p: 0,
+            mt: 0.5,
+            color: '#ccc',
+            '&.Mui-checked': {
+              color: '#81d8d0',
+            },
+          }}
+        />
+
         {/* Product Image */}
         <Box
           sx={{
-            width: { xs: 100, sm: 120, md: 140 },
+            width: { xs: 80, sm: 100, md: 120 },
             flexShrink: 0,
           }}
         >
@@ -408,7 +390,7 @@ const CartItem = ({ item, onQuantityChange, onRemove, onEdit, onSaveForLater }) 
 };
 
 // Component: Order Summary
-const OrderSummary = ({ subtotal, shipping, tax, total }) => {
+const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckout }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -425,7 +407,7 @@ const OrderSummary = ({ subtotal, shipping, tax, total }) => {
       {/* Summary Details */}
       <Stack spacing={2} sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body2">Subtotal</Typography>
+          <Typography variant="body2">Subtotal ({selectedCount} items)</Typography>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
             {subtotal.toLocaleString('vi-VN')} VNĐ
           </Typography>
@@ -496,8 +478,8 @@ const OrderSummary = ({ subtotal, shipping, tax, total }) => {
           fullWidth
           variant="contained"
           size="large"
-          component={RouterLink}
-          to="/checkout"
+          onClick={onCheckout}
+          disabled={selectedCount === 0}
           sx={{
             py: 1.5,
             bgcolor: '#000',
@@ -506,14 +488,16 @@ const OrderSummary = ({ subtotal, shipping, tax, total }) => {
             fontSize: '0.875rem',
             letterSpacing: '0.1em',
             '&:hover': { bgcolor: '#333' },
+            '&:disabled': { bgcolor: '#ccc', color: '#666' },
           }}
         >
-          CHECKOUT
+          CHECKOUT ({selectedCount})
         </Button>
         <Button
           fullWidth
           variant="outlined"
           size="large"
+          disabled={selectedCount === 0}
           sx={{
             py: 1.5,
             borderColor: '#ccc',
@@ -746,51 +730,76 @@ function Cart() {
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]); // For checkout selection like Shopee
   const [error, setError] = useState('');
-  const [snackbar, setSnackbar] = useState({ open: false, message: '' });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Fetch cart items from API
+  const fetchCart = async () => {
+    try {
+      const response = await axiosClient.get('/cart');
+      // Map API response to component format
+      const items = response.data.map((item) => ({
+        id: item.productId,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.urlImg,
+      }));
+      setCartItems(items);
+      // Select all items by default
+      setSelectedItems(items.map((item) => item.id));
+    } catch (err) {
+      console.error('Error fetching cart:', err);
+      if (err.response?.status === 401) {
+        setIsLoggedIn(false);
+      } else {
+        setError('Unable to load cart. Please try again.');
+      }
+    }
+  };
+
+  // Fetch recommended products from API
+  const fetchRecommendedProducts = async () => {
+    try {
+      const response = await axiosClient.get('/products');
+      // Get first 5 products as recommendations
+      const products = response.data.slice(0, 5).map((product) => ({
+        id: product.productId,
+        name: product.name,
+        price: product.price,
+        image: product.urlImg,
+        description: product.description,
+      }));
+      setRecommendedProducts(products);
+    } catch (err) {
+      console.error('Error fetching recommended products:', err);
+    }
+  };
 
   // Check login status and fetch cart
   useEffect(() => {
     const checkAuthAndFetchCart = async () => {
       setLoading(true);
 
-      // Check if user is logged in
-      // TEMPORARY: Force logged in for testing
       const token = localStorage.getItem('token');
 
-      // For development testing, always set logged in
-      setIsLoggedIn(true);
-
-      // Skip the early return to always load cart
-      // if (!token) {
-      //   setIsLoggedIn(false);
-      //   setLoading(false);
-      //   return;
-      // }
+      if (!token) {
+        setIsLoggedIn(false);
+        setLoading(false);
+        // Still fetch recommended products for non-logged in users
+        fetchRecommendedProducts();
+        return;
+      }
 
       setIsLoggedIn(true);
 
-      // TODO: Fetch cart items from API
-      // For now, using mock data
       try {
-        // Simulating API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Mock cart data - set to empty array for empty cart, or add items
-        const mockCartItems = [
-          {
-            id: 1,
-            name: 'HUST LUXURY Leather Care Kit with Cloth and Spray',
-            price: 1200000,
-            quantity: 1,
-            image: 'https://via.placeholder.com/150x150/81D8D0/fff?text=Care+Kit',
-          },
-        ];
-
-        setCartItems(mockCartItems);
+        await Promise.all([fetchCart(), fetchRecommendedProducts()]);
       } catch (err) {
-        console.error('Error fetching cart:', err);
-        setError('Unable to load cart. Please try again.');
+        console.error('Error loading cart data:', err);
       } finally {
         setLoading(false);
       }
@@ -804,35 +813,160 @@ function Cart() {
     navigate('/login');
   };
 
-  const handleQuantityChange = (itemId, newQuantity) => {
+  // Toggle item selection for checkout
+  const handleToggleSelect = (itemId) => {
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  // Select/Deselect all items
+  const handleSelectAll = () => {
+    if (selectedItems.length === cartItems.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(cartItems.map((item) => item.id));
+    }
+  };
+
+  // Update quantity via API
+  const handleQuantityChange = async (itemId, newQuantity) => {
+    const oldItems = [...cartItems];
+
+    // Optimistic update
     setCartItems((prev) =>
       prev.map((item) =>
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
     );
-  };
 
-  const handleRemoveItem = (itemId) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-  };
-
-  const handleEditItem = (itemId) => {
-    // Find the item and show edit options
-    const item = cartItems.find((i) => i.id === itemId);
-    if (item) {
-      // TODO: In production, open a modal or navigate to product page
-      alert(`Edit: ${item.name}\nPrice: ${item.price.toLocaleString('vi-VN')} VNĐ\nQuantity: ${item.quantity}`);
+    try {
+      // API expects array of updates
+      await axiosClient.post('/cart/update', [
+        { product_id: itemId, quantity: newQuantity }
+      ]);
+    } catch (err) {
+      console.error('Error updating quantity:', err);
+      // Rollback on error
+      setCartItems(oldItems);
+      setSnackbar({
+        open: true,
+        message: 'Failed to update quantity. Please try again.',
+        severity: 'error'
+      });
     }
   };
 
+  // Remove item via API
+  const handleRemoveItem = async (itemId) => {
+    const oldItems = [...cartItems];
+
+    // Optimistic update
+    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+    setSelectedItems((prev) => prev.filter((id) => id !== itemId));
+
+    try {
+      await axiosClient.delete(`/cart/delete/${itemId}`);
+      setSnackbar({
+        open: true,
+        message: 'Item removed from cart',
+        severity: 'success'
+      });
+    } catch (err) {
+      console.error('Error removing item:', err);
+      // Rollback on error
+      setCartItems(oldItems);
+      setSnackbar({
+        open: true,
+        message: 'Failed to remove item. Please try again.',
+        severity: 'error'
+      });
+    }
+  };
+
+  // Add to cart via API
+  const handleAddToCart = async (product) => {
+    // Check if user is logged in first
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setSnackbar({
+        open: true,
+        message: 'Please login to add items to cart',
+        severity: 'warning'
+      });
+      setTimeout(() => navigate('/login'), 1500);
+      return;
+    }
+
+    try {
+      await axiosClient.post('/cart/add', {
+        product_id: product.id,
+        quantity: 1
+      });
+
+      // Refresh cart after adding
+      await fetchCart();
+
+      setSnackbar({
+        open: true,
+        message: `"${product.name}" added to cart!`,
+        severity: 'success'
+      });
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      if (err.response?.status === 401) {
+        setSnackbar({
+          open: true,
+          message: 'Session expired. Please login again.',
+          severity: 'warning'
+        });
+        localStorage.removeItem('token');
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'Failed to add item to cart. Please try again.',
+          severity: 'error'
+        });
+      }
+    }
+  };
+
+  const handleEditItem = (itemId) => {
+    // Navigate to product page for editing
+    navigate(`/jewelry/shop/${itemId}`);
+  };
+
   const handleSaveForLater = (itemId) => {
-    // Move item to saved items
+    // For now, just remove from cart
     console.log('Save for later:', itemId);
     handleRemoveItem(itemId);
   };
 
-  // Calculate totals
-  const subtotal = cartItems.reduce(
+  // Proceed to checkout with selected items
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+      setSnackbar({
+        open: true,
+        message: 'Please select at least one item to checkout',
+        severity: 'warning'
+      });
+      return;
+    }
+
+    // Store selected items in sessionStorage for checkout page
+    const checkoutItems = cartItems.filter((item) => selectedItems.includes(item.id));
+    sessionStorage.setItem('checkoutItems', JSON.stringify(checkoutItems));
+
+    navigate('/checkout');
+  };
+
+  // Calculate totals for selected items only
+  const selectedCartItems = cartItems.filter((item) => selectedItems.includes(item.id));
+  const selectedCount = selectedCartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = selectedCartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
@@ -900,11 +1034,41 @@ function Cart() {
                   <Grid container spacing={{ xs: 2, md: 4 }}>
                     {/* Cart Items - 67% width */}
                     <Grid size={{ xs: 12, md: 8 }}>
+                      {/* Select All Header */}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          pb: 2,
+                          borderBottom: '1px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Checkbox
+                          checked={selectedItems.length === cartItems.length && cartItems.length > 0}
+                          indeterminate={selectedItems.length > 0 && selectedItems.length < cartItems.length}
+                          onChange={handleSelectAll}
+                          sx={{
+                            p: 0,
+                            color: '#ccc',
+                            '&.Mui-checked, &.MuiCheckbox-indeterminate': {
+                              color: '#81d8d0',
+                            },
+                          }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          Select All ({cartItems.length} items)
+                        </Typography>
+                      </Box>
+
                       <Box>
                         {cartItems.map((item) => (
                           <CartItem
                             key={item.id}
                             item={item}
+                            isSelected={selectedItems.includes(item.id)}
+                            onToggleSelect={handleToggleSelect}
                             onQuantityChange={handleQuantityChange}
                             onRemove={handleRemoveItem}
                             onEdit={handleEditItem}
@@ -921,6 +1085,8 @@ function Cart() {
                         shipping={shipping}
                         tax={tax}
                         total={total}
+                        selectedCount={selectedCount}
+                        onCheckout={handleCheckout}
                       />
                     </Grid>
                   </Grid>
@@ -929,38 +1095,17 @@ function Cart() {
             )}
           </Container>
 
-          {/* Recommended Products Section - shown for empty cart or with items */}
-          {isLoggedIn && (
+          {/* Recommended Products Section */}
+          {recommendedProducts.length > 0 && (
             <RecommendedSection
-              onAddToCart={(product) => {
-                console.log('onAddToCart called with:', product);
-                // Add product to cart
-                setCartItems((prev) => {
-                  const existing = prev.find((i) => i.id === product.id);
-                  if (existing) {
-                    // Increase quantity if already exists
-                    setSnackbar({
-                      open: true,
-                      message: `Increased quantity of "${product.name}" to ${existing.quantity + 1}`
-                    });
-                    return prev.map((i) =>
-                      i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-                    );
-                  }
-                  // Add new item to end of list
-                  setSnackbar({
-                    open: true,
-                    message: `"${product.name}" added to cart!`
-                  });
-                  return [...prev, { ...product, quantity: 1 }];
-                });
-              }}
+              products={recommendedProducts}
+              onAddToCart={handleAddToCart}
             />
           )}
         </>
       )}
 
-      {/* Snackbar notification for add to cart */}
+      {/* Snackbar notification */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -969,12 +1114,13 @@ function Cart() {
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity="success"
+          severity={snackbar.severity || 'success'}
           sx={{
             width: '100%',
-            bgcolor: '#000',
+            bgcolor: snackbar.severity === 'error' ? '#d32f2f' :
+              snackbar.severity === 'warning' ? '#ed6c02' : '#000',
             color: '#fff',
-            '& .MuiAlert-icon': { color: '#0ABAB5' },
+            '& .MuiAlert-icon': { color: snackbar.severity === 'success' ? '#0ABAB5' : '#fff' },
           }}
         >
           {snackbar.message}

@@ -23,6 +23,8 @@ import {
   Popper,
   Paper,
   Fade,
+  CircularProgress,
+  Divider,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -98,6 +100,13 @@ const Header = (props) => {
   const userTimeoutRef = useRef(null);
   const isUserOpen = Boolean(userAnchorEl);
 
+  // Cart popup state
+  const [cartAnchorEl, setCartAnchorEl] = useState(null);
+  const cartTimeoutRef = useRef(null);
+  const isCartOpen = Boolean(cartAnchorEl);
+  const [cartItems, setCartItems] = useState([]);
+  const [cartLoading, setCartLoading] = useState(false);
+
   const [activeMenu, setActiveMenu] = useState(null);
   const menuTimeoutRef = useRef(null);
 
@@ -107,6 +116,29 @@ const Header = (props) => {
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
   const isLoggedIn = !!localStorage.getItem('token');
+
+  // Fetch cart items from API when cart popup opens
+  const fetchCartItems = async () => {
+    if (!isLoggedIn) return;
+    setCartLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/cart`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data.slice(0, 3)); // Show max 3 items in preview
+      }
+    } catch (err) {
+      console.error('Error fetching cart:', err);
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
 
   // --- HANDLERS ---
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -137,6 +169,28 @@ const Header = (props) => {
   };
   const handleUserMenuLeave = () => {
     userTimeoutRef.current = setTimeout(() => setUserAnchorEl(null), 200);
+  };
+
+  // Cart Hover Logic
+  const handleCartMouseEnter = (event) => {
+    if (cartTimeoutRef.current) clearTimeout(cartTimeoutRef.current);
+    setCartAnchorEl(event.currentTarget);
+    if (isLoggedIn) {
+      fetchCartItems();
+    }
+  };
+  const handleCartMouseLeave = () => {
+    cartTimeoutRef.current = setTimeout(() => setCartAnchorEl(null), 200);
+  };
+  const handleCartMenuEnter = () => {
+    if (cartTimeoutRef.current) clearTimeout(cartTimeoutRef.current);
+  };
+  const handleCartMenuLeave = () => {
+    cartTimeoutRef.current = setTimeout(() => setCartAnchorEl(null), 200);
+  };
+  const handleViewCart = () => {
+    setCartAnchorEl(null);
+    navigate('/cart');
   };
 
   // Mega Menu Hover Logic
@@ -350,56 +404,56 @@ const Header = (props) => {
                                   My Account
                                 </Typography>
                                 <Stack spacing={2} width="100%">
-                                  <Link 
-                                    component={RouterLink} 
-                                    to="/account" 
-                                    underline="hover" 
+                                  <Link
+                                    component={RouterLink}
+                                    to="/account"
+                                    underline="hover"
                                     onClick={() => setUserAnchorEl(null)}
-                                    sx={{ 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      fontWeight: 600, 
-                                      color: 'text.primary', 
-                                      fontSize: '0.95rem', 
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      fontWeight: 600,
+                                      color: 'text.primary',
+                                      fontSize: '0.95rem',
                                       cursor: 'pointer',
-                                      '&:hover': { color: TIFFANY_BLUE } 
+                                      '&:hover': { color: TIFFANY_BLUE }
                                     }}
                                   >
                                     Xem thông tin cá nhân <ChevronRight size={16} style={{ marginLeft: 4 }} />
                                   </Link>
-                                  <Link 
-                                    component={RouterLink} 
-                                    to="/account/change-password" 
-                                    underline="hover" 
+                                  <Link
+                                    component={RouterLink}
+                                    to="/account/change-password"
+                                    underline="hover"
                                     onClick={() => setUserAnchorEl(null)}
-                                    sx={{ 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      fontWeight: 600, 
-                                      color: 'text.primary', 
-                                      fontSize: '0.95rem', 
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      fontWeight: 600,
+                                      color: 'text.primary',
+                                      fontSize: '0.95rem',
                                       cursor: 'pointer',
-                                      '&:hover': { color: TIFFANY_BLUE } 
+                                      '&:hover': { color: TIFFANY_BLUE }
                                     }}
                                   >
                                     Đổi mật khẩu <ChevronRight size={16} style={{ marginLeft: 4 }} />
                                   </Link>
-                                  <Link 
+                                  <Link
                                     component="button"
                                     onClick={handleLogout}
-                                    underline="hover" 
-                                    sx={{ 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      fontWeight: 600, 
-                                      color: 'text.primary', 
-                                      fontSize: '0.95rem', 
+                                    underline="hover"
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      fontWeight: 600,
+                                      color: 'text.primary',
+                                      fontSize: '0.95rem',
                                       cursor: 'pointer',
                                       border: 'none',
                                       background: 'none',
                                       padding: 0,
                                       textAlign: 'left',
-                                      '&:hover': { color: TIFFANY_BLUE } 
+                                      '&:hover': { color: TIFFANY_BLUE }
                                     }}
                                   >
                                     Đăng xuất <ChevronRight size={16} style={{ marginLeft: 4 }} />
@@ -440,11 +494,124 @@ const Header = (props) => {
                 >
                   <User size={20} strokeWidth={1.5} />
                 </IconButton>
-                <IconButton component={RouterLink} to="/cart" color="inherit">
-                  <Badge badgeContent={2} sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16, bgcolor: TIFFANY_BLUE, color: "#fff" } }}>
-                    <ShoppingBag size={20} strokeWidth={1.5} />
-                  </Badge>
-                </IconButton>
+
+                {/* Cart Icon with Hover Popup */}
+                <Box
+                  sx={{ position: 'relative', display: 'inline-block' }}
+                  onMouseEnter={handleCartMouseEnter}
+                  onMouseLeave={handleCartMouseLeave}
+                >
+                  <IconButton
+                    color={isCartOpen ? "primary" : "inherit"}
+                    onClick={handleViewCart}
+                    sx={{ color: isCartOpen ? TIFFANY_BLUE : 'inherit' }}
+                  >
+                    <Badge
+                      badgeContent={cartItems.length || 0}
+                      sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16, bgcolor: TIFFANY_BLUE, color: "#fff" } }}
+                    >
+                      <ShoppingBag size={20} strokeWidth={1.5} />
+                    </Badge>
+                  </IconButton>
+
+                  <Popper
+                    open={isCartOpen}
+                    anchorEl={cartAnchorEl}
+                    placement="bottom-end"
+                    transition
+                    sx={{ zIndex: 1300, pt: 1.5 }}
+                    onMouseEnter={handleCartMenuEnter}
+                    onMouseLeave={handleCartMenuLeave}
+                  >
+                    {({ TransitionProps }) => (
+                      <Fade {...TransitionProps} timeout={350}>
+                        <Paper
+                          elevation={4}
+                          sx={{
+                            width: 320, p: 3, borderRadius: 0,
+                            bgcolor: 'background.paper',
+                            borderTop: `3px solid ${TIFFANY_BLUE}`,
+                          }}
+                        >
+                          <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2, fontSize: '1.1rem' }}>
+                            Shopping Bag
+                          </Typography>
+
+                          {!isLoggedIn ? (
+                            <Box sx={{ textAlign: 'center', py: 2 }}>
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Sign in to view your cart
+                              </Typography>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => { setCartAnchorEl(null); navigate('/login'); }}
+                                sx={{ borderColor: '#000', color: '#000', borderRadius: 0 }}
+                              >
+                                Sign In
+                              </Button>
+                            </Box>
+                          ) : cartLoading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                              <CircularProgress size={24} sx={{ color: TIFFANY_BLUE }} />
+                            </Box>
+                          ) : cartItems.length === 0 ? (
+                            <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                              Your bag is empty
+                            </Typography>
+                          ) : (
+                            <Stack spacing={2}>
+                              {cartItems.map((item) => (
+                                <Box key={item.productId} sx={{ display: 'flex', gap: 2 }}>
+                                  <Box
+                                    sx={{
+                                      width: 50, height: 50, bgcolor: '#f5f5f5',
+                                      overflow: 'hidden', flexShrink: 0,
+                                    }}
+                                  >
+                                    <img
+                                      src={item.urlImg}
+                                      alt={item.name}
+                                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                  </Box>
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.85rem' }} noWrap>
+                                      {item.name}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      Qty: {item.quantity} • {item.price?.toLocaleString('vi-VN')} VNĐ
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              ))}
+                              {cartItems.length > 0 && (
+                                <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+                                  {cartItems.length >= 3 ? '+ more items in cart' : ''}
+                                </Typography>
+                              )}
+                            </Stack>
+                          )}
+
+                          <Divider sx={{ my: 2 }} />
+
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            onClick={handleViewCart}
+                            sx={{
+                              bgcolor: '#000', color: '#fff', borderRadius: 0,
+                              py: 1.2, fontSize: '0.85rem', letterSpacing: '0.05em',
+                              '&:hover': { bgcolor: '#333' },
+                            }}
+                          >
+                            VIEW CART
+                          </Button>
+                        </Paper>
+                      </Fade>
+                    )}
+                  </Popper>
+                </Box>
               </Stack>
             </Toolbar>
 

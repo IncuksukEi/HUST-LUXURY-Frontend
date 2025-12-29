@@ -9,6 +9,7 @@ import HomePage from './pages/home/HomePage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import JewelryPage from './pages/jewelry/JewelryPage';
 import JewelryShopPage from './pages/jewelry/shop/JewelryShopPage';
 import AccountPage from './pages/AccountPage';
@@ -43,6 +44,7 @@ function App() {
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/change-password" element={<ChangePasswordPage />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
           </Routes>
         </Box>
 
