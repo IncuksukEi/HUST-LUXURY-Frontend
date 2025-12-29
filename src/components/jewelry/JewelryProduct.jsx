@@ -2,34 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
     Box, Container, Grid, Typography, Button, IconButton, 
-    Checkbox, FormControlLabel, Menu, Chip, Fade, Drawer, useMediaQuery, useTheme
+    Checkbox, FormControlLabel, Menu, Chip, Fade, Drawer, useMediaQuery, useTheme,
+    CircularProgress, Alert
 } from '@mui/material';
 import { 
     ChevronDown, ChevronUp, X, Heart, Filter
 } from 'lucide-react';
+import axiosClient from '../../api/axiosClient';
+import { useWishlist } from '../../hooks/useWishlist';
 
-// --- 1. CONSTANTS & MOCK DATA ---
+// --- 1. CONSTANTS ---
 const COLLECTIONS = ['Tiffany T', 'Tiffany HardWear', 'Elsa Peretti', 'Tiffany Lock', 'Tiffany Knot'];
 const MATERIALS = ['Yellow Gold', 'Rose Gold', 'White Gold', 'Sterling Silver', 'Platinum'];
 const GEMSTONES = ['Diamond', 'Sapphire', 'Ruby', 'Mother-of-pearl', 'No Gemstones'];
 const SORT_OPTIONS = ['Recommendations', 'New to Tiffany', 'Price High to Low', 'Price Low to High'];
 
-// Tạo data giả lập nhiều ảnh để test tính năng Carousel
-const MOCK_PRODUCTS = Array.from({ length: 32 }, (_, i) => ({
-    id: i + 1,
-    name: i % 2 === 0 ? `Tiffany T Smile Pendant` : `Tiffany Lock Pendant`,
-    // Description chỉ hiện khi hover
-    description: i % 2 === 0 
-        ? "Graphic angles and clean lines blend to create the beautiful clarity of the Tiffany T collection." 
-        : "Inspired by the power of togetherness and inclusivity, Tiffany Lock is a bold and visual statement about the personal bonds that make us who we are.",
-    price: `$${(Math.random() * 5000 + 1000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
-    collection: COLLECTIONS[i % COLLECTIONS.length], 
-    material: MATERIALS[i % MATERIALS.length],
-    gemstone: GEMSTONES[i % GEMSTONES.length],
-    isNew: i < 5, 
-    // Mỗi sản phẩm chỉ có 1 ảnh
-    image: ['/image/necklaces-1.webp', '/image/necklaces-2.webp', '/image/necklaces-3.webp', '/image/necklaces-4.webp'][i % 4]
-}));
+// Mapping từ categorySlug sang categoryId (theo backend - khớp với CATEGORY_SLUG_MAP)
+const CATEGORY_SLUG_TO_ID = {
+    'necklaces-pendants': 1,
+    'necklaces': 1,
+    'earrings': 2,
+    'bracelets': 3,
+    'rings': 4,
+};
+
+// Helper function để format price từ VND sang USD
+const formatPrice = (price) => {
+    // Assuming price is in VND, convert to USD (1 USD ≈ 25,000 VND)
+    const priceInUSD = price / 25000;
+    return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+};
+
+// Map API product to JewelryProduct format
+const mapProductToJewelryFormat = (apiProduct, index) => {
+    return {
+        id: apiProduct.productId,
+        name: apiProduct.name,
+        description: apiProduct.description || `${apiProduct.name} - A luxurious piece crafted with exceptional attention to detail.`,
+        price: formatPrice(apiProduct.price),
+        image: apiProduct.urlImg,
+        collection: COLLECTIONS[index % COLLECTIONS.length],
+        material: MATERIALS[index % MATERIALS.length],
+        gemstone: GEMSTONES[index % GEMSTONES.length],
+        isNew: index < 4, // First 4 products are "New"
+        category: 'All Products',
+    };
+};
 
 // --- 2. FILTER COMPONENT (Desktop Dropdown) ---
 const FilterDropdown = ({ label, options, selected, onToggle }) => {
@@ -201,10 +219,14 @@ const MobileFilterSidebar = ({
 const ProductCard = ({ product }) => {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
-    const [isLiked, setIsLiked] = useState(false); 
+    const { isInWishlist, toggleWishlist } = useWishlist();
+    const isLiked = isInWishlist(product.id);
 
     // Mỗi sản phẩm chỉ có 1 ảnh
     const productImage = product.image || product.images?.[0] || '/placeholder.png';
+    
+    // Navigate với productId trực tiếp
+    const productUrl = `/jewelry/product/${product.id}`;
 
     return (
         // [WRAPPER]: Giữ vị trí trong Grid. 
@@ -224,7 +246,7 @@ const ProductCard = ({ product }) => {
         >
             {/* [BASE CARD]: Card cơ bản chỉ hiện ảnh khi không hover */}
             <Box 
-                onClick={() => navigate(`/jewelry/shop/shop/${product.id}`)}
+                onClick={() => navigate(productUrl)}
                 sx={{ 
                     position: 'relative',
                     width: '100%',
@@ -237,7 +259,7 @@ const ProductCard = ({ product }) => {
             >
                 {/* Wishlist Icon - Luôn hiện trên base card */}
                 <IconButton
-                    onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
+                    onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
                     sx={{ 
                         position: 'absolute', 
                         top: { xs: 5, md: 12 }, 
@@ -286,9 +308,12 @@ const ProductCard = ({ product }) => {
 
                 {/* 3. Image Area - Chỉ 1 ảnh */}
                 <Box sx={{ position: 'relative', width: '100%', paddingTop: '100%', bgcolor: '#f9f9f9' }}>
-                    <Box component="img" 
+                    <Box 
+                        component="img" 
                         src={productImage} 
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'multiply' }}
                     />
                 </Box>
@@ -296,7 +321,7 @@ const ProductCard = ({ product }) => {
 
             {/* [HOVER CARD]: Card đè lên khi hover, hiện đầy đủ thông tin */}
             <Box 
-                onClick={() => navigate(`/jewelry/shop/shop/${product.id}`)}
+                onClick={() => navigate(productUrl)}
                 sx={{ 
                     position: 'absolute',
                     top: { xs: 0, md: -8 },
@@ -327,7 +352,7 @@ const ProductCard = ({ product }) => {
             >
                 {/* 1. Wishlist Icon (Góc phải trên) - Luôn hiển thị trên hover card */}
                 <IconButton
-                    onClick={(e) => { e.stopPropagation(); setIsLiked(!isLiked); }}
+                    onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
                     sx={{ 
                         position: 'absolute', 
                         top: { xs: 5, md: 12 }, 
@@ -379,9 +404,12 @@ const ProductCard = ({ product }) => {
                     bgcolor: '#f9f9f9',
                     overflow: 'hidden'
                 }}>
-                    <Box component="img" 
+                    <Box 
+                        component="img" 
                         src={productImage} 
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         sx={{ 
                             position: 'absolute', 
                             top: '50%', 
@@ -467,7 +495,7 @@ const ProductCard = ({ product }) => {
                         }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/jewelry/shop/shop/${product.id}`);
+                            navigate(productUrl);
                         }}
                     >
                         View details
@@ -479,10 +507,15 @@ const ProductCard = ({ product }) => {
 };
 
 // --- 4. MAIN COMPONENT ---
-const JewelryProduct = ({ products = MOCK_PRODUCTS }) => { 
+const JewelryProduct = ({ products: propsProducts, categorySlug }) => { 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [searchParams, setSearchParams] = useSearchParams();
+    
+    // State for API data
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     
     const ITEMS_PER_PAGE = 12; // Số sản phẩm mỗi trang
     
@@ -491,6 +524,80 @@ const JewelryProduct = ({ products = MOCK_PRODUCTS }) => {
         const page = parseInt(searchParams.get('page') || '1', 10);
         return page > 0 ? page : 1;
     });
+    
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            setError('');
+            
+            // Map categorySlug to categoryId
+            const categoryId = CATEGORY_SLUG_TO_ID[categorySlug];
+            
+            if (!categoryId) {
+                setError('Category not found');
+                setLoading(false);
+                return;
+            }
+
+            // Fetch products from API
+            const response = await axiosClient.get(`/products/category/${categoryId}`);
+            
+            // Check if response.data is an array
+            if (!Array.isArray(response.data)) {
+                throw new Error('Invalid response format: expected array');
+            }
+            
+            // Map API products to JewelryProduct format
+            const mappedProducts = response.data.map((product, index) => 
+                mapProductToJewelryFormat(product, index)
+            );
+            
+            setProducts(mappedProducts);
+        } catch (err) {
+            console.error('Fetch products error:', err);
+            
+            let errorMessage = 'Không thể tải danh sách sản phẩm. Vui lòng thử lại!';
+            
+            if (err.response) {
+                if (err.response.status === 500) {
+                    errorMessage = 'Lỗi server. Vui lòng thử lại sau!';
+                } else if (err.response.status === 404) {
+                    errorMessage = 'Không tìm thấy sản phẩm cho danh mục này.';
+                } else {
+                    errorMessage = err.response.data?.message || `Lỗi ${err.response.status}: ${err.response.statusText}`;
+                }
+            } else if (err.request) {
+                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!';
+            } else {
+                errorMessage = err.message || errorMessage;
+            }
+            
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch products from API
+    useEffect(() => {
+        // Nếu có propsProducts được truyền vào, sử dụng nó (cho AllProductsPage)
+        if (propsProducts && propsProducts.length > 0) {
+            setProducts(propsProducts);
+            setLoading(false);
+            return;
+        }
+
+        // Nếu không có categorySlug hoặc là 'all-products', không fetch
+        if (!categorySlug || categorySlug === 'all-products') {
+            setProducts([]);
+            setLoading(false);
+            return;
+        }
+
+        // Luôn fetch từ API khi có categorySlug
+        fetchProducts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [categorySlug, propsProducts]);
     
     // Sync currentPage với URL khi URL thay đổi từ bên ngoài (như browser back/forward)
     useEffect(() => {
@@ -558,14 +665,34 @@ const JewelryProduct = ({ products = MOCK_PRODUCTS }) => {
     const visibleProducts = filteredProducts.slice(startIndex, endIndex);
     const hasActiveFilters = selectedCollections.length > 0 || selectedMaterials.length > 0 || selectedGemstones.length > 0;
 
+    // Loading state
+    if (loading) {
+        return (
+            <Container maxWidth="xl" sx={{ py: 10, textAlign: 'center' }}>
+                <CircularProgress />
+            </Container>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <Container maxWidth="xl" sx={{ py: 10, textAlign: 'center' }}>
+                <Alert severity="error" sx={{ mb: 3 }}>
+                    {error}
+                </Alert>
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4, lg: 6 } }}>
             {/* Header & Breadcrumb */}
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', textTransform: 'uppercase', fontSize: { xs: '0.65rem', md: '0.7rem' }, letterSpacing: '0.1em' }}>
-                Home &nbsp;/&nbsp; Jewelry &nbsp;/&nbsp; Necklaces & Pendants
+                Home &nbsp;/&nbsp; Jewelry &nbsp;/&nbsp; {categorySlug ? categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'All Products'}
             </Typography>
             <Typography variant="h4" sx={{ fontFamily: 'Sterling Display A', mb: { xs: 3, md: 4 }, fontWeight: 400, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                Necklaces & Pendants
+                {categorySlug ? categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'All Products'}
             </Typography>
 
             {/* Filter Bar */}
@@ -747,7 +874,7 @@ const JewelryProduct = ({ products = MOCK_PRODUCTS }) => {
                     {visibleProducts.map((product) => (
                         // size={{ xs: 6, md: 3 }} -> 4 cột trên Desktop, 2 cột trên Mobile
                         <Grid key={product.id} size={{ xs: 6, sm: 6, md: 3 }} sx={{ px: 1, mb: 1 }}>
-                            <ProductCard product={product} />
+                            <ProductCard product={product} categorySlug={categorySlug} />
                         </Grid>
                     ))}
                 </Grid>

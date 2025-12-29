@@ -172,7 +172,8 @@ const JewelryShopPage = () => {
 
                 {/* Product Grid & Filter */}
                 {/* Truyền key=slug để React remount component khi chuyển category, reset state filter */}
-                <JewelryProduct key={slug} products={currentCategoryData.products} />
+                {/* Component sẽ tự fetch từ API dựa trên categorySlug */}
+                <JewelryProduct key={slug} categorySlug={slug} />
             </Container>
 
             {/* Browse by Category Section */}
