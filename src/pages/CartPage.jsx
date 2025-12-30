@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -10,21 +10,237 @@ import {
   Divider,
   IconButton,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { ArrowLeft, Plus, Minus, X, ShoppingBag } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import axiosClient from '../api/axiosClient';
 
 const TIFFANY_BLUE = '#81d8d0';
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const { cart, updateQuantity, removeFromCart, getTotal, clearCart } = useCart();
+  const { cart: localCart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const isLoggedIn = !!localStorage.getItem('token');
+
+  // Fetch cart from API when logged in, or use CartContext when not logged in
+  useEffect(() => {
+    const loadCart = async () => {
+      if (isLoggedIn) {
+        setLoading(true);
+        try {
+          const response = await axiosClient.get('/cart');
+          if (response.data && Array.isArray(response.data)) {
+            // Map API response to cart format
+            const mappedCart = response.data.map(item => ({
+              id: item.productId,
+              productId: item.productId,
+              name: item.name,
+              description: item.description || '',
+              urlImg: item.urlImg || '',
+              quantity: item.quantity || 1,
+              price: item.price || 0,
+            }));
+            setCart(mappedCart);
+          }
+        } catch (err) {
+          console.error('Error loading cart:', err);
+          setError('Không thể tải giỏ hàng. Vui lòng thử lại!');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Use CartContext for non-logged in users
+        setCart(localCart || []);
+        setLoading(false);
+      }
+    };
+    loadCart();
+  }, [isLoggedIn, localCart]);
+
+  // Reload cart after update/remove operations
+  const reloadCart = async () => {
+    if (isLoggedIn) {
+      try {
+        const response = await axiosClient.get('/cart');
+        if (response.data && Array.isArray(response.data)) {
+          const mappedCart = response.data.map(item => ({
+            id: item.productId,
+            productId: item.productId,
+            name: item.name,
+            description: item.description || '',
+            urlImg: item.urlImg || '',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+          }));
+          setCart(mappedCart);
+        }
+      } catch (err) {
+        console.error('Error reloading cart:', err);
+      }
+    } else {
+      // Sync with localCart when not logged in
+      setCart(localCart || []);
+    }
+  };
+
+  // Sync cart with localCart when not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setCart(localCart || []);
+    }
+  }, [localCart, isLoggedIn]);
+
+  const [updatingItemId, setUpdatingItemId] = useState(null);
+  const [removingItemId, setRemovingItemId] = useState(null);
+
+  const handleUpdateQuantity = async (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    setUpdatingItemId(productId);
+    setError('');
+    try {
+      await updateQuantity(productId, newQuantity);
+      // CartContext đã tự động reload cart, nhưng CartPage cần reload để sync state
+      if (isLoggedIn) {
+        await reloadCart();
+      }
+    } catch (err) {
+      console.error('Error updating quantity:', err);
+      let errorMessage = 'Không thể cập nhật số lượng. Vui lòng thử lại!';
+      
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+        } else if (err.response.status === 400) {
+          errorMessage = err.response.data?.message || 'Dữ liệu không hợp lệ.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Lỗi server. Vui lòng thử lại sau!';
+        }
+      }
+      
+      setError(errorMessage);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setUpdatingItemId(null);
+    }
+  };
+
+  const handleRemoveFromCart = async (productId) => {
+    setRemovingItemId(productId);
+    setError('');
+    try {
+      await removeFromCart(productId);
+      // CartContext đã tự động reload cart, nhưng CartPage cần reload để sync state
+      if (isLoggedIn) {
+        await reloadCart();
+      }
+    } catch (err) {
+      console.error('Error removing item:', err);
+      let errorMessage = 'Không thể xóa sản phẩm. Vui lòng thử lại!';
+      
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+        } else if (err.response.status === 404) {
+          errorMessage = 'Sản phẩm không tồn tại trong giỏ hàng.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Lỗi server. Vui lòng thử lại sau!';
+        }
+      }
+      
+      setError(errorMessage);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setRemovingItemId(null);
+    }
+  };
+
+  const [clearingCart, setClearingCart] = useState(false);
+
+  const handleClearCart = async () => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?')) {
+      return;
+    }
+
+    setClearingCart(true);
+    setError('');
+    try {
+      await clearCart();
+      setCart([]);
+      if (isLoggedIn) {
+        await reloadCart();
+      }
+    } catch (err) {
+      console.error('Error clearing cart:', err);
+      let errorMessage = 'Không thể xóa giỏ hàng. Vui lòng thử lại!';
+      
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Lỗi server. Vui lòng thử lại sau!';
+        }
+      }
+      
+      setError(errorMessage);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setClearingCart(false);
+    }
+  };
 
   const formatPrice = (price) => {
     // price is in VND, convert to USD for display
     const priceInUSD = price / 25000;
     return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
   };
+
+  const getTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 }, px: { xs: 2, md: 4 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error && cart.length === 0) {
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 }, px: { xs: 2, md: 4 } }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="outlined"
+          onClick={() => navigate('/jewelry/shop')}
+          sx={{
+            borderColor: '#000',
+            color: '#000',
+            borderRadius: 0,
+            px: 4,
+            py: 1.5,
+            textTransform: 'none',
+            fontSize: '0.875rem',
+            '&:hover': {
+              borderColor: TIFFANY_BLUE,
+              color: TIFFANY_BLUE,
+            },
+          }}
+        >
+          Start Shopping
+        </Button>
+      </Container>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -80,6 +296,11 @@ const CartPage = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, md: 3 } }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+          {error}
+        </Alert>
+      )}
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Button
@@ -150,30 +371,59 @@ const CartPage = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconButton
                             size="small"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            sx={{ border: '1px solid #ddd', width: 32, height: 32 }}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                            disabled={item.quantity <= 1 || updatingItemId === item.id}
+                            sx={{ 
+                              border: '1px solid #ddd', 
+                              width: 32, 
+                              height: 32,
+                              '&:disabled': { opacity: 0.5 }
+                            }}
                           >
-                            <Minus size={14} />
+                            {updatingItemId === item.id ? (
+                              <CircularProgress size={12} />
+                            ) : (
+                              <Minus size={14} />
+                            )}
                           </IconButton>
                           <Typography variant="body2" sx={{ minWidth: 40, textAlign: 'center' }}>
                             {item.quantity}
                           </Typography>
                           <IconButton
                             size="small"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            sx={{ border: '1px solid #ddd', width: 32, height: 32 }}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                            disabled={updatingItemId === item.id}
+                            sx={{ 
+                              border: '1px solid #ddd', 
+                              width: 32, 
+                              height: 32,
+                              '&:disabled': { opacity: 0.5 }
+                            }}
                           >
-                            <Plus size={14} />
+                            {updatingItemId === item.id ? (
+                              <CircularProgress size={12} />
+                            ) : (
+                              <Plus size={14} />
+                            )}
                           </IconButton>
                         </Box>
                       </Box>
                       <Box sx={{ textAlign: 'right', ml: 2 }}>
                         <IconButton
                           size="small"
-                          onClick={() => removeFromCart(item.id)}
-                          sx={{ color: 'text.secondary', mb: 1 }}
+                          onClick={() => handleRemoveFromCart(item.id)}
+                          disabled={removingItemId === item.id}
+                          sx={{ 
+                            color: 'text.secondary', 
+                            mb: 1,
+                            '&:disabled': { opacity: 0.5 }
+                          }}
                         >
-                          <X size={18} />
+                          {removingItemId === item.id ? (
+                            <CircularProgress size={12} />
+                          ) : (
+                            <X size={18} />
+                          )}
                         </IconButton>
                         <Typography variant="body1" sx={{ fontWeight: 500 }}>
                           {formatPrice(item.price * item.quantity)}
@@ -247,7 +497,8 @@ const CartPage = () => {
             <Button
               fullWidth
               variant="outlined"
-              onClick={clearCart}
+              onClick={handleClearCart}
+              disabled={cart.length === 0 || clearingCart}
               sx={{
                 borderColor: '#000',
                 color: '#000',
@@ -259,9 +510,20 @@ const CartPage = () => {
                   borderColor: TIFFANY_BLUE,
                   color: TIFFANY_BLUE,
                 },
+                '&:disabled': {
+                  borderColor: '#ccc',
+                  color: '#ccc',
+                },
               }}
             >
-              Clear Cart
+              {clearingCart ? (
+                <>
+                  <CircularProgress size={16} sx={{ mr: 1 }} />
+                  Đang xóa...
+                </>
+              ) : (
+                'Clear Cart'
+              )}
             </Button>
           </Paper>
         </Grid>

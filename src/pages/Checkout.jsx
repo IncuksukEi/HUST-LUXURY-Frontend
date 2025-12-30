@@ -161,17 +161,23 @@ function Checkout() {
                                 >
                                     <Box
                                         sx={{
-                                            width: 80,
-                                            height: 80,
+                                            width: { xs: 80, sm: 100, md: 120 },
+                                            height: { xs: 80, sm: 100, md: 120 },
                                             bgcolor: '#f5f5f5',
                                             overflow: 'hidden',
                                             flexShrink: 0,
+                                            borderRadius: 1,
                                         }}
                                     >
                                         <img
                                             src={item.image}
                                             alt={item.name}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            style={{ 
+                                                width: '100%', 
+                                                height: '100%', 
+                                                objectFit: 'cover',
+                                                display: 'block',
+                                            }}
                                         />
                                     </Box>
                                     <Box sx={{ flex: 1 }}>

@@ -42,6 +42,7 @@ function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [addingToCart, setAddingToCart] = useState(false);
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
   const isWishlisted = product ? isInWishlist(product.id) : false;
@@ -156,10 +157,45 @@ function ProductDetailPage() {
     }
   };
 
-  const handleAddToCart = () => {
-    if (product) {
-      addToCart(product, 1);
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    const isLoggedIn = !!localStorage.getItem('token');
+    
+    if (!isLoggedIn) {
+      setError('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    setAddingToCart(true);
+    setError('');
+    
+    try {
+      await addToCart(product, 1);
       setSuccess('Đã thêm vào giỏ hàng!');
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      let errorMessage = 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!';
+      
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+        } else if (err.response.status === 400) {
+          errorMessage = err.response.data?.message || 'Dữ liệu không hợp lệ.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Lỗi server. Vui lòng thử lại sau!';
+        } else {
+          errorMessage = err.response.data?.message || `Lỗi ${err.response.status}: ${err.response.statusText}`;
+        }
+      } else if (err.request) {
+        errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng!';
+      }
+      
+      setError(errorMessage);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setAddingToCart(false);
     }
   };
 
@@ -177,8 +213,13 @@ function ProductDetailPage() {
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, md: 3 } }}>
       {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
+        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
           {success}
+        </Alert>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+          {error}
         </Alert>
       )}
       <Box
@@ -457,6 +498,7 @@ function ProductDetailPage() {
                 variant="contained"
                 fullWidth
                 onClick={handleAddToCart}
+                disabled={addingToCart || !product}
                 sx={{
                   bgcolor: '#000',
                   color: '#fff',
@@ -469,9 +511,20 @@ function ProductDetailPage() {
                   '&:hover': {
                     bgcolor: '#333',
                   },
+                  '&:disabled': {
+                    bgcolor: '#ccc',
+                    color: '#fff',
+                  },
                 }}
               >
-                Add to Bag
+                {addingToCart ? (
+                  <>
+                    <CircularProgress size={16} sx={{ mr: 1, color: '#fff' }} />
+                    Đang thêm...
+                  </>
+                ) : (
+                  'Add to Bag'
+                )}
               </Button>
               <Button
                 variant="outlined"

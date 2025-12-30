@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { useWishlist } from "../hooks/useWishlist";
 import { useCart } from "../contexts/CartContext";
+import axiosClient from "../api/axiosClient";
 
 // --- CẤU HÌNH MENU CHÍNH ---
 const navLinks = [
@@ -131,15 +132,12 @@ const Header = (props) => {
     if (!isLoggedIn) return;
     setCartLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/cart`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCartItems(data.slice(0, 3)); // Show max 3 items in preview
+      const response = await axiosClient.get('/cart');
+      if (response.data && Array.isArray(response.data)) {
+        setCartItems(response.data.slice(0, 3)); // Show max 3 items in preview
+        // Update total cart count
+        const total = response.data.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        setTotalCartCount(total);
       }
     } catch (err) {
       console.error('Error fetching cart:', err);
@@ -147,6 +145,29 @@ const Header = (props) => {
       setCartLoading(false);
     }
   };
+
+  // Calculate total cart count from API (sum of all quantities)
+  const [totalCartCount, setTotalCartCount] = useState(0);
+  
+  // Fetch cart count on mount and when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      const fetchCartCount = async () => {
+        try {
+          const response = await axiosClient.get('/cart');
+          if (response.data && Array.isArray(response.data)) {
+            const total = response.data.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            setTotalCartCount(total);
+          }
+        } catch (err) {
+          console.error('Error fetching cart count:', err);
+        }
+      };
+      fetchCartCount();
+    } else {
+      setTotalCartCount(cartCount); // Use local cart count if not logged in
+    }
+  }, [isLoggedIn, cartCount]);
 
 
   // --- HANDLERS ---
@@ -659,7 +680,7 @@ const Header = (props) => {
                     sx={{ color: isCartOpen ? TIFFANY_BLUE : 'inherit' }}
                   >
                     <Badge
-                      badgeContent={cartItems.length || 0}
+                      badgeContent={isLoggedIn ? totalCartCount : cartCount}
                       sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 16, minWidth: 16, bgcolor: TIFFANY_BLUE, color: "#fff" } }}
                     >
                       <ShoppingBag size={20} strokeWidth={1.5} />
@@ -732,7 +753,7 @@ const Header = (props) => {
                                       {item.name}
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
-                                      Qty: {item.quantity} • {item.price?.toLocaleString('vi-VN')} VNĐ
+                                      Qty: {item.quantity} • ${((item.price || 0) / 25000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                                     </Typography>
                                   </Box>
                                 </Box>
