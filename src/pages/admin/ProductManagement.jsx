@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Space, message, Image, Modal, Form, Input, InputNumber, Popconfirm, Upload } from 'antd';
+import { Table, Button, Space, message, Image, Modal, Form, Input, InputNumber, Popconfirm, Upload, Select, Tag } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import axiosClient from '../../api/axiosClient';
+
+const { Option } = Select;
 
 const ProductManagement = () => {
     const [products, setProducts] = useState([]);
@@ -10,6 +12,29 @@ const ProductManagement = () => {
     const [editingProduct, setEditingProduct] = useState(null);
     const [fileList, setFileList] = useState([]);
     const [form] = Form.useForm();
+
+    // Mapping Data
+    const categoryOptions = [
+        { id: 1, name: 'Dây chuyền (Necklaces)' },
+        { id: 2, name: 'Bông tai (Earrings)' },
+        { id: 3, name: 'Vòng tay (Bracelets)' },
+        { id: 4, name: 'Nhẫn (Rings)' },
+    ];
+
+    const materialOptions = [
+        { id: 1, name: 'Vàng (Gold)' },
+        { id: 2, name: 'Bạc (Silver)' },
+        { id: 3, name: 'Kim Cương (Diamond)' },
+        { id: 4, name: 'Bạch Kim (Platinum)' },
+        { id: 5, name: 'Đá Quý (Gemstone)' },
+    ];
+
+    const collectionOptions = [
+        { id: 100, name: 'Bộ Sưu Tập Cưới (Wedding)' },
+        { id: 101, name: 'Summer Vibes' },
+        { id: 102, name: 'Quà Tặng (Gift)' },
+        { id: 103, name: 'Luxury Limited' },
+    ];
 
     const fetchProducts = async () => {
         try {
@@ -35,37 +60,35 @@ const ProductManagement = () => {
         setIsModalOpen(true);
     };
 
-    // --- 1. SỬA HÀM EDIT: Map dữ liệu cũ từ Backend vào Form mới ---
     const handleEdit = (record) => {
         setEditingProduct(record);
         setFileList([]); 
-        
-        // Logic: Lấy giá trị từ trường cũ (Backend) gán vào trường mới (Frontend)
-        // Lưu ý: Kiểm tra kỹ tên biến backend trả về (thường là snake_case hoặc camelCase tùy cấu hình)
         const formValues = {
             ...record,
-            // Map Combo -> Collection
             collectionId: record.category_id_combo || record.categoryIdCombo, 
-            // Map UuDai -> Material
             materialId: record.category_id_uu_dai || record.categoryIdUuDai
         };
-        
         form.setFieldsValue(formValues);
         setIsModalOpen(true);
     };
 
+    // --- HÀM XÓA CHUẨN (Đã bỏ phần ẩn/hiện lỗi) ---
     const handleDelete = async (id) => {
         try {
             await axiosClient.delete(`/admin/products/${id}`);
-            message.success('Deleted product successfully');
+            message.success('Đã xóa sản phẩm thành công');
             fetchProducts();
         } catch (error) {
             console.error("Delete failed:", error);
-            message.error("Failed to delete product");
+            // Chỉ hiện lỗi nếu thực sự không xóa được (VD: Đã có đơn hàng đã mua)
+            if (error.response && error.response.data && error.response.data.error) {
+                 message.error(error.response.data.error);
+            } else {
+                 message.error("Không thể xóa sản phẩm này (Đang có đơn hàng liên quan)");
+            }
         }
     };
 
-    // --- 2. SỬA HÀM SAVE: Map dữ liệu Form mới về lại trường cũ của Backend ---
     const handleOk = () => {
         form.validateFields().then(async (values) => {
             try {
@@ -76,49 +99,28 @@ const ProductManagement = () => {
                 formData.append('categoryId', values.categoryId);
 
                 if (values.description) formData.append('description', values.description);
+                if (values.collectionId) formData.append('category_id_combo', values.collectionId);
+                if (values.materialId) formData.append('category_id_uu_dai', values.materialId);
 
-                // --- QUAN TRỌNG: Map ngược lại để gửi về Backend ---
-                // Lấy Collection ID gửi vào category_id_combo
-                if (values.collectionId) {
-                    formData.append('category_id_combo', values.collectionId);
-                }
-                
-                // Lấy Material ID gửi vào category_id_uu_dai
-                if (values.materialId) {
-                    formData.append('category_id_uu_dai', values.materialId);
-                }
-
-                // Xử lý file ảnh
                 if (fileList.length > 0 && fileList[0].originFileObj) {
                     formData.append('file', fileList[0].originFileObj);
                 }
 
-                // Cấu hình Header bắt buộc cho Upload file
-                const config = {
-                    headers: {
-                        'Content-Type': 'multipart/form-data', 
-                    },
-                };
+                const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
                 if (editingProduct) {
-                    // Update Product
                     await axiosClient.post(`/admin/products/update/${editingProduct.productId}`, formData, config);
-                    message.success('Product updated successfully');
+                    message.success('Cập nhật thành công');
                 } else {
-                    // Create Product
                     await axiosClient.post('/admin/products', formData, config);
-                    message.success('Product created successfully');
+                    message.success('Thêm mới thành công');
                 }
                 
                 setIsModalOpen(false);
                 fetchProducts();
             } catch (error) {
                 console.error("Save failed:", error);
-                if (error.response) {
-                    message.error(`Failed: ${error.response.data.message || error.response.statusText}`);
-                } else {
-                    message.error("Failed to save product");
-                }
+                message.error("Lưu thất bại");
             }
         });
     };
@@ -131,16 +133,14 @@ const ProductManagement = () => {
         setFileList(newFileList);
     };
 
-    const beforeUpload = (file) => {
-        return false; // Prevent auto upload
-    };
+    const beforeUpload = () => false;
 
     const columns = [
         {
             title: 'ID',
             dataIndex: 'productId',
             key: 'productId',
-            width: 70,
+            width: 60,
         },
         {
             title: 'Image',
@@ -152,6 +152,24 @@ const ProductManagement = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            width: 200,
+        },
+        {
+            title: 'Category',
+            key: 'category',
+            render: (_, record) => {
+                const cat = categoryOptions.find(c => c.id === record.categoryId);
+                return cat ? <Tag color="blue">{cat.name}</Tag> : record.categoryId;
+            }
+        },
+        {
+            title: 'Material', 
+            key: 'material',
+            render: (_, record) => {
+                const matId = record.category_id_uu_dai || record.categoryIdUuDai;
+                const mat = materialOptions.find(m => m.id === matId);
+                return mat ? mat.name : "";
+            }
         },
         {
             title: 'Price',
@@ -170,7 +188,7 @@ const ProductManagement = () => {
             render: (_, record) => (
                 <Space size="middle">
                     <Button type="primary" size="small" onClick={() => handleEdit(record)}>Edit</Button>
-                    <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.productId)}>
+                    <Popconfirm title="Bạn có chắc muốn xóa?" onConfirm={() => handleDelete(record.productId)}>
                         <Button type="primary" danger size="small">Delete</Button>
                     </Popconfirm>
                 </Space>
@@ -184,28 +202,63 @@ const ProductManagement = () => {
                 <h2>Product Management</h2>
                 <Button type="primary" onClick={handleAdd}>Add Product</Button>
             </div>
+            
             <Table
                 columns={columns}
                 dataSource={products}
                 rowKey="productId"
                 loading={loading}
+                pagination={{ pageSize: 8 }}
             />
 
-            <Modal title={editingProduct ? "Edit Product" : "Add Product"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+            <Modal title={editingProduct ? "Edit Product" : "Add Product"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={700}>
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please input product name!' }]}>
-                        <Input />
-                    </Form.Item>
-                    
-                    <Form.Item name="description" label="Description">
-                        <Input.TextArea rows={3} />
-                    </Form.Item>
-                    
-                    <Form.Item name="price" label="Price" rules={[{ required: true, message: 'Please input price!' }]}>
-                        <InputNumber style={{ width: '100%' }} formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/\$\s?|(,*)/g, '')} />
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true }]} style={{ flex: 2 }}>
+                            <Input placeholder="Nhập tên sản phẩm..." />
+                        </Form.Item>
+                        <Form.Item name="price" label="Giá bán (VNĐ)" rules={[{ required: true }]} style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/\$\s?|(,*)/g, '')} />
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item name="description" label="Mô tả chi tiết">
+                        <Input.TextArea rows={3} placeholder="Mô tả về sản phẩm..." />
                     </Form.Item>
 
-                    <Form.Item label="Image">
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <Form.Item name="categoryId" label="Danh mục (Category)" rules={[{ required: true }]} style={{ flex: 1 }}>
+                            <Select placeholder="Chọn danh mục">
+                                {categoryOptions.map(opt => (
+                                    <Option key={opt.id} value={opt.id}>{opt.name}</Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+
+                        <Form.Item name="stock" label="Tồn kho" rules={[{ required: true }]} style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <Form.Item name="materialId" label="Chất liệu (Material)" style={{ flex: 1 }}>
+                            <Select placeholder="Chọn chất liệu" allowClear>
+                                {materialOptions.map(opt => (
+                                    <Option key={opt.id} value={opt.id}>{opt.name}</Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+
+                        <Form.Item name="collectionId" label="Bộ sưu tập (Collection)" style={{ flex: 1 }}>
+                            <Select placeholder="Chọn bộ sưu tập" allowClear>
+                                {collectionOptions.map(opt => (
+                                    <Option key={opt.id} value={opt.id}>{opt.name}</Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item label="Hình ảnh sản phẩm">
                         <Upload
                             listType="picture"
                             fileList={fileList}
@@ -213,30 +266,9 @@ const ProductManagement = () => {
                             beforeUpload={beforeUpload}
                             maxCount={1}
                         >
-                            <Button icon={<UploadOutlined />}>Select Image</Button>
+                            <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                         </Upload>
                     </Form.Item>
-
-                    <Form.Item name="categoryId" label="Category ID" rules={[{ required: true }]}>
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
-                    
-                    <Form.Item name="stock" label="Stock" rules={[{ required: true }]}>
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
-
-                    {/* --- 3. SỬA GIAO DIỆN FORM: Đổi tên hiển thị --- */}
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {/* Trường Material (Frontend) -> map vào uu_dai (Backend) */}
-                        <Form.Item name="materialId" label="Material ID" style={{ flex: 1 }}>
-                            <InputNumber style={{ width: '100%' }} placeholder="Nhập ID Chất liệu" />
-                        </Form.Item>
-
-                        {/* Trường Collection (Frontend) -> map vào combo (Backend) */}
-                        <Form.Item name="collectionId" label="Collection ID" style={{ flex: 1 }}>
-                            <InputNumber style={{ width: '100%' }} placeholder="Nhập ID Bộ sưu tập" />
-                        </Form.Item>
-                    </div>
                 </Form>
             </Modal>
         </div>
