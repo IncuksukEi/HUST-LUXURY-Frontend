@@ -34,25 +34,28 @@ const CATEGORIES = [
 const SIXTEEN_STONE_DATA = {
     title: "Jean Schlumberger by Tiffany",
     subtitle: "Sixteen Stone",
-    description: "Inspired by the textile roots of his family, Jean Schlumberger’s Sixteen Stone ring features diamonds cross-stitched in gold—a masterpiece of love and connection.",
-    image: "https://media.tiffany.com/is/image/tiffanydm/2025_BOR_JLP_1_Desktop?$tile$&wid=2992&fmt=webp",
+    description: "Inspired by the textile roots of his family, Jean Schlumberger's Sixteen Stone ring features diamonds cross-stitched in gold—a masterpiece of love and connection.",
+    image: "/image/BOR_JLP.webp",
+    imageMobile: "/image/BOR_JLP_1_Mobile.webp",
     href: "/jewelry/shop/sixteen-stone"
 };
 
 const BIRD_ON_ROCK_DATA = {
     title: "Discover New Bird on a Rock Designs",
-    description: "Reimagining Jean Schlumberger’s iconic Bird on a Rock motif from 1965, Chief Artistic Officer Nathalie Verdeille introduces designs that capture the grace of nature in motion.",
+    description: "Reimagining Jean Schlumberger's iconic Bird on a Rock motif from 1965, Chief Artistic Officer Nathalie Verdeille introduces designs that capture the grace of nature in motion.",
     linkText: "Discover the Collection",
     href: "/jewelry/shop/bird-on-a-rock",
-    image: "https://media.tiffany.com/is/image/tiffanydm/2025_BOR_HP_3_ALT_Desktop?$tile$&wid=2992&fmt=webp"
+    image: "/image/BOR_HP_3_Desktop.webp",
+    imageMobile: "/image/BOR_HP_3_MOBILE.webp"
 };
 
 const TIFFANY_COLLECTIONS_DATA = {
     title: "Tiffany Collections",
-    description: "Discover the jewelry collections that feature Tiffany’s most iconic designs.",
+    description: "Discover the jewelry collections that feature Tiffany's most iconic designs.",
     linkText: "Browse by Collection",
     href: "/jewelry/shop/collections",
-    image: "https://media.tiffany.com/is/image/tiffanydm/2025_VDAY_GIFTSLP_Hero_Desktop?$tile$&wid=2992&fmt=webp"
+    image: "/image/VDAY_GIFTSLP_Hero_Desktop.webp",
+    imageMobile: "/image/VDAY_STORIESLP.webp"
 };
 
 const JewelryPage = () => {

@@ -241,7 +241,7 @@ const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) =
 };
 
 // Component: Cart Item with Checkbox
-const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove, onEdit, onSaveForLater }) => {
+const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove, onEdit, onSaveForLater, updatingItemId, removingItemId }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -342,13 +342,15 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
               <Select
                 value={item.quantity}
                 onChange={(e) => onQuantityChange(item.id, e.target.value)}
+                disabled={updatingItemId === item.id}
                 sx={{
                   fontSize: '0.875rem',
                   '&:before': { borderBottom: 'none' },
                   '&:after': { borderBottom: 'none' },
                   '&:hover:not(.Mui-disabled):before': { borderBottom: 'none' },
+                  opacity: updatingItemId === item.id ? 0.6 : 1,
                 }}
-                IconComponent={ChevronDown}
+                IconComponent={updatingItemId === item.id ? () => <CircularProgress size={14} /> : ChevronDown}
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                   <MenuItem key={num} value={num}>
@@ -373,24 +375,30 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
           {/* Action Links - Simple underline on hover */}
           <Stack direction="row" spacing={2.5} sx={{ mt: 'auto' }}>
             {[
-              { label: 'Edit', onClick: () => onEdit(item.id) },
-              { label: 'Save for Later', onClick: () => onSaveForLater(item.id) },
-              { label: 'Delete', onClick: () => onRemove(item.id) },
+              { label: 'Edit', onClick: () => onEdit(item.id), disabled: false },
+              { label: 'Save for Later', onClick: () => onSaveForLater(item.id), disabled: false },
+              { 
+                label: removingItemId === item.id ? 'Deleting...' : 'Delete', 
+                onClick: () => onRemove(item.id), 
+                disabled: removingItemId === item.id 
+              },
             ].map((action) => (
               <Typography
                 key={action.label}
                 component="button"
                 onClick={action.onClick}
+                disabled={action.disabled}
                 sx={{
                   background: 'none',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: action.disabled ? 'not-allowed' : 'pointer',
                   fontSize: '0.8rem',
-                  color: 'text.secondary',
+                  color: action.disabled ? 'text.disabled' : 'text.secondary',
                   p: 0,
                   textDecoration: 'underline',
+                  opacity: action.disabled ? 0.5 : 1,
                   '&:hover': {
-                    color: 'text.primary',
+                    color: action.disabled ? 'text.disabled' : 'text.primary',
                   },
                 }}
               >
@@ -857,8 +865,13 @@ function Cart() {
   };
 
   // Update quantity via API
+  const [updatingItemId, setUpdatingItemId] = useState(null);
+
   const handleQuantityChange = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+
     const oldItems = [...cartItems];
+    setUpdatingItemId(itemId);
 
     // Optimistic update
     setCartItems((prev) =>
@@ -872,21 +885,43 @@ function Cart() {
       await axiosClient.post('/cart/update', [
         { productid: itemId, quantity: newQuantity }
       ]);
+      
+      // Refresh cart to ensure sync
+      await fetchCart();
     } catch (err) {
       console.error('Error updating quantity:', err);
       // Rollback on error
       setCartItems(oldItems);
+      
+      let errorMessage = 'Failed to update quantity. Please try again.';
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = 'Session expired. Please login again.';
+          localStorage.removeItem('token');
+          setTimeout(() => navigate('/login'), 1500);
+        } else if (err.response.status === 400) {
+          errorMessage = err.response.data?.message || 'Invalid data.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+      }
+      
       setSnackbar({
         open: true,
-        message: 'Failed to update quantity. Please try again.',
+        message: errorMessage,
         severity: 'error'
       });
+    } finally {
+      setUpdatingItemId(null);
     }
   };
 
   // Remove item via API
+  const [removingItemId, setRemovingItemId] = useState(null);
+
   const handleRemoveItem = async (itemId) => {
     const oldItems = [...cartItems];
+    setRemovingItemId(itemId);
 
     // Optimistic update
     setCartItems((prev) => prev.filter((item) => item.id !== itemId));
@@ -894,6 +929,10 @@ function Cart() {
 
     try {
       await axiosClient.delete(`/cart/delete/${itemId}`);
+      
+      // Refresh cart to ensure sync
+      await fetchCart();
+      
       setSnackbar({
         open: true,
         message: 'Item removed from cart',
@@ -903,11 +942,28 @@ function Cart() {
       console.error('Error removing item:', err);
       // Rollback on error
       setCartItems(oldItems);
+      setSelectedItems(oldItems.map(item => item.id));
+      
+      let errorMessage = 'Failed to remove item. Please try again.';
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMessage = 'Session expired. Please login again.';
+          localStorage.removeItem('token');
+          setTimeout(() => navigate('/login'), 1500);
+        } else if (err.response.status === 404) {
+          errorMessage = 'Item not found in cart.';
+        } else if (err.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+      }
+      
       setSnackbar({
         open: true,
-        message: 'Failed to remove item. Please try again.',
+        message: errorMessage,
         severity: 'error'
       });
+    } finally {
+      setRemovingItemId(null);
     }
   };
 
@@ -1102,6 +1158,8 @@ function Cart() {
                             onRemove={handleRemoveItem}
                             onEdit={handleEditItem}
                             onSaveForLater={handleSaveForLater}
+                            updatingItemId={updatingItemId}
+                            removingItemId={removingItemId}
                           />
                         ))}
                       </Box>

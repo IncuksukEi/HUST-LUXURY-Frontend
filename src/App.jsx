@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { Box, CssBaseline, ThemeProvider, createTheme, CircularProgress } from '@mui/material';
 
-// Import Components
+// Import Components (Critical - Load immediately)
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/home/HomePage';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import JewelryPage from './pages/jewelry/JewelryPage';
-import JewelryShopPage from './pages/jewelry/shop/JewelryShopPage';
-import AccountPage from './pages/AccountPage';
-import ChangePasswordPage from './pages/ChangePasswordPage';
+
+// Lazy load non-critical pages
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const JewelryPage = lazy(() => import('./pages/jewelry/JewelryPage'));
+const JewelryShopPage = lazy(() => import('./pages/jewelry/shop/JewelryShopPage'));
+const AllProductsPage = lazy(() => import('./pages/jewelry/shop/AllProductsPage'));
+const ProductDetailPage = lazy(() => import('./pages/jewelry/ProductDetailPage'));
+const WishlistPage = lazy(() => import('./pages/WishlistPage'));
+const Cart = lazy(() => import('./pages/Cart'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrderHistoryPage = lazy(() => import('./pages/OrderHistoryPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
+
+import { WishlistProvider } from './contexts/WishlistContext';
+import { CartProvider } from './contexts/CartContext';
 
 // Tạo theme (Font chữ bạn đã cài)
 const theme = createTheme({
@@ -30,27 +39,41 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <WishlistProvider>
+        <CartProvider>
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            
+            <Header />
 
-        <Header />
+          <Box component="main" sx={{ flexGrow: 1 }}>
+            <Suspense fallback={
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                <CircularProgress />
+              </Box>
+            }>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/jewelry" element={<JewelryPage />} />
+                <Route path="/jewelry/shop" element={<AllProductsPage />} />
+                <Route path="/jewelry/shop/:slug" element={<JewelryShopPage />} />
+                <Route path="/jewelry/product/:productId" element={<ProductDetailPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/orders" element={<OrderHistoryPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/account" element={<AccountPage />} />
+                <Route path="/account/change-password" element={<ChangePasswordPage />} />
+              </Routes>
+            </Suspense>
+          </Box>
 
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/jewelry" element={<JewelryPage />} />
-            <Route path="/jewelry/shop/:slug" element={<JewelryShopPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/account/change-password" element={<ChangePasswordPage />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-          </Routes>
-        </Box>
-
-        <Footer />
-
-      </Box>
+            <Footer />
+            
+          </Box>
+        </CartProvider>
+      </WishlistProvider>
     </ThemeProvider>
   );
 }

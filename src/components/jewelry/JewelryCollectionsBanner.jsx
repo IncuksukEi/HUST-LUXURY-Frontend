@@ -4,7 +4,8 @@ import { Box, Typography, Link } from '@mui/material';
 import { ChevronRight } from 'lucide-react';
 
 const JewelryCollectionsBanner = ({ data }) => {
-    const { title, description, linkText, href, image } = data;
+    const { title, description, linkText, href, image, imageMobile } = data;
+    const displayImage = imageMobile || image; // Fallback to image if imageMobile not provided
 
     return (
         <Box
@@ -16,11 +17,36 @@ const JewelryCollectionsBanner = ({ data }) => {
                 mt: { xs: 2, lg: 6.5 }
             }}
         >
+            {/* Mobile: Ảnh riêng cho mobile */}
+            {imageMobile && (
+                <Box
+                    component="img"
+                    src={imageMobile}
+                    alt={title}
+                    loading="lazy"
+                    decoding="async"
+                    sx={{
+                        display: { xs: 'block', lg: 'none' },
+                        position: 'relative',
+                        width: '100%',
+                        height: 'auto',
+                        aspectRatio: '16/9',
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                        zIndex: 0
+                    }}
+                />
+            )}
+            
+            {/* Desktop: Ảnh cho desktop */}
             <Box
                 component="img"
                 src={image}
                 alt={title}
+                loading="lazy"
+                decoding="async"
                 sx={{
+                    display: { xs: imageMobile ? 'none' : 'block', lg: 'block' },
                     position: { xs: 'relative', lg: 'absolute' },
                     top: 0, 
                     left: 0,
