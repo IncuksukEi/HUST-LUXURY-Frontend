@@ -8,7 +8,6 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Grid,
   Paper,
   List,
   ListItem,
@@ -95,7 +94,6 @@ function ChangePasswordPage() {
       <Typography
         variant="h4"
         sx={{
-          fontFamily: '"Times New Roman", Times, serif',
           fontSize: { xs: '1.5rem', md: '2rem' },
           fontWeight: 400,
           mb: 4,
@@ -103,12 +101,17 @@ function ChangePasswordPage() {
           borderBottom: '2px solid #000',
         }}
       >
-        My Account
+        Tài khoản của tôi
       </Typography>
 
-      <Grid container spacing={4}>
-        {/* Sidebar */}
-        <Grid item xs={12} md={3}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+        {/* Sidebar - Fixed left */}
+        <Box
+          sx={{
+            width: { xs: '100%', md: 280 },
+            flexShrink: 0,
+          }}
+        >
           <Paper
             elevation={0}
             sx={{
@@ -123,6 +126,8 @@ function ChangePasswordPage() {
                   to="/account"
                   selected={location.pathname === '/account'}
                   sx={{
+                    py: 2,
+                    px: 3,
                     borderLeft: location.pathname === '/account' ? `3px solid ${TIFFANY_BLUE}` : '3px solid transparent',
                     '&.Mui-selected': {
                       bgcolor: 'rgba(129, 216, 208, 0.1)',
@@ -130,9 +135,12 @@ function ChangePasswordPage() {
                         bgcolor: 'rgba(129, 216, 208, 0.15)',
                       },
                     },
+                    '&:hover': {
+                      bgcolor: 'rgba(129, 216, 208, 0.05)',
+                    },
                   }}
                 >
-                  <User size={20} style={{ marginRight: 12 }} />
+                  <User size={20} style={{ marginRight: 12, flexShrink: 0 }} />
                   <ListItemText
                     primary="Thông tin cá nhân"
                     primaryTypographyProps={{
@@ -148,6 +156,8 @@ function ChangePasswordPage() {
                   to="/account/change-password"
                   selected={location.pathname === '/account/change-password'}
                   sx={{
+                    py: 2,
+                    px: 3,
                     borderLeft: location.pathname === '/account/change-password' ? `3px solid ${TIFFANY_BLUE}` : '3px solid transparent',
                     '&.Mui-selected': {
                       bgcolor: 'rgba(129, 216, 208, 0.1)',
@@ -155,9 +165,12 @@ function ChangePasswordPage() {
                         bgcolor: 'rgba(129, 216, 208, 0.15)',
                       },
                     },
+                    '&:hover': {
+                      bgcolor: 'rgba(129, 216, 208, 0.05)',
+                    },
                   }}
                 >
-                  <Lock size={20} style={{ marginRight: 12 }} />
+                  <Lock size={20} style={{ marginRight: 12, flexShrink: 0 }} />
                   <ListItemText
                     primary="Đổi mật khẩu"
                     primaryTypographyProps={{
@@ -169,14 +182,14 @@ function ChangePasswordPage() {
               </ListItem>
             </List>
           </Paper>
-        </Grid>
+        </Box>
 
-        {/* Main Content */}
-        <Grid item xs={12} md={9}>
+        {/* Main Content - Vertical layout */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 3, md: 4 },
               border: '1px solid #e0e0e0',
               borderRadius: 0,
             }}
@@ -184,7 +197,6 @@ function ChangePasswordPage() {
             <Typography
               variant="h5"
               sx={{
-                fontFamily: '"Times New Roman", Times, serif',
                 fontSize: { xs: '1.25rem', md: '1.5rem' },
                 fontWeight: 400,
                 mb: 4,
@@ -194,102 +206,135 @@ function ChangePasswordPage() {
             </Typography>
 
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
                 {error}
               </Alert>
             )}
             {success && (
-              <Alert severity="success" sx={{ mb: 3 }}>
+              <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
                 {success}
               </Alert>
             )}
 
             <Box component="form" onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Box sx={{ position: 'relative' }}>
-                    <TextField
-                      fullWidth
-                      label="Mật khẩu hiện tại"
-                      name="oldPassword"
-                      type={showOldPassword ? 'text' : 'password'}
-                      value={passwordData.oldPassword}
-                      onChange={handleChange}
-                      variant="standard"
-                      required
-                      InputLabelProps={{
-                        sx: { color: '#666' },
-                      }}
-                    />
-                    <IconButton
-                      onClick={() => setShowOldPassword(!showOldPassword)}
-                      sx={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 16,
-                      }}
-                    >
-                      {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </IconButton>
-                  </Box>
-                </Grid>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box sx={{ position: 'relative' }}>
+                  <TextField
+                    fullWidth
+                    label="Mật khẩu hiện tại"
+                    name="oldPassword"
+                    type={showOldPassword ? 'text' : 'password'}
+                    value={passwordData.oldPassword}
+                    onChange={handleChange}
+                    variant="outlined"
+                    required
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 0,
+                        '&:hover fieldset': {
+                          borderColor: '#000',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#000',
+                        },
+                      },
+                      '& .MuiInputLabel-asterisk': {
+                        color: '#d32f2f',
+                      },
+                    }}
+                  />
+                  <IconButton
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      zIndex: 1,
+                    }}
+                  >
+                    {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </IconButton>
+                </Box>
 
-                <Grid item xs={12}>
-                  <Box sx={{ position: 'relative' }}>
-                    <TextField
-                      fullWidth
-                      label="Mật khẩu mới"
-                      name="newPassword"
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={passwordData.newPassword}
-                      onChange={handleChange}
-                      variant="standard"
-                      required
-                      InputLabelProps={{
-                        sx: { color: '#666' },
-                      }}
-                    />
-                    <IconButton
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      sx={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 16,
-                      }}
-                    >
-                      {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </IconButton>
-                  </Box>
-                </Grid>
+                <Box sx={{ position: 'relative' }}>
+                  <TextField
+                    fullWidth
+                    label="Mật khẩu mới"
+                    name="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwordData.newPassword}
+                    onChange={handleChange}
+                    variant="outlined"
+                    required
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 0,
+                        '&:hover fieldset': {
+                          borderColor: '#000',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#000',
+                        },
+                      },
+                      '& .MuiInputLabel-asterisk': {
+                        color: '#d32f2f',
+                      },
+                    }}
+                  />
+                  <IconButton
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      zIndex: 1,
+                    }}
+                  >
+                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </IconButton>
+                </Box>
 
-                <Grid item xs={12}>
-                  <Box sx={{ position: 'relative' }}>
-                    <TextField
-                      fullWidth
-                      label="Xác nhận mật khẩu mới"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={passwordData.confirmPassword}
-                      onChange={handleChange}
-                      variant="standard"
-                      required
-                      InputLabelProps={{
-                        sx: { color: '#666' },
-                      }}
-                    />
-                    <IconButton
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      sx={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 16,
-                      }}
-                    >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </IconButton>
-                  </Box>
-                </Grid>
-              </Grid>
+                <Box sx={{ position: 'relative' }}>
+                  <TextField
+                    fullWidth
+                    label="Xác nhận mật khẩu mới"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={passwordData.confirmPassword}
+                    onChange={handleChange}
+                    variant="outlined"
+                    required
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 0,
+                        '&:hover fieldset': {
+                          borderColor: '#000',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#000',
+                        },
+                      },
+                      '& .MuiInputLabel-asterisk': {
+                        color: '#d32f2f',
+                      },
+                    }}
+                  />
+                  <IconButton
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      zIndex: 1,
+                    }}
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </IconButton>
+                </Box>
+              </Box>
 
               <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'flex-end' }}>
                 <Button
@@ -303,18 +348,23 @@ function ChangePasswordPage() {
                     fontSize: '0.875rem',
                     letterSpacing: '0.1em',
                     px: 4,
+                    py: 1.5,
+                    textTransform: 'uppercase',
                     '&:hover': {
                       bgcolor: '#333',
                     },
+                    '&:disabled': {
+                      bgcolor: '#ccc',
+                    },
                   }}
                 >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Đổi mật khẩu'}
+                  {loading ? <CircularProgress size={24} color="inherit" /> : 'ĐỔI MẬT KHẨU'}
                 </Button>
               </Box>
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 }

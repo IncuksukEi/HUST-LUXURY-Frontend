@@ -212,7 +212,7 @@ function Register() {
           >
             <TextField
               fullWidth
-              label="Full Name"
+              label="Họ và tên"
               name="fullName"
               type="text"
               value={registerData.fullName}
@@ -226,7 +226,7 @@ function Register() {
             />
             <TextField
               fullWidth
-              label="Phone"
+              label="Số điện thoại"
               name="phone"
               type="tel"
               value={registerData.phone}
@@ -240,7 +240,7 @@ function Register() {
             />
             <TextField
               fullWidth
-              label="Email address"
+              label="Địa chỉ email"
               name="email"
               type="email"
               value={registerData.email}
@@ -256,7 +256,7 @@ function Register() {
             <Box sx={{ position: 'relative', mb: 4 }}>
               <TextField
                 fullWidth
-                label="Password"
+                label="Mật khẩu"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={registerData.password}
@@ -282,7 +282,7 @@ function Register() {
             <Box sx={{ position: 'relative', mb: 4 }}>
               <TextField
                 fullWidth
-                label="Confirm Password"
+                label="Xác nhận mật khẩu"
                 name="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={registerData.confirmPassword}
@@ -324,22 +324,22 @@ function Register() {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                'CREATE ACCOUNT'
+                'TẠO TÀI KHOẢN'
               )}
             </Button>
 
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              *Required Fields
+              *Các trường bắt buộc
             </Typography>
 
             <Typography variant="body2" sx={{ mt: 3, color: '#666' }}>
-              By creating an account, you agree to our{' '}
+              Bằng cách tạo tài khoản, bạn đồng ý với{' '}
               <Link href="#" sx={{ color: '#000' }}>
-                Terms of Service
+                Điều khoản dịch vụ
               </Link>{' '}
-              and{' '}
+              và{' '}
               <Link href="#" sx={{ color: '#000' }}>
-                Privacy Policy
+                Chính sách bảo mật
               </Link>
               .
             </Typography>
@@ -347,7 +347,7 @@ function Register() {
             {/* Sign In Link */}
             <Box sx={{ mt: 6, pt: 4, borderTop: '1px solid #eee' }}>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Already have an account?
+                Đã có tài khoản?
               </Typography>
               <Button
                 fullWidth
@@ -368,7 +368,7 @@ function Register() {
                   },
                 }}
               >
-                SIGN IN
+                ĐĂNG NHẬP
               </Button>
             </Box>
           </Box>

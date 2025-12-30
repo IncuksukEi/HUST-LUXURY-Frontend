@@ -453,7 +453,7 @@ const Header = (props) => {
                             {isLoggedIn ? (
                               <>
                                 <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 3, fontSize: '1.25rem' }}>
-                                  My Account
+                                  Tài khoản của tôi
                                 </Typography>
                                 <Stack spacing={2} width="100%">
                                   <Link
@@ -532,17 +532,17 @@ const Header = (props) => {
                             ) : (
                               <>
                                 <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2, fontSize: '1.25rem' }}>
-                                  Sign in or create an account
+                                  Đăng nhập hoặc tạo tài khoản
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-                                  With an account you can check out faster, view your online order history and access your shopping bag or saved items from any device.
+                                  Với tài khoản, bạn có thể thanh toán nhanh hơn, xem lịch sử đơn hàng trực tuyến và truy cập giỏ hàng hoặc các mục đã lưu từ bất kỳ thiết bị nào.
                                 </Typography>
                                 <Stack spacing={2} width="100%">
                                   <Link component={RouterLink} to="/register" underline="hover" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: 'text.primary', fontSize: '0.95rem', '&:hover': { color: TIFFANY_BLUE } }}>
-                                    Create an Account <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                    Tạo tài khoản <ChevronRight size={16} style={{ marginLeft: 4 }} />
                                   </Link>
                                   <Link component={RouterLink} to="/login" underline="hover" sx={{ display: 'flex', alignItems: 'center', fontWeight: 600, color: 'text.primary', fontSize: '0.95rem', '&:hover': { color: TIFFANY_BLUE } }}>
-                                    Sign In <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                    Đăng nhập <ChevronRight size={16} style={{ marginLeft: 4 }} />
                                   </Link>
                                 </Stack>
                               </>
@@ -590,12 +590,12 @@ const Header = (props) => {
                           }}
                         >
                           <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 3, fontSize: '1.25rem' }}>
-                            Saved Items
+                            Mục đã lưu
                           </Typography>
                           {wishlistCount > 0 ? (
                             <>
                               <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
-                                You have {wishlistCount} {wishlistCount === 1 ? 'item' : 'items'} saved.
+                                Bạn đã lưu {wishlistCount} {wishlistCount === 1 ? 'mục' : 'mục'}.
                               </Typography>
                               <Stack spacing={2} width="100%">
                                 {wishlist.slice(0, 3).map((item) => (
@@ -627,7 +627,7 @@ const Header = (props) => {
                                 ))}
                                 {wishlistCount > 3 && (
                                   <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', textAlign: 'center', width: '100%' }}>
-                                    +{wishlistCount - 3} more {wishlistCount - 3 === 1 ? 'item' : 'items'}
+                                    +{wishlistCount - 3} mục {wishlistCount - 3 === 1 ? 'khác' : 'khác'}
                                   </Typography>
                                 )}
                               </Stack>
@@ -647,12 +647,12 @@ const Header = (props) => {
                                   '&:hover': { color: TIFFANY_BLUE }
                                 }}
                               >
-                                View All Saved Items <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                                Xem tất cả mục đã lưu <ChevronRight size={16} style={{ marginLeft: 4 }} />
                               </Link>
                             </>
                           ) : (
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
-                              You haven't saved any items yet.
+                              Bạn chưa lưu mục nào.
                             </Typography>
                           )}
                         </Paper>
@@ -707,13 +707,13 @@ const Header = (props) => {
                           }}
                         >
                           <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2, fontSize: '1.1rem' }}>
-                            Shopping Bag
+                            Giỏ hàng
                           </Typography>
 
                           {!isLoggedIn ? (
                             <Box sx={{ textAlign: 'center', py: 2 }}>
                               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Sign in to view your cart
+                                Đăng nhập để xem giỏ hàng
                               </Typography>
                               <Button
                                 variant="outlined"
@@ -721,7 +721,7 @@ const Header = (props) => {
                                 onClick={() => { setCartAnchorEl(null); navigate('/login'); }}
                                 sx={{ borderColor: '#000', color: '#000', borderRadius: 0 }}
                               >
-                                Sign In
+                                Đăng nhập
                               </Button>
                             </Box>
                           ) : cartLoading ? (
@@ -730,7 +730,7 @@ const Header = (props) => {
                             </Box>
                           ) : cartItems.length === 0 ? (
                             <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                              Your bag is empty
+                              Giỏ hàng của bạn đang trống
                             </Typography>
                           ) : (
                             <Stack spacing={2}>
@@ -760,7 +760,7 @@ const Header = (props) => {
                               ))}
                               {cartItems.length > 0 && (
                                 <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
-                                  {cartItems.length >= 3 ? '+ more items in cart' : ''}
+                                  {cartItems.length >= 3 ? '+ thêm sản phẩm trong giỏ hàng' : ''}
                                 </Typography>
                               )}
                             </Stack>
@@ -778,7 +778,7 @@ const Header = (props) => {
                               '&:hover': { bgcolor: '#333' },
                             }}
                           >
-                            VIEW CART
+                            XEM GIỎ HÀNG
                           </Button>
                         </Paper>
                       </Fade>

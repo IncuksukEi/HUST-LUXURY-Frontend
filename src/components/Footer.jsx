@@ -44,32 +44,32 @@ const socialIcons = [
 
 const footerLinks = {
   clientCare: {
-    title: "Client Care",
+    title: "Chăm sóc khách hàng",
     links: [
-      { label: "Contact Us", href: "/contact" },
-      { label: "Product Care & Repair", href: "/care" },
-      { label: "Frequently Asked Questions", href: "/faq" },
-      { label: "Catalogues", href: "/catalogues" },
-      { label: "Jewelry Gift Guide", href: "/gift-guide" },
-      { label: "Sign up for MAJewelry Emails", href: "/newsletter" },
+      { label: "Liên hệ chúng tôi", href: "/contact" },
+      { label: "Chăm sóc & Sửa chữa sản phẩm", href: "/care" },
+      { label: "Câu hỏi thường gặp", href: "/faq" },
+      { label: "Danh mục", href: "/catalogues" },
+      { label: "Hướng dẫn quà tặng trang sức", href: "/gift-guide" },
+      { label: "Đăng ký nhận email từ MAJewelry", href: "/newsletter" },
     ],
   },
   ourCompany: {
-    title: "Our Company",
+    title: "Công ty chúng tôi",
     links: [
-      { label: "World of MAJewelry", href: "/world" },
-      { label: "Sustainability", href: "/sustainability" },
-      { label: "Website Policies", href: "/policy" },
-      { label: "MAJewelry Global Servicing Terms & Conditions", href: "/terms" },
-      { label: "Site Index", href: "/site-index" },
-      { label: "Product Safety", href: "/safety" },
+      { label: "Thế giới MAJewelry", href: "/world" },
+      { label: "Bền vững", href: "/sustainability" },
+      { label: "Chính sách website", href: "/policy" },
+      { label: "Điều khoản & Điều kiện dịch vụ toàn cầu MAJewelry", href: "/terms" },
+      { label: "Mục lục trang", href: "/site-index" },
+      { label: "An toàn sản phẩm", href: "/safety" },
     ],
   },
   relatedSites: {
-    title: "Related Sites",
+    title: "Trang liên quan",
     links: [
-      { label: "MAJewelry for the Press", href: "/press" },
-      { label: "The MAJewelry Foundation", href: "/foundation" },
+      { label: "MAJewelry dành cho báo chí", href: "/press" },
+      { label: "Quỹ MAJewelry", href: "/foundation" },
     ],
   },
 };
@@ -144,7 +144,7 @@ const NewsletterForm = () => (
         wordBreak: "break-word",
       }}
     >
-      Be the first to know about exciting new designs, special events, store openings and much more.
+      Là người đầu tiên biết về các thiết kế mới thú vị, sự kiện đặc biệt, khai trương cửa hàng và nhiều hơn nữa.
     </Typography>
     <TextField
       fullWidth
@@ -179,7 +179,7 @@ const NewsletterForm = () => (
         "&:hover": { bgcolor: "transparent", borderColor: "text.primary" },
       }}
     >
-        Sign up
+        Đăng ký
     </Button>
   </Box>
 );
@@ -282,7 +282,7 @@ const Footer = () => {
                  flexShrink: 0 
               }}
             >
-              <SectionTitle>Latest from MAJEWELRY</SectionTitle>
+              <SectionTitle>Mới nhất từ MAJEWELRY</SectionTitle>
               <NewsletterForm />
                <Box sx={{ mt: 5, width: '100%' }}>
                  <SocialIconsStack mobileJustify={true} />

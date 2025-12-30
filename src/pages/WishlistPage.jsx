@@ -44,7 +44,7 @@ const WishlistPage = () => {
               mb: 2,
             }}
           >
-            Your Saved Items
+            Mục đã lưu của bạn
           </Typography>
           <Typography
             variant="body1"
@@ -54,7 +54,7 @@ const WishlistPage = () => {
               mb: 4,
             }}
           >
-            You haven't saved any items yet.
+            Bạn chưa lưu mục nào.
           </Typography>
           <Button
             component={RouterLink}
@@ -74,7 +74,7 @@ const WishlistPage = () => {
               },
             }}
           >
-            Start Shopping
+            Bắt đầu mua sắm
           </Button>
         </Box>
       </Container>
@@ -101,7 +101,7 @@ const WishlistPage = () => {
               }}
             >
               <ArrowLeft size={16} style={{ marginRight: 8 }} />
-              Sign In
+              Đăng nhập
             </Link>
             <Typography
               variant="h3"
@@ -113,7 +113,7 @@ const WishlistPage = () => {
                 textUnderlineOffset: '0.2em',
               }}
             >
-              Saved Items
+              Mục đã lưu
             </Typography>
           </Box>
           {wishlistCount > 0 && (
@@ -128,7 +128,7 @@ const WishlistPage = () => {
                 '&:hover': { color: '#000', bgcolor: 'transparent' },
               }}
             >
-              Clear All
+              Xóa tất cả
             </Button>
           )}
         </Box>
@@ -232,7 +232,7 @@ const WishlistPage = () => {
                     },
                   }}
                 >
-                  Remove
+                  Xóa
                   <ChevronRight size={16} style={{ marginLeft: 4 }} />
                 </Box>
               </Box>
@@ -259,7 +259,7 @@ const WishlistPage = () => {
                 '&:hover': { color: TIFFANY_BLUE },
               }}
             >
-              View All Saved Products
+              Xem tất cả sản phẩm đã lưu
               <ChevronRight size={16} style={{ marginLeft: 4 }} />
             </Link>
           </Box>

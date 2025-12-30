@@ -26,9 +26,7 @@ import { CartProvider } from './contexts/CartContext';
 
 // Tạo theme (Font chữ bạn đã cài)
 const theme = createTheme({
-  typography: {
-    fontFamily: '"Santral W01", "Times New Roman", serif',
-  },
+
   palette: {
     primary: { main: '#000' }, // Đen sang trọng
     background: { default: '#fff' }

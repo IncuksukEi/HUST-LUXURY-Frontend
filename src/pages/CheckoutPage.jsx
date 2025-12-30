@@ -179,7 +179,7 @@ const CheckoutPage = () => {
             mb: 2,
           }}
         >
-          Checkout
+          Thanh toán
         </Typography>
       </Box>
 
@@ -219,7 +219,7 @@ const CheckoutPage = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Shipping Address
+                Địa chỉ giao hàng
               </Typography>
 
               {!isEditingAddress && address ? (
@@ -263,13 +263,13 @@ const CheckoutPage = () => {
                       },
                     }}
                   >
-                    Change Address
+                    Thay đổi địa chỉ
                   </Button>
                 </Box>
               ) : (
                 <TextField
                   fullWidth
-                  label="Delivery Address"
+                  label="Địa chỉ giao hàng"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
@@ -288,7 +288,7 @@ const CheckoutPage = () => {
                       },
                     },
                   }}
-                  placeholder="Enter your full delivery address..."
+                  placeholder="Nhập địa chỉ giao hàng đầy đủ của bạn..."
                 />
               )}
             </Paper>
@@ -313,7 +313,7 @@ const CheckoutPage = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Order Summary ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
+                Tóm tắt đơn hàng ({cart.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
               </Typography>
 
               {cart.map((item, index) => (
@@ -384,7 +384,7 @@ const CheckoutPage = () => {
                               fontSize: { xs: '0.8rem', md: '0.875rem' },
                             }}
                           >
-                            {formatPrice(item.price)} each
+                            {formatPrice(item.price)} / sản phẩm
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <IconButton
@@ -497,7 +497,7 @@ const CheckoutPage = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Order Total
+                Tổng đơn hàng
               </Typography>
 
               <Box sx={{ mb: 3 }}>
@@ -507,7 +507,7 @@ const CheckoutPage = () => {
                     color="text.secondary"
                     sx={{ fontSize: '0.875rem' }}
                   >
-                    Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
+                    Tạm tính ({cart.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
                   </Typography>
                   <Typography 
                     variant="body2"
@@ -522,7 +522,7 @@ const CheckoutPage = () => {
                     color="text.secondary"
                     sx={{ fontSize: '0.875rem' }}
                   >
-                    Shipping
+                    Vận chuyển
                   </Typography>
                   <Typography 
                     variant="body2"
@@ -541,7 +541,7 @@ const CheckoutPage = () => {
                       fontFamily: 'serif',
                     }}
                   >
-                    Total
+                    Tổng cộng
                   </Typography>
                   <Typography 
                     variant="h6" 
@@ -563,7 +563,7 @@ const CheckoutPage = () => {
                     fontStyle: 'italic',
                   }}
                 >
-                  Complimentary Delivery & Returns
+                    Giao hàng & Đổi trả miễn phí
                 </Typography>
               </Box>
 
@@ -597,7 +597,7 @@ const CheckoutPage = () => {
                 {loading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
-                  'Place Order'
+                  'Đặt hàng'
                 )}
               </Button>
               
@@ -617,7 +617,7 @@ const CheckoutPage = () => {
                   },
                 }}
               >
-                Back to Cart
+                Quay lại giỏ hàng
               </Button>
             </Paper>
           </Grid>

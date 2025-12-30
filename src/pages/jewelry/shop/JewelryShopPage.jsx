@@ -166,9 +166,9 @@ const JewelryShopPage = () => {
 
     return (
         <Box>
-            <Container maxWidth="xl" sx={{ py: 8, px: { xs: 2, md: 4 } }}>
+            <Container maxWidth="xl" sx={{ px: { xs: 2, md: 6.5 } }}>
                 {/* Header Categories */}
-                <JewelryCategorySection data={currentCategoryData} />
+                {/* <JewelryCategorySection data={currentCategoryData} /> */}
 
                 {/* Product Grid & Filter */}
                 {/* Truyền key=slug để React remount component khi chuyển category, reset state filter */}
