@@ -1,11 +1,17 @@
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, CssBaseline, ThemeProvider, createTheme, CircularProgress } from '@mui/material';
 
 // Import Components (Critical - Load immediately)
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/home/HomePage';
+import AdminLayout from './layouts/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import ProductManagement from './pages/admin/ProductManagement';
+import AdminLogin from './pages/admin/AdminLogin';
+import ProtectedRoute from './components/ProtectedRoute';
+import OrderManagement from './pages/admin/OrderManagement';
 
 // Lazy load non-critical pages
 const Login = lazy(() => import('./pages/Login'));
@@ -51,6 +57,7 @@ function App() {
             }>
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/jewelry" element={<JewelryPage />} />
                 <Route path="/jewelry/shop" element={<AllProductsPage />} />
                 <Route path="/jewelry/shop/:slug" element={<JewelryShopPage />} />
@@ -63,6 +70,14 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/account/change-password" element={<ChangePasswordPage />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="products" element={<ProductManagement />} />
+                    <Route path="orders" element={<OrderManagement />} />
+                  </Route>
+                </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
           </Box>
