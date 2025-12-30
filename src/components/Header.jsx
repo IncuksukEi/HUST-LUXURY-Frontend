@@ -753,7 +753,7 @@ const Header = (props) => {
                                       {item.name}
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
-                                      Qty: {item.quantity} • ${((item.price || 0) / 25000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                                      Qty: {item.quantity} • {((item.price || 0).toLocaleString('vi-VN'))} VNĐ
                                     </Typography>
                                   </Box>
                                 </Box>

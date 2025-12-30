@@ -29,11 +29,10 @@ const CATEGORY_ID_TO_INFO = {
   4: { name: 'Rings', slug: 'rings' },
 };
 
-// Helper function để format price từ VND sang USD
+// Helper function để format price VND
 const formatPrice = (price) => {
-  // Assuming price is in VND, convert to USD (1 USD ≈ 25,000 VND)
-  const priceInUSD = price / 25000;
-  return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+  // Format price in VND
+  return `${price.toLocaleString('vi-VN')} VNĐ`;
 };
 
 function ProductDetailPage() {
