@@ -96,7 +96,7 @@ const CheckoutPage = () => {
         price: item.price,
       }));
 
-      const response = await axiosClient.post('/orders', {
+      await axiosClient.post('/orders', {
         address: address.trim(),
         items: items,
       });
@@ -199,7 +199,16 @@ const CheckoutPage = () => {
         <Grid container spacing={4}>
           {/* Left Column - Shipping Address */}
           <Grid item xs={12} md={7}>
-            <Paper sx={{ p: { xs: 3, md: 4 }, mb: 3 }}>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 3, md: 4 }, 
+                mb: 3,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0,
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -207,6 +216,7 @@ const CheckoutPage = () => {
                   fontSize: { xs: '1rem', md: '1.25rem' },
                   fontWeight: 600,
                   mb: 3,
+                  letterSpacing: '0.05em',
                 }}
               >
                 Shipping Address
@@ -214,9 +224,27 @@ const CheckoutPage = () => {
 
               {!isEditingAddress && address ? (
                 <Box>
-                  <Typography variant="body1" sx={{ mb: 2 }}>
-                    {address}
-                  </Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      bgcolor: '#fafafa',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 0,
+                    }}
+                  >
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        mb: 0,
+                        lineHeight: 1.6,
+                        color: 'text.primary',
+                      }}
+                    >
+                      {address}
+                    </Typography>
+                  </Box>
                   <Button
                     variant="outlined"
                     onClick={() => setIsEditingAddress(true)}
@@ -226,9 +254,12 @@ const CheckoutPage = () => {
                       borderRadius: 0,
                       textTransform: 'none',
                       fontSize: '0.875rem',
+                      px: 3,
+                      py: 1,
                       '&:hover': {
                         borderColor: TIFFANY_BLUE,
                         color: TIFFANY_BLUE,
+                        bgcolor: 'transparent',
                       },
                     }}
                   >
@@ -238,21 +269,40 @@ const CheckoutPage = () => {
               ) : (
                 <TextField
                   fullWidth
-                  label="Address"
+                  label="Delivery Address"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
                   multiline
                   rows={4}
-                  variant="standard"
-                  sx={{ mb: 2 }}
-                  placeholder="Nhập địa chỉ giao hàng"
+                  variant="outlined"
+                  sx={{ 
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: TIFFANY_BLUE,
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: TIFFANY_BLUE,
+                      },
+                    },
+                  }}
+                  placeholder="Enter your full delivery address..."
                 />
               )}
             </Paper>
 
             {/* Order Summary */}
-            <Paper sx={{ p: { xs: 3, md: 4 } }}>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 3, md: 4 },
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0,
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -260,65 +310,158 @@ const CheckoutPage = () => {
                   fontSize: { xs: '1rem', md: '1.25rem' },
                   fontWeight: 600,
                   mb: 3,
+                  letterSpacing: '0.05em',
                 }}
               >
-                Order Summary
+                Order Summary ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
               </Typography>
 
-              {cart.map((item) => (
-                <Box key={item.id} sx={{ mb: 3, pb: 3, borderBottom: '1px solid #f0f0f0' }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={3}>
+              {cart.map((item, index) => (
+                <Box 
+                  key={item.id} 
+                  sx={{ 
+                    mb: index < cart.length - 1 ? 3 : 0, 
+                    pb: index < cart.length - 1 ? 3 : 0, 
+                    borderBottom: index < cart.length - 1 ? '1px solid' : 'none',
+                    borderColor: 'divider',
+                    transition: 'background-color 0.2s',
+                    '&:hover': {
+                      bgcolor: 'transparent',
+                    },
+                  }}
+                >
+                  <Grid container spacing={3}>
+                    <Grid item xs={4} sm={3}>
                       <Box
-                        component="img"
-                        src={item.urlImg || item.image}
-                        alt={item.name}
                         sx={{
-                          width: '100%',
-                          aspectRatio: '1',
-                          objectFit: 'cover',
+                          width: { xs: 80, sm: 100, md: 120 },
+                          height: { xs: 80, sm: 100, md: 120 },
                           bgcolor: '#f5f5f5',
+                          overflow: 'hidden',
+                          borderRadius: 1,
+                          flexShrink: 0,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          transition: 'transform 0.2s, box-shadow 0.2s',
+                          '&:hover': {
+                            transform: 'scale(1.02)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          },
                         }}
-                      />
+                      >
+                        <Box
+                          component="img"
+                          src={item.urlImg || item.image}
+                          alt={item.name}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block',
+                          }}
+                        />
+                      </Box>
                     </Grid>
-                    <Grid item xs={9}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                    <Grid item xs={8} sm={9}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', height: '100%' }}>
+                        <Box sx={{ flex: 1, pr: 2 }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              fontWeight: 500, 
+                              mb: 0.5,
+                              fontSize: { xs: '0.9rem', md: '1rem' },
+                              lineHeight: 1.4,
+                            }}
+                          >
                             {item.name}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            sx={{ 
+                              mb: 1.5,
+                              fontSize: { xs: '0.8rem', md: '0.875rem' },
+                            }}
+                          >
                             {formatPrice(item.price)} each
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <IconButton
                               size="small"
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              sx={{ border: '1px solid #ddd', width: 28, height: 28 }}
+                              disabled={item.quantity <= 1}
+                              sx={{ 
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                width: 32, 
+                                height: 32,
+                                '&:hover': {
+                                  borderColor: TIFFANY_BLUE,
+                                  color: TIFFANY_BLUE,
+                                  bgcolor: 'transparent',
+                                },
+                                '&:disabled': {
+                                  opacity: 0.4,
+                                },
+                              }}
                             >
                               <Minus size={14} />
                             </IconButton>
-                            <Typography variant="body2" sx={{ minWidth: 30, textAlign: 'center' }}>
+                            <Typography 
+                              variant="body2" 
+                              sx={{ 
+                                minWidth: 40, 
+                                textAlign: 'center',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                              }}
+                            >
                               {item.quantity}
                             </Typography>
                             <IconButton
                               size="small"
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              sx={{ border: '1px solid #ddd', width: 28, height: 28 }}
+                              sx={{ 
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                width: 32, 
+                                height: 32,
+                                '&:hover': {
+                                  borderColor: TIFFANY_BLUE,
+                                  color: TIFFANY_BLUE,
+                                  bgcolor: 'transparent',
+                                },
+                              }}
                             >
                               <Plus size={14} />
                             </IconButton>
                           </Box>
                         </Box>
-                        <Box sx={{ textAlign: 'right' }}>
+                        <Box sx={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                           <IconButton
                             size="small"
                             onClick={() => removeFromCart(item.id)}
-                            sx={{ color: 'text.secondary' }}
+                            sx={{ 
+                              color: 'text.secondary',
+                              mb: 0.5,
+                              '&:hover': {
+                                color: '#d32f2f',
+                                bgcolor: 'transparent',
+                              },
+                            }}
                           >
                             <X size={18} />
                           </IconButton>
-                          <Typography variant="body1" sx={{ fontWeight: 500, mt: 1 }}>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              fontWeight: 600, 
+                              mt: 0.5,
+                              fontSize: { xs: '0.9rem', md: '1rem' },
+                              fontFamily: 'serif',
+                            }}
+                          >
                             {formatPrice(item.price * item.quantity)}
                           </Typography>
                         </Box>
@@ -332,7 +475,18 @@ const CheckoutPage = () => {
 
           {/* Right Column - Order Total */}
           <Grid item xs={12} md={5}>
-            <Paper sx={{ p: { xs: 3, md: 4 }, position: { md: 'sticky' }, top: { md: 20 } }}>
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: { xs: 3, md: 4 }, 
+                position: { md: 'sticky' }, 
+                top: { md: 20 },
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 0,
+                bgcolor: '#fafafa',
+              }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -340,6 +494,7 @@ const CheckoutPage = () => {
                   fontSize: { xs: '1rem', md: '1.25rem' },
                   fontWeight: 600,
                   mb: 3,
+                  letterSpacing: '0.05em',
                 }}
               >
                 Order Total
@@ -347,22 +502,69 @@ const CheckoutPage = () => {
 
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{ fontSize: '0.875rem' }}
+                  >
                     Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
                   </Typography>
-                  <Typography variant="body2">
+                  <Typography 
+                    variant="body2"
+                    sx={{ fontWeight: 500, fontSize: '0.875rem' }}
+                  >
                     {formatPrice(total)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{ fontSize: '0.875rem' }}
+                  >
+                    Shipping
+                  </Typography>
+                  <Typography 
+                    variant="body2"
+                    sx={{ fontWeight: 500, fontSize: '0.875rem', color: TIFFANY_BLUE }}
+                  >
+                    Free
                   </Typography>
                 </Box>
                 <Divider sx={{ my: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 600,
+                      fontSize: { xs: '1rem', md: '1.125rem' },
+                      fontFamily: 'serif',
+                    }}
+                  >
                     Total
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 600,
+                      fontSize: { xs: '1rem', md: '1.125rem' },
+                      fontFamily: 'serif',
+                    }}
+                  >
                     {formatPrice(total)}
                   </Typography>
                 </Box>
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary"
+                  sx={{ 
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  Complimentary Delivery & Returns
+                </Typography>
               </Box>
 
               <Button
@@ -379,11 +581,16 @@ const CheckoutPage = () => {
                   letterSpacing: '0.15em',
                   textTransform: 'uppercase',
                   fontWeight: 500,
+                  mb: 2,
+                  transition: 'all 0.2s',
                   '&:hover': {
                     bgcolor: '#333',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   },
                   '&:disabled': {
                     bgcolor: '#ccc',
+                    color: '#666',
                   },
                 }}
               >
@@ -392,6 +599,25 @@ const CheckoutPage = () => {
                 ) : (
                   'Place Order'
                 )}
+              </Button>
+              
+              <Button
+                fullWidth
+                variant="text"
+                onClick={() => navigate('/cart')}
+                sx={{
+                  color: 'text.secondary',
+                  textTransform: 'none',
+                  fontSize: '0.875rem',
+                  textDecoration: 'underline',
+                  '&:hover': {
+                    color: 'text.primary',
+                    bgcolor: 'transparent',
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                Back to Cart
               </Button>
             </Paper>
           </Grid>
