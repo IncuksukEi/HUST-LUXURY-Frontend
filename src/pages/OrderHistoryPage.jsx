@@ -182,7 +182,7 @@ const OrderHistoryPage = () => {
               mb: 2,
             }}
           >
-            Order History
+            Lịch sử đơn hàng
           </Typography>
           <Typography
             variant="body1"
@@ -192,7 +192,7 @@ const OrderHistoryPage = () => {
               mb: 4,
             }}
           >
-            You haven't placed any orders yet.
+            Bạn chưa đặt đơn hàng nào.
           </Typography>
           <Button
             variant="outlined"
@@ -211,7 +211,7 @@ const OrderHistoryPage = () => {
               },
             }}
           >
-            Start Shopping
+            Bắt đầu mua sắm
           </Button>
         </Box>
       </Container>
@@ -243,7 +243,7 @@ const OrderHistoryPage = () => {
             mb: 2,
           }}
         >
-          Order History
+          Lịch sử đơn hàng
         </Typography>
       </Box>
 
@@ -255,7 +255,7 @@ const OrderHistoryPage = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3, flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                  Order #{order.orderId}
+                  Đơn hàng #{order.orderId}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {formatDate(order.orderTime)}
@@ -279,7 +279,7 @@ const OrderHistoryPage = () => {
             {/* Shipping Address */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
-                Shipping Address:
+                Địa chỉ giao hàng:
               </Typography>
               <Typography variant="body2">
                 {order.orderAddress}
@@ -315,7 +315,7 @@ const OrderHistoryPage = () => {
                           {product.description}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Qty: {product.quantity} × {formatPrice(product.price)}
+                          Số lượng: {product.quantity} × {formatPrice(product.price)}
                         </Typography>
                       </Box>
                     </Box>

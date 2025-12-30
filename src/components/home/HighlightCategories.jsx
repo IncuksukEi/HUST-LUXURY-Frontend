@@ -38,8 +38,7 @@ const HighlightCategories = () => {
         sx={{ 
           mb: { xs: 4, md: 6 }, 
           fontWeight: 600, 
-          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' },
-          fontFamily: '"Times New Roman", Times, serif'
+          fontSize: { xs: '1.5rem', sm: '1.25rem', md: '1.25rem', lg: '1.5rem' }
         }}
       >
         Find the Perfect Gift
@@ -102,7 +101,7 @@ const HighlightCategories = () => {
                   variant="h6" 
                   sx={{
                     fontWeight: 400,
-                    fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                    fontSize: { xs: '0.875rem', sm: '0.875rem', md: '0.875rem' },
                     letterSpacing: { xs: 0.5, sm: 1 },
                     position: 'relative', 
                     width: 'fit-content', 

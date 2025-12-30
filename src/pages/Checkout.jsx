@@ -59,7 +59,7 @@ function Checkout() {
         if (!address.trim()) {
             setSnackbar({
                 open: true,
-                message: 'Please enter a delivery address',
+                message: 'Vui lòng nhập địa chỉ giao hàng',
                 severity: 'warning',
             });
             return;
@@ -88,7 +88,7 @@ function Checkout() {
 
             setSnackbar({
                 open: true,
-                message: 'Order placed successfully!',
+                message: 'Đặt hàng thành công!',
                 severity: 'success',
             });
 
@@ -100,7 +100,7 @@ function Checkout() {
             console.error('Error placing order:', err);
             setSnackbar({
                 open: true,
-                message: 'Failed to place order. Please try again.',
+                message: 'Đặt hàng thất bại. Vui lòng thử lại.',
                 severity: 'error',
             });
         } finally {
@@ -144,7 +144,7 @@ function Checkout() {
                     <Grid item xs={12} md={7}>
                         {/* Order Items */}
                         <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2 }}>
-                            Order Summary ({checkoutItems.reduce((sum, item) => sum + item.quantity, 0)} items)
+                            Tóm tắt đơn hàng ({checkoutItems.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
                         </Typography>
 
                         <Stack spacing={2} sx={{ mb: 4 }}>
@@ -185,7 +185,7 @@ function Checkout() {
                                             {item.name}
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Qty: {item.quantity}
+                                            Số lượng: {item.quantity}
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontWeight: 500, mt: 1 }}>
                                             {(item.price * item.quantity).toLocaleString('vi-VN')} VNĐ
@@ -197,13 +197,13 @@ function Checkout() {
 
                         {/* Delivery Address */}
                         <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 2 }}>
-                            Delivery Address
+                            Địa chỉ giao hàng
                         </Typography>
                         <TextField
                             fullWidth
                             multiline
                             rows={3}
-                            placeholder="Enter your full delivery address..."
+                            placeholder="Nhập địa chỉ giao hàng đầy đủ của bạn..."
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
                             sx={{
@@ -225,20 +225,20 @@ function Checkout() {
                             }}
                         >
                             <Typography variant="h6" sx={{ fontFamily: 'serif', mb: 3 }}>
-                                Payment Summary
+                                Tóm tắt thanh toán
                             </Typography>
 
                             <Stack spacing={2}>
                                 <Stack direction="row" justifyContent="space-between">
-                                    <Typography variant="body2">Subtotal</Typography>
+                                    <Typography variant="body2">Tạm tính</Typography>
                                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                         {subtotal.toLocaleString('vi-VN')} VNĐ
                                     </Typography>
                                 </Stack>
                                 <Stack direction="row" justifyContent="space-between">
-                                    <Typography variant="body2">Delivery</Typography>
+                                    <Typography variant="body2">Vận chuyển</Typography>
                                     <Typography variant="body2" sx={{ fontWeight: 500, color: '#0ABAB5' }}>
-                                        Free
+                                        Miễn phí
                                     </Typography>
                                 </Stack>
                             </Stack>
@@ -247,7 +247,7 @@ function Checkout() {
 
                             <Stack direction="row" justifyContent="space-between" sx={{ mb: 3 }}>
                                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                    Total
+                                    Tổng cộng
                                 </Typography>
                                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                                     {total.toLocaleString('vi-VN')} VNĐ
@@ -271,7 +271,7 @@ function Checkout() {
                                     '&:disabled': { bgcolor: '#ccc' },
                                 }}
                             >
-                                {submitting ? 'PROCESSING...' : 'PLACE ORDER'}
+                                {submitting ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG'}
                             </Button>
 
                             <Button
@@ -285,7 +285,7 @@ function Checkout() {
                                     '&:hover': { color: 'text.primary' },
                                 }}
                             >
-                                Back to Cart
+                                Quay lại giỏ hàng
                             </Button>
                         </Box>
                     </Grid>

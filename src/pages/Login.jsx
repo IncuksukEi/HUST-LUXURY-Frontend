@@ -178,7 +178,7 @@ function Login() {
               display: 'inline-block',
             }}
           >
-            Sign In
+            Đăng nhập
           </Typography>
         </Box>
 
@@ -196,7 +196,7 @@ function Login() {
         >
           <TextField
               fullWidth
-              label="Email address"
+              label="Địa chỉ email"
               name="email"
               type="email"
               value={loginData.email}
@@ -212,7 +212,7 @@ function Login() {
             <Box sx={{ position: 'relative' }}>
               <TextField
                 fullWidth
-                label="Password"
+                label="Mật khẩu"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={loginData.password}
@@ -247,7 +247,7 @@ function Login() {
                   '&:hover': { color: '#0ABAB5' },
                 }}
               >
-                Forgot password
+                Quên mật khẩu
               </Link>
             </Box>
 
@@ -270,7 +270,7 @@ function Login() {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                'SIGN IN'
+                'ĐĂNG NHẬP'
               )}
             </Button>
 
@@ -295,11 +295,11 @@ function Login() {
                 },
               }}
             >
-              CREATE AN ACCOUNT
+              TẠO TÀI KHOẢN
             </Button>
 
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              *Required Fields
+              *Các trường bắt buộc
             </Typography>
           </Box>
         </Box>

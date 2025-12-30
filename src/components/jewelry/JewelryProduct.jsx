@@ -12,10 +12,7 @@ import axiosClient from '../../api/axiosClient';
 import { useWishlist } from '../../hooks/useWishlist';
 
 // --- 1. CONSTANTS ---
-const COLLECTIONS = ['Tiffany T', 'Tiffany HardWear', 'Elsa Peretti', 'Tiffany Lock', 'Tiffany Knot'];
-const MATERIALS = ['Yellow Gold', 'Rose Gold', 'White Gold', 'Sterling Silver', 'Platinum'];
-const GEMSTONES = ['Diamond', 'Sapphire', 'Ruby', 'Mother-of-pearl', 'No Gemstones'];
-const SORT_OPTIONS = ['Recommendations', 'New to Tiffany', 'Price High to Low', 'Price Low to High'];
+const SORT_OPTIONS = ['Đề xuất', 'Mới nhất', 'Giá cao đến thấp', 'Giá thấp đến cao'];
 
 // Mapping từ categorySlug sang categoryId (theo backend - khớp với CATEGORY_SLUG_MAP)
 const CATEGORY_SLUG_TO_ID = {
@@ -41,9 +38,9 @@ const mapProductToJewelryFormat = (apiProduct, index) => {
         description: apiProduct.description || `${apiProduct.name} - A luxurious piece crafted with exceptional attention to detail.`,
         price: formatPrice(apiProduct.price),
         image: apiProduct.urlImg,
-        collection: COLLECTIONS[index % COLLECTIONS.length],
-        material: MATERIALS[index % MATERIALS.length],
-        gemstone: GEMSTONES[index % GEMSTONES.length],
+        collection: apiProduct.collectionName || null,
+        material: apiProduct.materialName || null,
+        gemstone: apiProduct.gemstoneName || null,
         isNew: index < 4, // First 4 products are "New"
         category: 'All Products',
     };
@@ -178,13 +175,13 @@ const MobileFilterSidebar = ({
                             '&:hover': { bgcolor: 'transparent', color: '#000' }
                         }}
                     >
-                        Clear All
+                        Xóa tất cả
                     </Button>
                 )}
 
                 {/* Filter Sections */}
                 <FilterSection
-                    title="Designers & Collections"
+                    title="Nhà thiết kế & Bộ sưu tập"
                     options={collections}
                     selected={selectedCollections}
                     onToggle={onToggleCollection}
@@ -193,7 +190,7 @@ const MobileFilterSidebar = ({
                     onToggleSection={toggleSection}
                 />
                 <FilterSection
-                    title="Materials"
+                    title="Chất liệu"
                     options={materials}
                     selected={selectedMaterials}
                     onToggle={onToggleMaterial}
@@ -202,7 +199,7 @@ const MobileFilterSidebar = ({
                     onToggleSection={toggleSection}
                 />
                 <FilterSection
-                    title="Gemstones"
+                    title="Đá quý"
                     options={gemstones}
                     selected={selectedGemstones}
                     onToggle={onToggleGemstone}
@@ -434,16 +431,18 @@ const ProductCard = ({ product }) => {
                     flexDirection: 'column',
                     justifyContent: 'flex-start'
                 }}>
-                    <Typography variant="subtitle2" sx={{ 
-                        fontFamily: 'Sterling Display A', 
-                        fontSize: { xs: '0.85rem', md: '0.95rem' }, 
-                        fontWeight: 500, 
-                        mb: 0.5, 
-                        lineHeight: 1.3,
-                        color: '#000'
-                    }}>
-                        {product.collection}
-                    </Typography>
+                    {product.collection && (
+                        <Typography variant="subtitle2" sx={{ 
+                            fontFamily: 'Sterling Display A', 
+                            fontSize: { xs: '0.85rem', md: '0.95rem' }, 
+                            fontWeight: 500, 
+                            mb: 0.5, 
+                            lineHeight: 1.3,
+                            color: '#000'
+                        }}>
+                            {product.collection}
+                        </Typography>
+                    )}
                     <Typography variant="body2" sx={{ 
                         fontSize: { xs: '0.8rem', md: '0.9rem' }, 
                         color: '#333', 
@@ -469,7 +468,21 @@ const ProductCard = ({ product }) => {
                         fontSize: '0.8rem',
                         color: '#666'
                     }}>
-                        {product.material} with {product.gemstone}. <br/>
+                        {product.material && product.gemstone && (
+                            <>
+                                {product.material} with {product.gemstone}. <br/>
+                            </>
+                        )}
+                        {product.material && !product.gemstone && (
+                            <>
+                                {product.material}. <br/>
+                            </>
+                        )}
+                        {!product.material && product.gemstone && (
+                            <>
+                                {product.gemstone}. <br/>
+                            </>
+                        )}
                         {product.description}
                     </Typography>
 
@@ -534,7 +547,7 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
             const categoryId = CATEGORY_SLUG_TO_ID[categorySlug];
             
             if (!categoryId) {
-                setError('Category not found');
+                setError('Không tìm thấy danh mục');
                 setLoading(false);
                 return;
             }
@@ -628,9 +641,37 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
     const [selectedCollections, setSelectedCollections] = useState([]);
     const [selectedMaterials, setSelectedMaterials] = useState([]);
     const [selectedGemstones, setSelectedGemstones] = useState([]);
-    const [sortOption, setSortOption] = useState('Recommendations');
+    const [sortOption, setSortOption] = useState('Đề xuất');
     const [anchorSort, setAnchorSort] = useState(null);
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+    // Extract unique filter options from actual products data
+    const availableCollections = React.useMemo(() => {
+        const collections = products
+            .map(p => p.collection)
+            .filter(Boolean) // Remove null/undefined
+            .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+            .sort();
+        return collections;
+    }, [products]);
+
+    const availableMaterials = React.useMemo(() => {
+        const materials = products
+            .map(p => p.material)
+            .filter(Boolean) // Remove null/undefined
+            .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+            .sort();
+        return materials;
+    }, [products]);
+
+    const availableGemstones = React.useMemo(() => {
+        const gemstones = products
+            .map(p => p.gemstone)
+            .filter(Boolean) // Remove null/undefined
+            .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+            .sort();
+        return gemstones;
+    }, [products]);
 
     // Helpers
     const toggleFilter = (item, currentList, setList) => {
@@ -650,9 +691,9 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
         return colMatch && matMatch && gemMatch;
     }).sort((a, b) => {
         // Simple sort logic demo
-        if (sortOption === 'Price High to Low') return parseInt(b.price.replace(/\D/g,'')) - parseInt(a.price.replace(/\D/g,''));
-        if (sortOption === 'Price Low to High') return parseInt(a.price.replace(/\D/g,'')) - parseInt(b.price.replace(/\D/g,''));
-        if (sortOption === 'New to Tiffany') return b.isNew ? 1 : -1;
+        if (sortOption === 'Giá cao đến thấp') return parseInt(b.price.replace(/\D/g,'')) - parseInt(a.price.replace(/\D/g,''));
+        if (sortOption === 'Giá thấp đến cao') return parseInt(a.price.replace(/\D/g,'')) - parseInt(b.price.replace(/\D/g,''));
+        if (sortOption === 'Mới nhất') return b.isNew ? 1 : -1;
         return a.id - b.id; // Default
     });
 
@@ -686,12 +727,12 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4, lg: 6 } }}>
+        <Container maxWidth="xl" >
             {/* Header & Breadcrumb */}
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', textTransform: 'uppercase', fontSize: { xs: '0.65rem', md: '0.7rem' }, letterSpacing: '0.1em' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ pt: 1.375, pb: 0.625, display: 'block', textTransform: 'uppercase', fontSize: { xs: '0.65rem', md: '0.7rem' }, letterSpacing: '0.1em' }}>
                 Home &nbsp;/&nbsp; Jewelry &nbsp;/&nbsp; {categorySlug ? categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'All Products'}
             </Typography>
-            <Typography variant="h4" sx={{ fontFamily: 'Sterling Display A', mb: { xs: 3, md: 4 }, fontWeight: 400, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+            <Typography variant="h4" sx={{ fontFamily: 'Sterling Display A', py: 2, fontWeight: 400, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
                 {categorySlug ? categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'All Products'}
             </Typography>
 
@@ -715,7 +756,7 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
                                 '&:hover': { bgcolor: '#f5f5f5', borderColor: '#000' }
                             }}
                         >
-                            Filter by
+                            Lọc theo
                             {hasActiveFilters && (
                                 <Chip 
                                     label={selectedCollections.length + selectedMaterials.length + selectedGemstones.length}
@@ -755,9 +796,15 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
                         <Box sx={{ maxWidth: '80%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2, flexWrap: 'wrap' }}>
                                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Filter by:</Typography>
-                                <FilterDropdown label="Designers & Collections" options={COLLECTIONS} selected={selectedCollections} onToggle={(val) => toggleFilter(val, selectedCollections, setSelectedCollections)} />
-                                <FilterDropdown label="Materials" options={MATERIALS} selected={selectedMaterials} onToggle={(val) => toggleFilter(val, selectedMaterials, setSelectedMaterials)} />
-                                <FilterDropdown label="Gemstones" options={GEMSTONES} selected={selectedGemstones} onToggle={(val) => toggleFilter(val, selectedGemstones, setSelectedGemstones)} />
+                                {availableCollections.length > 0 && (
+                                    <FilterDropdown label="Nhà thiết kế & Bộ sưu tập" options={availableCollections} selected={selectedCollections} onToggle={(val) => toggleFilter(val, selectedCollections, setSelectedCollections)} />
+                                )}
+                                {availableMaterials.length > 0 && (
+                                    <FilterDropdown label="Chất liệu" options={availableMaterials} selected={selectedMaterials} onToggle={(val) => toggleFilter(val, selectedMaterials, setSelectedMaterials)} />
+                                )}
+                                {availableGemstones.length > 0 && (
+                                    <FilterDropdown label="Đá quý" options={availableGemstones} selected={selectedGemstones} onToggle={(val) => toggleFilter(val, selectedGemstones, setSelectedGemstones)} />
+                                )}
                             </Box>
 
                             {/* Chips */}
@@ -821,9 +868,9 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
             <MobileFilterSidebar
                 open={mobileFilterOpen}
                 onClose={() => setMobileFilterOpen(false)}
-                collections={COLLECTIONS}
-                materials={MATERIALS}
-                gemstones={GEMSTONES}
+                collections={availableCollections}
+                materials={availableMaterials}
+                gemstones={availableGemstones}
                 selectedCollections={selectedCollections}
                 selectedMaterials={selectedMaterials}
                 selectedGemstones={selectedGemstones}
@@ -843,7 +890,7 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
             {visibleProducts.length > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Typography variant="body2" sx={{ color: '#666', fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
-                        Showing {startIndex + 1} - {Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length}
+                        Hiển thị {startIndex + 1} - {Math.min(endIndex, filteredProducts.length)} trong tổng số {filteredProducts.length}
                     </Typography>
                     {totalPages > 1 && (
                         <Button
@@ -861,7 +908,7 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
                                 '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' }
                             }}
                         >
-                            View All
+                            Xem tất cả
                         </Button>
                     )}
                 </Box>
@@ -880,9 +927,9 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
                 </Grid>
             ) : (
                 <Box sx={{ py: 10, textAlign: 'center' }}>
-                    <Typography variant="h6" sx={{ fontFamily: 'Sterling Display A' }}>No results found.</Typography>
-                    <Typography color="text.secondary" sx={{ mb: 2 }}>Try removing some filters.</Typography>
-                    <Button variant="outlined" onClick={handleClearAll} sx={{ color: '#000', borderColor: '#000', borderRadius: 0 }}>Clear Filters</Button>
+                    <Typography variant="h6" sx={{ fontFamily: 'Sterling Display A' }}>Không tìm thấy kết quả.</Typography>
+                    <Typography color="text.secondary" sx={{ mb: 2 }}>Thử xóa một số bộ lọc.</Typography>
+                    <Button variant="outlined" onClick={handleClearAll} sx={{ color: '#000', borderColor: '#000', borderRadius: 0 }}>Xóa bộ lọc</Button>
                 </Box>
             )}
 

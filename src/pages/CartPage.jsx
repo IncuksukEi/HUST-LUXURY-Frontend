@@ -256,7 +256,7 @@ const CartPage = () => {
               mb: 2,
             }}
           >
-            Your Shopping Bag
+            Giỏ hàng của bạn
           </Typography>
           <Typography
             variant="body1"
@@ -266,7 +266,7 @@ const CartPage = () => {
               mb: 4,
             }}
           >
-            Your bag is empty.
+            Giỏ hàng của bạn đang trống.
           </Typography>
           <Button
             variant="outlined"
@@ -285,7 +285,7 @@ const CartPage = () => {
               },
             }}
           >
-            Start Shopping
+            Bắt đầu mua sắm
           </Button>
         </Box>
       </Container>
@@ -313,7 +313,7 @@ const CartPage = () => {
             '&:hover': { color: TIFFANY_BLUE },
           }}
         >
-          Continue Shopping
+          Tiếp tục mua sắm
         </Button>
         <Typography
           variant="h3"
@@ -324,7 +324,7 @@ const CartPage = () => {
             mb: 2,
           }}
         >
-          Shopping Bag
+          Giỏ hàng
         </Typography>
       </Box>
 
@@ -366,7 +366,7 @@ const CartPage = () => {
                           {item.name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          {formatPrice(item.price)} each
+                          {formatPrice(item.price)} / sản phẩm
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconButton
@@ -449,13 +449,13 @@ const CartPage = () => {
                 mb: 3,
               }}
             >
-              Order Summary
+              Tóm tắt đơn hàng
             </Typography>
 
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
+                  Tạm tính ({cart.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
                 </Typography>
                 <Typography variant="body2">
                   {formatPrice(total)}
@@ -464,7 +464,7 @@ const CartPage = () => {
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Total
+                  Tổng cộng
                 </Typography>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   {formatPrice(total)}
@@ -491,7 +491,7 @@ const CartPage = () => {
                 },
               }}
             >
-              Proceed to Checkout
+              Tiến hành thanh toán
             </Button>
 
             <Button
@@ -522,7 +522,7 @@ const CartPage = () => {
                   Đang xóa...
                 </>
               ) : (
-                'Clear Cart'
+                'Xóa giỏ hàng'
               )}
             </Button>
           </Paper>

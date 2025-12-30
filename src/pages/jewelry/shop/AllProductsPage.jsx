@@ -3,11 +3,6 @@ import { Box, Container, Typography, CircularProgress, Alert } from '@mui/materi
 import JewelryProduct from '../../../components/jewelry/JewelryProduct';
 import axiosClient from '../../../api/axiosClient';
 
-// Constants for mapping products
-const COLLECTIONS = ['Tiffany T', 'Tiffany HardWear', 'Elsa Peretti', 'Tiffany Lock', 'Tiffany Knot'];
-const MATERIALS = ['Yellow Gold', 'Rose Gold', 'White Gold', 'Sterling Silver', 'Platinum'];
-const GEMSTONES = ['Diamond', 'Sapphire', 'Ruby', 'Mother-of-pearl', 'No Gemstones'];
-
 // Helper function to format price from VND to USD
 const formatPrice = (price) => {
   // Assuming price is in VND, convert to USD (1 USD ≈ 25,000 VND)
@@ -23,9 +18,9 @@ const mapProductToJewelryFormat = (apiProduct, index) => {
     description: apiProduct.description || `${apiProduct.name} - A luxurious piece crafted with exceptional attention to detail.`,
     price: formatPrice(apiProduct.price),
     image: apiProduct.urlImg,
-    collection: COLLECTIONS[index % COLLECTIONS.length],
-    material: MATERIALS[index % MATERIALS.length],
-    gemstone: GEMSTONES[index % GEMSTONES.length],
+    collection: apiProduct.collectionName || null,
+    material: apiProduct.materialName || null,
+    gemstone: apiProduct.gemstoneName || null,
     isNew: index < 4, // First 4 products are "New"
     category: 'All Products',
   };

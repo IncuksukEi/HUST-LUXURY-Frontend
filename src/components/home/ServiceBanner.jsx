@@ -53,21 +53,20 @@ const ServiceBanner = () => {
           <Typography 
             variant="h4" 
             sx={{ 
-              fontSize: { xs: '1.25rem', sm: '1.5rem' },
+              fontSize: '24px',
               color: 'text.primary',
               mb: 2,
               fontWeight: 600,
-              lineHeight: 1.2,
-              fontFamily: '"Times New Roman", Times, serif',
+              lineHeight: 1.2
             }}
           >
-            Discover Our Gifting <br /> Services
+            Discover Our Gifting Services
           </Typography>
 
           <Typography 
             variant="body1" 
             sx={{ 
-              fontSize: { xs: '0.875rem', sm: '1rem' },
+              fontSize: '0.875rem',
               color: 'text.secondary',
               mb: 4,
               lineHeight: 1.8,
@@ -154,7 +153,7 @@ const ServiceBanner = () => {
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: { md: 'center', lg: 'flex-start' },
-              textAlign: { md: 'center', lg: 'left' },
+              textAlign: { md: 'center', lg: 'center' },
               p: { md: 4, lg: 6, xl: 8 },
               pl: { md: 4, lg: 6, xl: 8 },
             }}
@@ -168,21 +167,20 @@ const ServiceBanner = () => {
               <Typography 
                 variant="h4" 
                 sx={{ 
-                  fontSize: { md: '1.5rem', lg: '1.75rem', xl: '2rem' },
+                  fontSize: '1.5rem',
                   color: 'text.primary',
                   mb: { md: 2, lg: 3 },
                   fontWeight: 600,
                   lineHeight: 1.2,
-                  fontFamily: '"Times New Roman", Times, serif',
                 }}
               >
-                Discover Our Gifting <br /> Services
+                Discover Our Gifting Services
               </Typography>
 
               <Typography 
                 variant="body1" 
                 sx={{ 
-                  fontSize: { md: '1rem', lg: '1.125rem', xl: '1.25rem' },
+                  fontSize: '0.875rem',
                   color: 'text.secondary',
                   mb: { md: 4, lg: 5 },
                   lineHeight: 1.8,
@@ -199,7 +197,7 @@ const ServiceBanner = () => {
                 to="/appointment" 
                 underline="none"
                 sx={{
-                  fontSize: { md: '0.95rem', lg: '1rem', xl: '1.1rem' },
+                  fontSize: { md: '0.875rem', lg: '1rem', xl: '1rem' },
                   fontWeight: 500,
                   color: 'text.primary',
                   display: 'inline-flex',

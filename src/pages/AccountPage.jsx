@@ -115,7 +115,6 @@ function AccountPage() {
       <Typography
         variant="h4"
         sx={{
-          fontFamily: '"Times New Roman", Times, serif',
           fontSize: { xs: '1.5rem', md: '2rem' },
           fontWeight: 400,
           mb: 4,
@@ -123,12 +122,17 @@ function AccountPage() {
           borderBottom: '2px solid #000',
         }}
       >
-        My Account
+        Tài khoản của tôi
       </Typography>
 
-      <Grid container spacing={4}>
-        {/* Sidebar */}
-        <Grid item xs={12} md={3}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+        {/* Sidebar - Fixed left */}
+        <Box
+          sx={{
+            width: { xs: '100%', md: 280 },
+            flexShrink: 0,
+          }}
+        >
           <Paper
             elevation={0}
             sx={{
@@ -143,6 +147,8 @@ function AccountPage() {
                   to="/account"
                   selected={location.pathname === '/account'}
                   sx={{
+                    py: 2,
+                    px: 3,
                     borderLeft: location.pathname === '/account' ? `3px solid ${TIFFANY_BLUE}` : '3px solid transparent',
                     '&.Mui-selected': {
                       bgcolor: 'rgba(129, 216, 208, 0.1)',
@@ -150,9 +156,12 @@ function AccountPage() {
                         bgcolor: 'rgba(129, 216, 208, 0.15)',
                       },
                     },
+                    '&:hover': {
+                      bgcolor: 'rgba(129, 216, 208, 0.05)',
+                    },
                   }}
                 >
-                  <User size={20} style={{ marginRight: 12 }} />
+                  <User size={20} style={{ marginRight: 12, flexShrink: 0 }} />
                   <ListItemText
                     primary="Thông tin cá nhân"
                     primaryTypographyProps={{
@@ -168,6 +177,8 @@ function AccountPage() {
                   to="/account/change-password"
                   selected={location.pathname === '/account/change-password'}
                   sx={{
+                    py: 2,
+                    px: 3,
                     borderLeft: location.pathname === '/account/change-password' ? `3px solid ${TIFFANY_BLUE}` : '3px solid transparent',
                     '&.Mui-selected': {
                       bgcolor: 'rgba(129, 216, 208, 0.1)',
@@ -175,9 +186,12 @@ function AccountPage() {
                         bgcolor: 'rgba(129, 216, 208, 0.15)',
                       },
                     },
+                    '&:hover': {
+                      bgcolor: 'rgba(129, 216, 208, 0.05)',
+                    },
                   }}
                 >
-                  <Lock size={20} style={{ marginRight: 12 }} />
+                  <Lock size={20} style={{ marginRight: 12, flexShrink: 0 }} />
                   <ListItemText
                     primary="Đổi mật khẩu"
                     primaryTypographyProps={{
@@ -189,14 +203,14 @@ function AccountPage() {
               </ListItem>
             </List>
           </Paper>
-        </Grid>
+        </Box>
 
-        {/* Main Content */}
-        <Grid item xs={12} md={9}>
+        {/* Main Content - Vertical layout */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 3, md: 4 },
               border: '1px solid #e0e0e0',
               borderRadius: 0,
             }}
@@ -205,7 +219,6 @@ function AccountPage() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: '"Times New Roman", Times, serif',
                   fontSize: { xs: '1.25rem', md: '1.5rem' },
                   fontWeight: 400,
                 }}
@@ -217,141 +230,202 @@ function AccountPage() {
                   variant="outlined"
                   onClick={() => setIsEditing(true)}
                   sx={{
+                    fontFamily: 'Inter',
                     borderColor: '#000',
                     color: '#000',
                     borderRadius: 0,
                     fontSize: '0.875rem',
                     letterSpacing: '0.1em',
+                    px: 3,
+                    py: 1,
+                    textTransform: 'uppercase',
                     '&:hover': {
-                      borderColor: TIFFANY_BLUE,
-                      bgcolor: 'transparent',
+                      borderColor: '#000',
+                      color: '#000',
+                      bgcolor: '#f5f5f5',
                     },
                   }}
                 >
-                  Chỉnh sửa
+                  CHỈNH SỬA
                 </Button>
               )}
             </Box>
 
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
                 {error}
               </Alert>
             )}
             {success && (
-              <Alert severity="success" sx={{ mb: 3 }}>
+              <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess('')}>
                 {success}
               </Alert>
             )}
 
             <Box component="form" onSubmit={handleSave}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="email"
-                    type="email"
-                    value={profileData.email}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    variant="standard"
-                    required
-                    InputLabelProps={{
-                      sx: { color: '#666' },
-                    }}
-                  />
-                </Grid>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={profileData.email}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  variant="outlined"
+                  required
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: '#000',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#000',
+                      },
+                    },
+                    '& .MuiInputLabel-asterisk': {
+                      color: '#d32f2f',
+                    },
+                  }}
+                />
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Họ và tên"
-                    name="fullName"
-                    value={profileData.fullName}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    variant="standard"
-                    required
-                    InputLabelProps={{
-                      sx: { color: '#666' },
-                    }}
-                  />
-                </Grid>
+                <TextField
+                  fullWidth
+                  label="Họ và tên"
+                  name="fullName"
+                  value={profileData.fullName}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  variant="outlined"
+                  required
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: '#000',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#000',
+                      },
+                    },
+                    '& .MuiInputLabel-asterisk': {
+                      color: '#d32f2f',
+                    },
+                  }}
+                />
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Số điện thoại"
-                    name="phone"
-                    value={profileData.phone}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    variant="standard"
-                    required
-                    InputLabelProps={{
-                      sx: { color: '#666' },
-                    }}
-                  />
-                </Grid>
+                <TextField
+                  fullWidth
+                  label="Số điện thoại"
+                  name="phone"
+                  value={profileData.phone}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  variant="outlined"
+                  required
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: '#000',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#000',
+                      },
+                    },
+                    '& .MuiInputLabel-asterisk': {
+                      color: '#d32f2f',
+                    },
+                  }}
+                />
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    select
-                    label="Giới tính"
-                    name="gender"
-                    value={profileData.gender}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    variant="standard"
-                    required
-                    InputLabelProps={{
-                      sx: { color: '#666' },
-                    }}
-                  >
-                    <MenuItem value="MALE">Nam</MenuItem>
-                    <MenuItem value="FEMALE">Nữ</MenuItem>
-                    <MenuItem value="OTHER">Khác</MenuItem>
-                  </TextField>
-                </Grid>
+                <TextField
+                  fullWidth
+                  select
+                  label="Giới tính"
+                  name="gender"
+                  value={profileData.gender}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  variant="outlined"
+                  required
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: '#000',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#000',
+                      },
+                    },
+                    '& .MuiInputLabel-asterisk': {
+                      color: '#d32f2f',
+                    },
+                  }}
+                >
+                  <MenuItem value="MALE">Nam</MenuItem>
+                  <MenuItem value="FEMALE">Nữ</MenuItem>
+                  <MenuItem value="OTHER">Khác</MenuItem>
+                </TextField>
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Ngày sinh"
-                    name="birthDate"
-                    type="date"
-                    value={profileData.birthDate}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    variant="standard"
-                    required
-                    InputLabelProps={{
-                      shrink: true,
-                      sx: { color: '#666' },
-                    }}
-                  />
-                </Grid>
+                <TextField
+                  fullWidth
+                  label="Ngày sinh"
+                  name="birthDate"
+                  type="date"
+                  value={profileData.birthDate}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  variant="outlined"
+                  required
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: '#000',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#000',
+                      },
+                    },
+                    '& .MuiInputLabel-asterisk': {
+                      color: '#d32f2f',
+                    },
+                  }}
+                />
 
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Địa chỉ"
-                    name="address"
-                    value={profileData.address}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    variant="standard"
-                    required
-                    multiline
-                    rows={2}
-                    InputLabelProps={{
-                      sx: { color: '#666' },
-                    }}
-                  />
-                </Grid>
-              </Grid>
+                <TextField
+                  fullWidth
+                  label="Địa chỉ"
+                  name="address"
+                  value={profileData.address}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  variant="outlined"
+                  required
+                  multiline
+                  rows={3}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 0,
+                      '&:hover fieldset': {
+                        borderColor: '#000',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#000',
+                      },
+                    },
+                    '& .MuiInputLabel-asterisk': {
+                      color: '#d32f2f',
+                    },
+                  }}
+                />
+              </Box>
 
               {isEditing && (
                 <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'flex-end' }}>
@@ -366,13 +440,15 @@ function AccountPage() {
                       fontSize: '0.875rem',
                       letterSpacing: '0.1em',
                       px: 4,
+                      py: 1.5,
+                      textTransform: 'uppercase',
                       '&:hover': {
                         borderColor: '#666',
                         bgcolor: 'transparent',
                       },
                     }}
                   >
-                    Hủy
+                    HỦY
                   </Button>
                   <Button
                     type="submit"
@@ -385,19 +461,24 @@ function AccountPage() {
                       fontSize: '0.875rem',
                       letterSpacing: '0.1em',
                       px: 4,
+                      py: 1.5,
+                      textTransform: 'uppercase',
                       '&:hover': {
                         bgcolor: '#333',
                       },
+                      '&:disabled': {
+                        bgcolor: '#ccc',
+                      },
                     }}
                   >
-                    {saving ? <CircularProgress size={24} color="inherit" /> : 'Lưu thay đổi'}
+                    {saving ? <CircularProgress size={24} color="inherit" /> : 'LƯU THAY ĐỔI'}
                   </Button>
                 </Box>
               )}
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 }

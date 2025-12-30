@@ -70,7 +70,7 @@ function ProductDetailPage() {
       
       // Map API response to component format
       const categoryInfo = CATEGORY_ID_TO_INFO[response.data.categoryId] || { 
-        name: 'Unknown', 
+        name: 'Không xác định', 
         slug: 'all-products' 
       };
       
@@ -85,9 +85,9 @@ function ProductDetailPage() {
         category: categoryInfo.name,
         categorySlug: categoryInfo.slug,
         categoryId: response.data.categoryId,
-        collection: response.data.collectionName || 'Unknown Collection',
+        collection: response.data.collectionName || 'Bộ sưu tập không xác định',
         collectionId: response.data.collectionId,
-        material: response.data.materialName || 'Unknown Material',
+        material: response.data.materialName || 'Chất liệu không xác định',
         materialId: response.data.materialId,
       };
       
@@ -403,7 +403,7 @@ function ProductDetailPage() {
                   textTransform: 'uppercase',
                 }}
               >
-                Description & Details
+                Mô tả & Chi tiết
               </Typography>
               <Typography
                 variant="body1"
@@ -429,8 +429,8 @@ function ProductDetailPage() {
                       fontWeight: 300,
                     }}
                   >
-                    <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Stock:</Box>
-                    {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
+                    <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Tồn kho:</Box>
+                    {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
                   </Typography>
                 </Box>
               )}
@@ -447,7 +447,7 @@ function ProductDetailPage() {
                   fontWeight: 300,
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Category:</Box>
+                <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Danh mục:</Box>
                 {product.category}
               </Typography>
               <Typography
@@ -459,7 +459,7 @@ function ProductDetailPage() {
                   fontWeight: 300,
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Collection:</Box>
+                <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Bộ sưu tập:</Box>
                 {product.collection}
               </Typography>
               <Typography
@@ -471,10 +471,10 @@ function ProductDetailPage() {
                   fontWeight: 300,
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Material:</Box>
+                <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Chất liệu:</Box>
                 {product.material}
               </Typography>
-              {product.gemstone !== 'No Gemstones' && (
+              {product.gemstone && product.gemstone !== 'No Gemstones' && (
                 <Typography
                   variant="body2"
                   sx={{
@@ -483,7 +483,7 @@ function ProductDetailPage() {
                     fontWeight: 300,
                   }}
                 >
-                  <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Gemstone:</Box>
+                  <Box component="span" sx={{ fontWeight: 600, mr: 1 }}>Đá quý:</Box>
                   {product.gemstone}
                 </Typography>
               )}
@@ -544,7 +544,7 @@ function ProductDetailPage() {
                   },
                 }}
               >
-                Contact
+                Liên hệ
               </Button>
             </Box>
           </Box>

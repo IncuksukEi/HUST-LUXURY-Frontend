@@ -181,7 +181,7 @@ const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) =
             fontSize: { xs: '1.25rem', md: '1.5rem' },
           }}
         >
-          Recommended for You
+          Gợi ý cho bạn
         </Typography>
 
         {/* Loading State */}
@@ -191,7 +191,7 @@ const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) =
           </Box>
         ) : displayProducts.length === 0 ? (
           <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
-            No recommendations available at the moment.
+            Hiện tại không có gợi ý nào.
           </Typography>
         ) : (
           /* Horizontal Scroll Container */
@@ -336,7 +336,7 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
           {/* Quantity Selector */}
           <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Qty
+              Số lượng
             </Typography>
             <FormControl size="small" variant="standard">
               <Select
@@ -369,16 +369,16 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
               mb: 1.5,
             }}
           >
-            Complimentary Standard Delivery
+            Giao hàng tiêu chuẩn miễn phí
           </Typography>
 
           {/* Action Links - Simple underline on hover */}
           <Stack direction="row" spacing={2.5} sx={{ mt: 'auto' }}>
             {[
-              { label: 'Edit', onClick: () => onEdit(item.id), disabled: false },
-              { label: 'Save for Later', onClick: () => onSaveForLater(item.id), disabled: false },
+              { label: 'Chỉnh sửa', onClick: () => onEdit(item.id), disabled: false },
+              { label: 'Lưu để sau', onClick: () => onSaveForLater(item.id), disabled: false },
               { 
-                label: removingItemId === item.id ? 'Deleting...' : 'Delete', 
+                label: removingItemId === item.id ? 'Đang xóa...' : 'Xóa', 
                 onClick: () => onRemove(item.id), 
                 disabled: removingItemId === item.id 
               },
@@ -430,15 +430,15 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
       {/* Summary Details */}
       <Stack spacing={2} sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body2">Subtotal ({selectedCount} items)</Typography>
+          <Typography variant="body2">Tạm tính ({selectedCount} sản phẩm)</Typography>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
             {subtotal.toLocaleString('vi-VN')} VNĐ
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body2">Complimentary Standard Delivery</Typography>
+          <Typography variant="body2">Giao hàng tiêu chuẩn miễn phí</Typography>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {shipping === 0 ? 'Free' : `${shipping.toLocaleString('vi-VN')} VNĐ`}
+            {shipping === 0 ? 'Miễn phí' : `${shipping.toLocaleString('vi-VN')} VNĐ`}
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -469,12 +469,12 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              Taxes and other shipping methods
+              Thuế và các phương thức vận chuyển khác
             </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 0 }}>
             <Typography variant="caption" color="text.secondary">
-              Express shipping available at checkout
+              Vận chuyển nhanh có sẵn khi thanh toán
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -485,14 +485,14 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
       {/* Total */}
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Estimated Total
+          Tổng ước tính
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {total.toLocaleString('vi-VN')} VNĐ
         </Typography>
       </Stack>
       <Typography variant="caption" color="text.secondary" sx={{ mb: 3, display: 'block' }}>
-        Complimentary Delivery & Returns
+        Giao hàng & Đổi trả miễn phí
       </Typography>
 
       {/* Checkout Buttons */}
@@ -514,7 +514,7 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
             '&:disabled': { bgcolor: '#ccc', color: '#666' },
           }}
         >
-          CHECKOUT ({selectedCount})
+          THANH TOÁN ({selectedCount})
         </Button>
         <Button
           fullWidth
@@ -542,9 +542,9 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
       {/* Info Accordions */}
       <Box sx={{ mt: 4 }}>
         {[
-          { icon: Truck, label: 'Delivery & Returns' },
-          { icon: CreditCard, label: 'Accepted Payment Types' },
-          { icon: Wrench, label: 'Product Care & Repair' },
+          { icon: Truck, label: 'Giao hàng & Đổi trả' },
+          { icon: CreditCard, label: 'Các loại thanh toán được chấp nhận' },
+          { icon: Wrench, label: 'Chăm sóc & Sửa chữa sản phẩm' },
         ].map((item, index) => (
           <Accordion
             key={index}
@@ -580,7 +580,7 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
             </AccordionSummary>
             <AccordionDetails sx={{ px: 0, pt: 0, pb: 2 }}>
               <Typography variant="caption" color="text.secondary">
-                Details about {item.label.toLowerCase()}...
+                Chi tiết về {item.label.toLowerCase()}...
               </Typography>
             </AccordionDetails>
           </Accordion>
@@ -628,10 +628,10 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
             variant="body2"
             sx={{ fontFamily: 'serif', fontWeight: 600, mb: 0.5 }}
           >
-            The Signature Blue Box®
+            Hộp Xanh Đặc Trưng®
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Every purchase comes in our iconic Blue Box® crowned with a white ribbon.
+            Mỗi giao dịch mua đều được đựng trong Hộp Xanh đặc trưng của chúng tôi với dải ruy băng trắng.
           </Typography>
         </Box>
       </Box>
@@ -654,7 +654,7 @@ const EmptyCartView = ({ isLoggedIn, onSignIn }) => {
             fontSize: { xs: '1.25rem', md: '1.5rem' },
           }}
         >
-          Shopping Cart <Typography component="span" sx={{ color: 'text.secondary' }}>(0)</Typography>
+          Giỏ hàng <Typography component="span" sx={{ color: 'text.secondary' }}>(0)</Typography>
         </Typography>
 
         <Typography
@@ -662,7 +662,7 @@ const EmptyCartView = ({ isLoggedIn, onSignIn }) => {
           color="text.secondary"
           sx={{ mb: 4 }}
         >
-          Your Shopping Cart is Empty
+          Giỏ hàng của bạn đang trống
         </Typography>
 
         {!isLoggedIn && (
@@ -684,7 +684,7 @@ const EmptyCartView = ({ isLoggedIn, onSignIn }) => {
               },
             }}
           >
-            SIGN IN OR CREATE AN ACCOUNT
+            ĐĂNG NHẬP HOẶC TẠO TÀI KHOẢN
           </Button>
         )}
       </Box>
@@ -715,7 +715,7 @@ const NotLoggedInView = ({ onSignIn }) => {
           color="text.secondary"
           sx={{ mb: 4 }}
         >
-          Please sign in to view your cart
+          Vui lòng đăng nhập để xem giỏ hàng
         </Typography>
 
         <Button
@@ -780,7 +780,7 @@ function Cart() {
       if (err.response?.status === 401) {
         setIsLoggedIn(false);
       } else {
-        setError('Unable to load cart. Please try again.');
+        setError('Không thể tải giỏ hàng. Vui lòng thử lại.');
       }
     }
   };
@@ -893,7 +893,7 @@ function Cart() {
       // Rollback on error
       setCartItems(oldItems);
       
-      let errorMessage = 'Failed to update quantity. Please try again.';
+      let errorMessage = 'Không thể cập nhật số lượng. Vui lòng thử lại.';
       if (err.response) {
         if (err.response.status === 401) {
           errorMessage = 'Session expired. Please login again.';
@@ -944,7 +944,7 @@ function Cart() {
       setCartItems(oldItems);
       setSelectedItems(oldItems.map(item => item.id));
       
-      let errorMessage = 'Failed to remove item. Please try again.';
+      let errorMessage = 'Không thể xóa sản phẩm. Vui lòng thử lại.';
       if (err.response) {
         if (err.response.status === 401) {
           errorMessage = 'Session expired. Please login again.';
@@ -974,7 +974,7 @@ function Cart() {
     if (!token) {
       setSnackbar({
         open: true,
-        message: 'Please login to add items to cart',
+        message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng',
         severity: 'warning'
       });
       setTimeout(() => navigate('/login'), 1500);
@@ -1004,7 +1004,7 @@ function Cart() {
       if (err.response?.status === 401) {
         setSnackbar({
           open: true,
-          message: 'Session expired. Please login again.',
+          message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
           severity: 'warning'
         });
         localStorage.removeItem('token');
@@ -1012,7 +1012,7 @@ function Cart() {
       } else {
         setSnackbar({
           open: true,
-          message: 'Failed to add item to cart. Please try again.',
+          message: 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.',
           severity: 'error'
         });
       }
@@ -1035,7 +1035,7 @@ function Cart() {
     if (selectedItems.length === 0) {
       setSnackbar({
         open: true,
-        message: 'Please select at least one item to checkout',
+        message: 'Vui lòng chọn ít nhất một sản phẩm để thanh toán',
         severity: 'warning'
       });
       return;
@@ -1110,7 +1110,7 @@ function Cart() {
                       fontSize: { xs: '1.25rem', md: '1.5rem' },
                     }}
                   >
-                    Shopping Cart{' '}
+                    Giỏ hàng{' '}
                     <Typography component="span" sx={{ color: 'text.secondary' }}>
                       ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
                     </Typography>
@@ -1143,7 +1143,7 @@ function Cart() {
                           }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          Select All ({cartItems.length} items)
+                          Chọn tất cả ({cartItems.length} sản phẩm)
                         </Typography>
                       </Box>
 
