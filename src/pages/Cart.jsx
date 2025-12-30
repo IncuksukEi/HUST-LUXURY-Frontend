@@ -96,7 +96,7 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
             transform: isHovered ? 'scale(1.08)' : 'scale(1)',
           }}
         />
-        {/* Quick Add Button - Tiffany style */}
+        {/* Quick Add Button - Always visible for better UX */}
         <Box
           sx={{
             position: 'absolute',
@@ -104,14 +104,17 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
             left: 0,
             right: 0,
             p: 1.5,
-            opacity: isHovered ? 1 : 0,
-            transform: isHovered ? 'translateY(0)' : 'translateY(10px)',
+            zIndex: 10, // Ensure button is above all layers
+            opacity: isHovered ? 1 : 0.9,
+            transform: isHovered ? 'translateY(0)' : 'translateY(0)',
             transition: 'all 0.3s ease',
+            pointerEvents: 'auto', // Ensure clicks work
           }}
         >
           <Button
             fullWidth
             size="small"
+            variant="contained"
             onClick={handleAddToCart}
             sx={{
               bgcolor: 'rgba(255,255,255,0.95)',
@@ -119,6 +122,7 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
               fontSize: '0.7rem',
               letterSpacing: '0.1em',
               py: 1,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               '&:hover': {
                 bgcolor: '#000',
                 color: '#fff',
@@ -159,7 +163,7 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
 };
 
 // Component: Recommended Products Section - Horizontal Scroll (5 products max)
-const RecommendedSection = ({ products = [], onAddToCart }) => {
+const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) => {
   // Limit to 5 products
   const displayProducts = products.slice(0, 5);
 
@@ -180,46 +184,57 @@ const RecommendedSection = ({ products = [], onAddToCart }) => {
           Recommended for You
         </Typography>
 
-        {/* Horizontal Scroll Container */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: { xs: 2, md: 3 },
-            overflowX: 'auto',
-            scrollSnapType: 'x mandatory',
-            scrollBehavior: 'smooth',
-            pb: 2,
-            // Hide scrollbar but keep functionality
-            '&::-webkit-scrollbar': {
-              height: 6,
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#ddd',
-              borderRadius: 3,
-              '&:hover': {
-                background: '#0ABAB5',
+        {/* Loading State */}
+        {isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress sx={{ color: '#0ABAB5' }} />
+          </Box>
+        ) : displayProducts.length === 0 ? (
+          <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
+            No recommendations available at the moment.
+          </Typography>
+        ) : (
+          /* Horizontal Scroll Container */
+          <Box
+            sx={{
+              display: 'flex',
+              gap: { xs: 2, md: 3 },
+              overflowX: 'auto',
+              scrollSnapType: 'x mandatory',
+              scrollBehavior: 'smooth',
+              pb: 2,
+              // Hide scrollbar but keep functionality
+              '&::-webkit-scrollbar': {
+                height: 6,
               },
-            },
-          }}
-        >
-          {displayProducts.map((product, index) => (
-            <Fade in timeout={300 + index * 100} key={product.id}>
-              <Box
-                sx={{
-                  flex: '0 0 auto',
-                  width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 12px)' },
-                  minWidth: 180,
-                  scrollSnapAlign: 'start',
-                }}
-              >
-                <ProductCard product={product} index={index} onAddToCart={onAddToCart} />
-              </Box>
-            </Fade>
-          ))}
-        </Box>
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#ddd',
+                borderRadius: 3,
+                '&:hover': {
+                  background: '#0ABAB5',
+                },
+              },
+            }}
+          >
+            {displayProducts.map((product, index) => (
+              <Fade in timeout={300 + index * 100} key={product.id}>
+                <Box
+                  sx={{
+                    flex: '0 0 auto',
+                    width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 12px)' },
+                    minWidth: 180,
+                    scrollSnapAlign: 'start',
+                  }}
+                >
+                  <ProductCard product={product} index={index} onAddToCart={onAddToCart} />
+                </Box>
+              </Fade>
+            ))}
+          </Box>
+        )}
       </Container>
     </Box>
   );
@@ -731,6 +746,7 @@ function Cart() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [recommendedLoading, setRecommendedLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState([]); // For checkout selection like Shopee
   const [error, setError] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -761,21 +777,29 @@ function Cart() {
     }
   };
 
-  // Fetch recommended products from API
-  const fetchRecommendedProducts = async () => {
+  // Load recommended products from API (GET /api/products)
+  const loadRecommendedProducts = async () => {
+    console.log('Fetching recommended products from API /api/products...');
     try {
       const response = await axiosClient.get('/products');
-      // Get first 5 products as recommendations
+      console.log('Products API response:', response.data);
+
+      // API returns: [{ productId, name, description, urlImg, price }, ...]
       const products = response.data.slice(0, 5).map((product) => ({
         id: product.productId,
         name: product.name,
-        price: product.price,
+        price: product.price, // Number from API
         image: product.urlImg,
         description: product.description,
       }));
+
+      console.log('Mapped recommended products:', products);
       setRecommendedProducts(products);
     } catch (err) {
       console.error('Error fetching recommended products:', err);
+      // Leave empty on error - no fallback
+    } finally {
+      setRecommendedLoading(false);
     }
   };
 
@@ -784,20 +808,21 @@ function Cart() {
     const checkAuthAndFetchCart = async () => {
       setLoading(true);
 
+      // Load recommended products immediately (local data)
+      loadRecommendedProducts();
+
       const token = localStorage.getItem('token');
 
       if (!token) {
         setIsLoggedIn(false);
         setLoading(false);
-        // Still fetch recommended products for non-logged in users
-        fetchRecommendedProducts();
         return;
       }
 
       setIsLoggedIn(true);
 
       try {
-        await Promise.all([fetchCart(), fetchRecommendedProducts()]);
+        await fetchCart();
       } catch (err) {
         console.error('Error loading cart data:', err);
       } finally {
@@ -843,9 +868,9 @@ function Cart() {
     );
 
     try {
-      // API expects array of updates
+      // API docs: [{ "productid": 1, "quantity": 5 }]
       await axiosClient.post('/cart/update', [
-        { product_id: itemId, quantity: newQuantity }
+        { productid: itemId, quantity: newQuantity }
       ]);
     } catch (err) {
       console.error('Error updating quantity:', err);
@@ -901,10 +926,14 @@ function Cart() {
     }
 
     try {
-      await axiosClient.post('/cart/add', {
+      // Try with product_id (underscore format)
+      const requestBody = {
         product_id: product.id,
         quantity: 1
-      });
+      };
+      console.log('Add to cart request:', requestBody);
+
+      await axiosClient.post('/cart/add', requestBody);
 
       // Refresh cart after adding
       await fetchCart();
@@ -1095,13 +1124,12 @@ function Cart() {
             )}
           </Container>
 
-          {/* Recommended Products Section */}
-          {recommendedProducts.length > 0 && (
-            <RecommendedSection
-              products={recommendedProducts}
-              onAddToCart={handleAddToCart}
-            />
-          )}
+          {/* Recommended Products Section - Always show */}
+          <RecommendedSection
+            products={recommendedProducts}
+            onAddToCart={handleAddToCart}
+            isLoading={recommendedLoading}
+          />
         </>
       )}
 
