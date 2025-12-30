@@ -13,7 +13,7 @@ const ProductManagement = () => {
     const [fileList, setFileList] = useState([]);
     const [form] = Form.useForm();
 
-    // Mapping Data
+    // Dữ liệu mapping cứng ở FE (để hiển thị tên cho đẹp)
     const categoryOptions = [
         { id: 1, name: 'Dây chuyền (Necklaces)' },
         { id: 2, name: 'Bông tai (Earrings)' },
@@ -43,7 +43,6 @@ const ProductManagement = () => {
             setProducts(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("Failed to fetch products:", error);
-            message.error("Failed to fetch products");
         } finally {
             setLoading(false);
         }
@@ -63,6 +62,7 @@ const ProductManagement = () => {
     const handleEdit = (record) => {
         setEditingProduct(record);
         setFileList([]); 
+        // Map lại các trường ID cũ/mới nếu cần
         const formValues = {
             ...record,
             collectionId: record.category_id_combo || record.categoryIdCombo, 
@@ -72,7 +72,6 @@ const ProductManagement = () => {
         setIsModalOpen(true);
     };
 
-    // --- HÀM XÓA CHUẨN (Đã bỏ phần ẩn/hiện lỗi) ---
     const handleDelete = async (id) => {
         try {
             await axiosClient.delete(`/admin/products/${id}`);
@@ -80,11 +79,13 @@ const ProductManagement = () => {
             fetchProducts();
         } catch (error) {
             console.error("Delete failed:", error);
-            // Chỉ hiện lỗi nếu thực sự không xóa được (VD: Đã có đơn hàng đã mua)
+            // Bắt lỗi từ Backend trả về
             if (error.response && error.response.data && error.response.data.error) {
+                 // Nếu BE trả về message lỗi cụ thể (VD: Ràng buộc khóa ngoại)
                  message.error(error.response.data.error);
             } else {
-                 message.error("Không thể xóa sản phẩm này (Đang có đơn hàng liên quan)");
+                 // Lỗi chung chung hoặc lỗi 500 do Constraint Violation
+                 message.error("Không thể xóa sản phẩm này (Sản phẩm đã có trong đơn hàng hoặc giỏ hàng).");
             }
         }
     };
@@ -120,7 +121,7 @@ const ProductManagement = () => {
                 fetchProducts();
             } catch (error) {
                 console.error("Save failed:", error);
-                message.error("Lưu thất bại");
+                message.error("Lưu thất bại: " + (error.response?.data?.error || error.message));
             }
         });
     };
@@ -136,26 +137,16 @@ const ProductManagement = () => {
     const beforeUpload = () => false;
 
     const columns = [
+        { title: 'ID', dataIndex: 'productId', key: 'productId', width: 60 },
         {
-            title: 'ID',
-            dataIndex: 'productId',
-            key: 'productId',
-            width: 60,
-        },
-        {
-            title: 'Image',
+            title: 'Ảnh',
             dataIndex: 'urlImg',
             key: 'urlImg',
             render: (url) => <Image width={50} src={url || "https://via.placeholder.com/50"} fallback="https://via.placeholder.com/50" />,
         },
+        { title: 'Tên SP', dataIndex: 'name', key: 'name', width: 200 },
         {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-            width: 200,
-        },
-        {
-            title: 'Category',
+            title: 'Danh mục',
             key: 'category',
             render: (_, record) => {
                 const cat = categoryOptions.find(c => c.id === record.categoryId);
@@ -163,7 +154,7 @@ const ProductManagement = () => {
             }
         },
         {
-            title: 'Material', 
+            title: 'Chất liệu', 
             key: 'material',
             render: (_, record) => {
                 const matId = record.category_id_uu_dai || record.categoryIdUuDai;
@@ -172,24 +163,20 @@ const ProductManagement = () => {
             }
         },
         {
-            title: 'Price',
+            title: 'Giá',
             dataIndex: 'price',
             key: 'price',
             render: (price) => price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
         },
+        { title: 'Kho', dataIndex: 'stock', key: 'stock' },
         {
-            title: 'Stock',
-            dataIndex: 'stock',
-            key: 'stock',
-        },
-        {
-            title: 'Action',
+            title: 'Hành động',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type="primary" size="small" onClick={() => handleEdit(record)}>Edit</Button>
+                    <Button type="primary" size="small" onClick={() => handleEdit(record)}>Sửa</Button>
                     <Popconfirm title="Bạn có chắc muốn xóa?" onConfirm={() => handleDelete(record.productId)}>
-                        <Button type="primary" danger size="small">Delete</Button>
+                        <Button type="primary" danger size="small">Xóa</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -199,8 +186,8 @@ const ProductManagement = () => {
     return (
         <div>
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Product Management</h2>
-                <Button type="primary" onClick={handleAdd}>Add Product</Button>
+                <h2>Quản lý sản phẩm</h2>
+                <Button type="primary" onClick={handleAdd}>Thêm sản phẩm</Button>
             </div>
             
             <Table
@@ -211,7 +198,7 @@ const ProductManagement = () => {
                 pagination={{ pageSize: 8 }}
             />
 
-            <Modal title={editingProduct ? "Edit Product" : "Add Product"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={700}>
+            <Modal title={editingProduct ? "Cập nhật sản phẩm" : "Thêm sản phẩm"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} width={700}>
                 <Form form={form} layout="vertical">
                     <div style={{ display: 'flex', gap: '15px' }}>
                         <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true }]} style={{ flex: 2 }}>
