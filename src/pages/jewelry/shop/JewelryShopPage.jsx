@@ -6,50 +6,6 @@ import JewelryProduct from '../../../components/jewelry/JewelryProduct';
 import JewelryCategoryGrid from '../../../components/jewelry/JewelryCategoryGrid';
 import JewelryCategoryDescription from '../../../components/jewelry/JewelryCategoryDescription';
 
-// --- CONSTANTS ĐỂ GENERATE DATA CHUẨN ---
-const COLLECTIONS = ['Tiffany T', 'Tiffany HardWear', 'Elsa Peretti', 'Tiffany Lock', 'Tiffany Knot'];
-const MATERIALS = ['Yellow Gold', 'Rose Gold', 'White Gold', 'Sterling Silver', 'Platinum'];
-const GEMSTONES = ['Diamond', 'Sapphire', 'Ruby', 'Mother-of-pearl', 'No Gemstones'];
-
-// Hàm hỗ trợ lấy ảnh dựa trên category
-const getBaseImageName = (slug) => {
-    if (slug.includes('necklace')) return 'necklaces';
-    if (slug.includes('earring')) return 'earrings'; // Lưu ý: cần đảm bảo file ảnh tồn tại
-    if (slug.includes('bracelet')) return 'necklaces'; // Tạm dùng necklaces nếu chưa có ảnh bracelet đủ bộ
-    if (slug.includes('ring')) return 'hero-ring'; // Tạm dùng hero-ring
-    return 'necklaces'; // Fallback
-};
-
-// --- HÀM GENERATE DATA MỚI ---
-const GENERATE_PRODUCTS = (categoryName, slug, count) => {
-    const baseImg = getBaseImageName(slug);
-    
-    return Array.from({ length: count }, (_, i) => {
-        // Chọn random thuộc tính
-        const collection = COLLECTIONS[i % COLLECTIONS.length];
-        const material = MATERIALS[i % MATERIALS.length];
-        const gemstone = GEMSTONES[i % GEMSTONES.length];
-        
-        // Mỗi sản phẩm chỉ có 1 ảnh
-        const imageIndex = (i % 4) + 1; // Lặp lại ảnh 1-4
-        const image = `/image/${baseImg}-${imageIndex}.webp`;
-
-        return {
-            id: i + 1,
-            name: `${collection} ${categoryName} ${i + 1}`,
-            description: `${collection} design in ${material} ${gemstone !== 'No Gemstones' ? `with ${gemstone}` : ''}. A bold statement of modern love.`,
-            price: `$${(Math.random() * 10000 + 2000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
-            category: categoryName,
-            
-            // Các trường quan trọng cho Filter & UI mới
-            collection: collection,
-            material: material,
-            gemstone: gemstone,
-            isNew: i < 4, // 4 sản phẩm đầu tiên là New
-            image: image // Chỉ 1 ảnh
-        };
-    });
-};
 
 const CATEGORY_DATA_MAP = {
     // URL: /jewelry/shop/necklaces-pendants
@@ -61,7 +17,6 @@ const CATEGORY_DATA_MAP = {
             { label: 'Browse Bracelets', href: '/jewelry/shop/bracelets' },
             { label: 'Browse Rings', href: '/jewelry/shop/rings' }
         ],
-        products: GENERATE_PRODUCTS('Pendant', 'necklaces-pendants', 24),
         subItems: [ 
             { name: 'Everyday Diamonds', image: '/image/necklaces-1.webp', href: '/jewelry/shop/necklaces-pendants/everyday' },
             { name: 'Chain', image: '/image/necklaces-2.webp', href: '/jewelry/shop/necklaces-pendants/chain' },
@@ -79,7 +34,6 @@ const CATEGORY_DATA_MAP = {
             { label: 'Browse Rings', href: '/jewelry/shop/rings' },
             { label: 'Browse Bracelets', href: '/jewelry/shop/bracelets' }
         ],
-        products: GENERATE_PRODUCTS('Earrings', 'earrings', 20),
         subItems: [ 
             { name: 'Stud', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/stud' },
             { name: 'Hoop', image: '/image/sapphire-earrings.webp', href: '/jewelry/shop/earrings/hoop' },
@@ -98,7 +52,6 @@ const CATEGORY_DATA_MAP = {
             { label: 'Browse Earrings', href: '/jewelry/shop/earrings' },
             { label: 'Browse Rings', href: '/jewelry/shop/rings' }
         ],
-        products: GENERATE_PRODUCTS('Bracelet', 'bracelets', 16),
         subItems: [
             { name: 'Chain', image: '/image/emerald-bracelet.webp' },
             { name: 'Bangle', image: '/image/emerald-bracelet.webp' },
@@ -117,7 +70,6 @@ const CATEGORY_DATA_MAP = {
             { label: 'Browse Earrings', href: '/jewelry/shop/earrings' },
             { label: 'Browse Bracelets', href: '/jewelry/shop/bracelets' }
         ],
-        products: GENERATE_PRODUCTS('Ring', 'rings', 16),
         subItems: [
             { name: 'Stacking', image: '/image/hero-ring.webp' },
             { name: 'Statement', image: '/image/hero-ring.webp' },

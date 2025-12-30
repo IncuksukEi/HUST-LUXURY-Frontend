@@ -12,9 +12,6 @@ import axiosClient from '../../api/axiosClient';
 import { useWishlist } from '../../hooks/useWishlist';
 
 // --- 1. CONSTANTS ---
-const COLLECTIONS = ['Tiffany T', 'Tiffany HardWear', 'Elsa Peretti', 'Tiffany Lock', 'Tiffany Knot'];
-const MATERIALS = ['Yellow Gold', 'Rose Gold', 'White Gold', 'Sterling Silver', 'Platinum'];
-const GEMSTONES = ['Diamond', 'Sapphire', 'Ruby', 'Mother-of-pearl', 'No Gemstones'];
 const SORT_OPTIONS = ['Đề xuất', 'Mới nhất', 'Giá cao đến thấp', 'Giá thấp đến cao'];
 
 // Mapping từ categorySlug sang categoryId (theo backend - khớp với CATEGORY_SLUG_MAP)
@@ -41,9 +38,9 @@ const mapProductToJewelryFormat = (apiProduct, index) => {
         description: apiProduct.description || `${apiProduct.name} - A luxurious piece crafted with exceptional attention to detail.`,
         price: formatPrice(apiProduct.price),
         image: apiProduct.urlImg,
-        collection: COLLECTIONS[index % COLLECTIONS.length],
-        material: MATERIALS[index % MATERIALS.length],
-        gemstone: GEMSTONES[index % GEMSTONES.length],
+        collection: apiProduct.collectionName || null,
+        material: apiProduct.materialName || null,
+        gemstone: apiProduct.gemstoneName || null,
         isNew: index < 4, // First 4 products are "New"
         category: 'All Products',
     };
@@ -434,16 +431,18 @@ const ProductCard = ({ product }) => {
                     flexDirection: 'column',
                     justifyContent: 'flex-start'
                 }}>
-                    <Typography variant="subtitle2" sx={{ 
-                        fontFamily: 'Sterling Display A', 
-                        fontSize: { xs: '0.85rem', md: '0.95rem' }, 
-                        fontWeight: 500, 
-                        mb: 0.5, 
-                        lineHeight: 1.3,
-                        color: '#000'
-                    }}>
-                        {product.collection}
-                    </Typography>
+                    {product.collection && (
+                        <Typography variant="subtitle2" sx={{ 
+                            fontFamily: 'Sterling Display A', 
+                            fontSize: { xs: '0.85rem', md: '0.95rem' }, 
+                            fontWeight: 500, 
+                            mb: 0.5, 
+                            lineHeight: 1.3,
+                            color: '#000'
+                        }}>
+                            {product.collection}
+                        </Typography>
+                    )}
                     <Typography variant="body2" sx={{ 
                         fontSize: { xs: '0.8rem', md: '0.9rem' }, 
                         color: '#333', 
@@ -469,7 +468,21 @@ const ProductCard = ({ product }) => {
                         fontSize: '0.8rem',
                         color: '#666'
                     }}>
-                        {product.material} with {product.gemstone}. <br/>
+                        {product.material && product.gemstone && (
+                            <>
+                                {product.material} with {product.gemstone}. <br/>
+                            </>
+                        )}
+                        {product.material && !product.gemstone && (
+                            <>
+                                {product.material}. <br/>
+                            </>
+                        )}
+                        {!product.material && product.gemstone && (
+                            <>
+                                {product.gemstone}. <br/>
+                            </>
+                        )}
                         {product.description}
                     </Typography>
 
@@ -628,9 +641,37 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
     const [selectedCollections, setSelectedCollections] = useState([]);
     const [selectedMaterials, setSelectedMaterials] = useState([]);
     const [selectedGemstones, setSelectedGemstones] = useState([]);
-    const [sortOption, setSortOption] = useState('Recommendations');
+    const [sortOption, setSortOption] = useState('Đề xuất');
     const [anchorSort, setAnchorSort] = useState(null);
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+    // Extract unique filter options from actual products data
+    const availableCollections = React.useMemo(() => {
+        const collections = products
+            .map(p => p.collection)
+            .filter(Boolean) // Remove null/undefined
+            .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+            .sort();
+        return collections;
+    }, [products]);
+
+    const availableMaterials = React.useMemo(() => {
+        const materials = products
+            .map(p => p.material)
+            .filter(Boolean) // Remove null/undefined
+            .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+            .sort();
+        return materials;
+    }, [products]);
+
+    const availableGemstones = React.useMemo(() => {
+        const gemstones = products
+            .map(p => p.gemstone)
+            .filter(Boolean) // Remove null/undefined
+            .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+            .sort();
+        return gemstones;
+    }, [products]);
 
     // Helpers
     const toggleFilter = (item, currentList, setList) => {
@@ -755,9 +796,15 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
                         <Box sx={{ maxWidth: '80%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2, flexWrap: 'wrap' }}>
                                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Filter by:</Typography>
-                                <FilterDropdown label="Nhà thiết kế & Bộ sưu tập" options={COLLECTIONS} selected={selectedCollections} onToggle={(val) => toggleFilter(val, selectedCollections, setSelectedCollections)} />
-                                <FilterDropdown label="Chất liệu" options={MATERIALS} selected={selectedMaterials} onToggle={(val) => toggleFilter(val, selectedMaterials, setSelectedMaterials)} />
-                                <FilterDropdown label="Đá quý" options={GEMSTONES} selected={selectedGemstones} onToggle={(val) => toggleFilter(val, selectedGemstones, setSelectedGemstones)} />
+                                {availableCollections.length > 0 && (
+                                    <FilterDropdown label="Nhà thiết kế & Bộ sưu tập" options={availableCollections} selected={selectedCollections} onToggle={(val) => toggleFilter(val, selectedCollections, setSelectedCollections)} />
+                                )}
+                                {availableMaterials.length > 0 && (
+                                    <FilterDropdown label="Chất liệu" options={availableMaterials} selected={selectedMaterials} onToggle={(val) => toggleFilter(val, selectedMaterials, setSelectedMaterials)} />
+                                )}
+                                {availableGemstones.length > 0 && (
+                                    <FilterDropdown label="Đá quý" options={availableGemstones} selected={selectedGemstones} onToggle={(val) => toggleFilter(val, selectedGemstones, setSelectedGemstones)} />
+                                )}
                             </Box>
 
                             {/* Chips */}
@@ -821,9 +868,9 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
             <MobileFilterSidebar
                 open={mobileFilterOpen}
                 onClose={() => setMobileFilterOpen(false)}
-                collections={COLLECTIONS}
-                materials={MATERIALS}
-                gemstones={GEMSTONES}
+                collections={availableCollections}
+                materials={availableMaterials}
+                gemstones={availableGemstones}
                 selectedCollections={selectedCollections}
                 selectedMaterials={selectedMaterials}
                 selectedGemstones={selectedGemstones}
