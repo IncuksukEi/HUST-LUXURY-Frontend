@@ -16,7 +16,7 @@ const HomePage = () => {
 
       <ServiceBanner />
 
-      <Experience />
+      {/* <Experience /> */}
     </Box>
   );
 };

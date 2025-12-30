@@ -76,7 +76,6 @@ const VideoTeaser = () => {
                 mb: 2, 
                 fontWeight: 600,
                 fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem', lg: '3rem' },
-                fontFamily: '"Times New Roman", Times, serif',
                 textAlign: 'center'
               }}
             >

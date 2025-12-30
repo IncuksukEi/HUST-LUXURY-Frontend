@@ -86,7 +86,7 @@ const LinkList = ({ links }) => (
         underline="none"
         sx={{
           color: "text.primary",
-          fontSize: "13px",
+          fontSize: "0.75rem",
           display: "block",
           width: "fit-content",
           maxWidth: "100%",
@@ -125,7 +125,7 @@ const SectionTitle = ({ children }) => (
       letterSpacing: 1,
       mb: { xs: 0.5, lg: 2 },
       color: "text.primary",
-      fontSize: "0.75rem",
+      fontSize: "0.875rem",
     }}
   >
     {children}
@@ -138,7 +138,7 @@ const NewsletterForm = () => (
       variant="body2" 
       sx={{ 
         mb: 3, 
-        fontSize: '13px', 
+        fontSize: '0.75rem', 
         lineHeight: 1.6,
         whiteSpace: "normal",
         wordBreak: "break-word",

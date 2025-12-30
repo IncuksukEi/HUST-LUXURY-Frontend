@@ -46,7 +46,7 @@ import axiosClient from "../api/axiosClient";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "High Jewelry", href: "/high-jewelry" },
+  // { label: "High Jewelry", href: "/high-jewelry" },
   { label: "Jewelry", href: "/jewelry" },
   { label: "Contact", href: "/contact" },
 ];
