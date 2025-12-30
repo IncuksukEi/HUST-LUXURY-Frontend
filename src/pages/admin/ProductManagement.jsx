@@ -15,10 +15,10 @@ const ProductManagement = () => {
         try {
             setLoading(true);
             const response = await axiosClient.get('/admin/products');
-            console.log("Product Data:", response.data);
             setProducts(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("Failed to fetch products:", error);
+            message.error("Failed to fetch products");
         } finally {
             setLoading(false);
         }
@@ -35,10 +35,22 @@ const ProductManagement = () => {
         setIsModalOpen(true);
     };
 
+    // --- 1. SỬA HÀM EDIT: Map dữ liệu cũ từ Backend vào Form mới ---
     const handleEdit = (record) => {
         setEditingProduct(record);
-        setFileList([]); // Clear file list on edit open
-        form.setFieldsValue(record);
+        setFileList([]); 
+        
+        // Logic: Lấy giá trị từ trường cũ (Backend) gán vào trường mới (Frontend)
+        // Lưu ý: Kiểm tra kỹ tên biến backend trả về (thường là snake_case hoặc camelCase tùy cấu hình)
+        const formValues = {
+            ...record,
+            // Map Combo -> Collection
+            collectionId: record.category_id_combo || record.categoryIdCombo, 
+            // Map UuDai -> Material
+            materialId: record.category_id_uu_dai || record.categoryIdUuDai
+        };
+        
+        form.setFieldsValue(formValues);
         setIsModalOpen(true);
     };
 
@@ -53,6 +65,7 @@ const ProductManagement = () => {
         }
     };
 
+    // --- 2. SỬA HÀM SAVE: Map dữ liệu Form mới về lại trường cũ của Backend ---
     const handleOk = () => {
         form.validateFields().then(async (values) => {
             try {
@@ -63,30 +76,45 @@ const ProductManagement = () => {
                 formData.append('categoryId', values.categoryId);
 
                 if (values.description) formData.append('description', values.description);
-                if (values.category_id_combo) formData.append('category_id_combo', values.category_id_combo);
-                if (values.category_id_uu_dai) formData.append('category_id_uu_dai', values.category_id_uu_dai);
-                if (values.materialId) formData.append('materialId', values.materialId);
-                if (values.collectionId) formData.append('collectionId', values.collectionId);
 
-                if (fileList.length > 0) {
+                // --- QUAN TRỌNG: Map ngược lại để gửi về Backend ---
+                // Lấy Collection ID gửi vào category_id_combo
+                if (values.collectionId) {
+                    formData.append('category_id_combo', values.collectionId);
+                }
+                
+                // Lấy Material ID gửi vào category_id_uu_dai
+                if (values.materialId) {
+                    formData.append('category_id_uu_dai', values.materialId);
+                }
+
+                // Xử lý file ảnh
+                if (fileList.length > 0 && fileList[0].originFileObj) {
                     formData.append('file', fileList[0].originFileObj);
                 }
 
+                // Cấu hình Header bắt buộc cho Upload file
+                const config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data', 
+                    },
+                };
+
                 if (editingProduct) {
-                    // Update: POST /api/admin/products/update/{id}
-                    await axiosClient.post(`/admin/products/update/${editingProduct.productId}`, formData);
+                    // Update Product
+                    await axiosClient.post(`/admin/products/update/${editingProduct.productId}`, formData, config);
                     message.success('Product updated successfully');
                 } else {
-                    // Create: POST /api/admin/products
-                    await axiosClient.post('/admin/products', formData);
+                    // Create Product
+                    await axiosClient.post('/admin/products', formData, config);
                     message.success('Product created successfully');
                 }
+                
                 setIsModalOpen(false);
                 fetchProducts();
             } catch (error) {
                 console.error("Save failed:", error);
                 if (error.response) {
-                    console.log("Server Error Response:", error.response.data);
                     message.error(`Failed: ${error.response.data.message || error.response.statusText}`);
                 } else {
                     message.error("Failed to save product");
@@ -109,7 +137,7 @@ const ProductManagement = () => {
 
     const columns = [
         {
-            title: 'Valid',
+            title: 'ID',
             dataIndex: 'productId',
             key: 'productId',
             width: 70,
@@ -126,10 +154,10 @@ const ProductManagement = () => {
             key: 'name',
         },
         {
-            title: 'Price (VNĐ)',
+            title: 'Price',
             dataIndex: 'price',
             key: 'price',
-            render: (price) => price?.toLocaleString(),
+            render: (price) => price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }),
         },
         {
             title: 'Stock',
@@ -165,14 +193,16 @@ const ProductManagement = () => {
 
             <Modal title={editingProduct ? "Edit Product" : "Add Product"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Form form={form} layout="vertical">
-                    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Please input product name!' }]}>
                         <Input />
                     </Form.Item>
+                    
                     <Form.Item name="description" label="Description">
-                        <Input.TextArea />
+                        <Input.TextArea rows={3} />
                     </Form.Item>
-                    <Form.Item name="price" label="Price" rules={[{ required: true }]}>
-                        <InputNumber style={{ width: '100%' }} />
+                    
+                    <Form.Item name="price" label="Price" rules={[{ required: true, message: 'Please input price!' }]}>
+                        <InputNumber style={{ width: '100%' }} formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} parser={value => value.replace(/\$\s?|(,*)/g, '')} />
                     </Form.Item>
 
                     <Form.Item label="Image">
@@ -190,25 +220,21 @@ const ProductManagement = () => {
                     <Form.Item name="categoryId" label="Category ID" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
+                    
                     <Form.Item name="stock" label="Stock" rules={[{ required: true }]}>
                         <InputNumber style={{ width: '100%' }} />
                     </Form.Item>
 
+                    {/* --- 3. SỬA GIAO DIỆN FORM: Đổi tên hiển thị --- */}
                     <div style={{ display: 'flex', gap: '10px' }}>
+                        {/* Trường Material (Frontend) -> map vào uu_dai (Backend) */}
                         <Form.Item name="materialId" label="Material ID" style={{ flex: 1 }}>
-                            <InputNumber style={{ width: '100%' }} />
+                            <InputNumber style={{ width: '100%' }} placeholder="Nhập ID Chất liệu" />
                         </Form.Item>
-                        <Form.Item name="collectionId" label="Collection ID" style={{ flex: 1 }}>
-                            <InputNumber style={{ width: '100%' }} />
-                        </Form.Item>
-                    </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <Form.Item name="category_id_uu_dai" label="Category Uu Dai ID" style={{ flex: 1 }}>
-                            <InputNumber style={{ width: '100%' }} />
-                        </Form.Item>
-                        <Form.Item name="category_id_combo" label="Category Combo ID" style={{ flex: 1 }}>
-                            <InputNumber style={{ width: '100%' }} />
+                        {/* Trường Collection (Frontend) -> map vào combo (Backend) */}
+                        <Form.Item name="collectionId" label="Collection ID" style={{ flex: 1 }}>
+                            <InputNumber style={{ width: '100%' }} placeholder="Nhập ID Bộ sưu tập" />
                         </Form.Item>
                     </div>
                 </Form>

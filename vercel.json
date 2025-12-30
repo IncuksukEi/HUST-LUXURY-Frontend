@@ -1,5 +1,4 @@
 {
-    "region": "sin1",
   "rewrites": [
     {
       "source": "/(.*)",
