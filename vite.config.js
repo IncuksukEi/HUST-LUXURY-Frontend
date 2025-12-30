@@ -10,10 +10,21 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-mui': ['@mui/material', '@mui/icons-material'],
-          'vendor-utils': ['axios', 'lucide-react'],
+        manualChunks(id) {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@mui/material') || id.includes('@mui/icons-material')) {
+              return 'vendor-mui';
+            }
+            if (id.includes('axios') || id.includes('lucide-react')) {
+              return 'vendor-utils';
+            }
+            // Other node_modules go to vendor-common
+            return 'vendor-common';
+          }
         },
       },
     },
