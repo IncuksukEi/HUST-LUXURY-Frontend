@@ -10,15 +10,18 @@ const TIFFANY_BLUE = '#81d8d0'; // Màu xanh chủ đạo cho hover
 const ITEMS = [
   { 
     title: 'Quà Tặng Cho Cô Ấy', 
-    image: '/image/gfh-hp.webp' 
+    image: '/image/gfh-hp.webp',
+    href: '/jewelry/shop'
   },
   { 
     title: 'Trang Sức Kim Cương', 
-    image: '/image/diamond-hp.webp' 
+    image: '/image/diamond-hp.webp',
+    href: '/jewelry/shop/diamond'
   },
   { 
     title: 'Trang Sức Vàng', 
-    image: '/image/gold-hp.webp' 
+    image: '/image/gold-hp.webp',
+    href: '/jewelry/shop/gold'
   },
 ];
 
@@ -49,7 +52,7 @@ const HighlightCategories = () => {
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.title}>
             <Link 
               component={RouterLink} 
-              to="/jewelry/shop" 
+              to={item.href || "/jewelry/shop"} 
               underline="none" 
               sx={{ 
                 display: 'block', 

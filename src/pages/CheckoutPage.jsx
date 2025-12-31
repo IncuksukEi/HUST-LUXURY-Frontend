@@ -21,11 +21,12 @@ const TIFFANY_BLUE = '#81d8d0';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { cart, updateQuantity, removeFromCart, getTotal, clearCart } = useCart();
+  const { clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [fetchingAddress, setFetchingAddress] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [checkoutItems, setCheckoutItems] = useState([]);
   
   const [address, setAddress] = useState('');
   const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -38,8 +39,22 @@ const CheckoutPage = () => {
       return;
     }
 
-    // Nếu cart rỗng, redirect về cart page
-    if (cart.length === 0) {
+    // Load selected items from sessionStorage
+    const items = sessionStorage.getItem('checkoutItems');
+    if (!items) {
+      navigate('/cart');
+      return;
+    }
+
+    try {
+      const parsedItems = JSON.parse(items);
+      if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
+        navigate('/cart');
+        return;
+      }
+      setCheckoutItems(parsedItems);
+    } catch (err) {
+      console.error('Error parsing checkout items:', err);
       navigate('/cart');
       return;
     }
@@ -47,7 +62,7 @@ const CheckoutPage = () => {
     // Lấy address từ account
     fetchAccountAddress();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cart.length]);
+  }, []);
 
   const fetchAccountAddress = async () => {
     try {
@@ -76,7 +91,7 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (cart.length === 0) {
+    if (checkoutItems.length === 0) {
       setError('Giỏ hàng của bạn đang trống');
       return;
     }
@@ -87,7 +102,7 @@ const CheckoutPage = () => {
       setSuccess('');
 
       // Format items theo API yêu cầu
-      const items = cart.map(item => ({
+      const items = checkoutItems.map(item => ({
         productId: item.productId || item.id,
         name: item.name,
         description: item.description || '',
@@ -105,10 +120,12 @@ const CheckoutPage = () => {
       
       // Xóa cart sau khi đặt hàng thành công
       clearCart();
+      // Xóa checkoutItems từ sessionStorage
+      sessionStorage.removeItem('checkoutItems');
       
-      // Redirect sau 2 giây
+      // Redirect về trang chủ sau 2 giây
       setTimeout(() => {
-        navigate('/account');
+        navigate('/');
       }, 2000);
     } catch (err) {
       console.error('Checkout error:', err);
@@ -138,10 +155,17 @@ const CheckoutPage = () => {
     }
   };
 
-  const formatPrice = (price) => {
-    // price is in VND, convert to USD for display
-    const priceInUSD = price / 25000;
-    return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+  // Helper function để format price VND
+  const formatPriceVND = (price) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    if (isNaN(numPrice)) return '0 ₫';
+    
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(numPrice);
   };
 
   if (fetchingAddress) {
@@ -152,20 +176,29 @@ const CheckoutPage = () => {
     );
   }
 
-  const total = getTotal();
+  // Calculate total from checkoutItems
+  const total = checkoutItems.reduce(
+    (sum, item) => sum + (item.price * item.quantity),
+    0
+  );
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, md: 3 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, md: 4 } }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: { xs: 3, md: 4 } }}>
         <Button
-          startIcon={<ArrowLeft size={20} />}
+          startIcon={<ArrowLeft size={18} />}
           onClick={() => navigate(-1)}
           sx={{
             color: 'text.secondary',
-            mb: 3,
+            mb: 2,
             textTransform: 'none',
-            '&:hover': { color: TIFFANY_BLUE },
+            fontSize: '0.875rem',
+            px: 0,
+            '&:hover': { 
+              color: '#000',
+              bgcolor: 'transparent',
+            },
           }}
         >
           Quay lại
@@ -173,10 +206,9 @@ const CheckoutPage = () => {
         <Typography
           variant="h3"
           sx={{
-            fontFamily: '"Times New Roman", Times, serif',
-            fontSize: { xs: '1.75rem', md: '2.5rem' },
+            fontSize: { xs: '1.5rem', md: '2rem' },
             fontWeight: 400,
-            mb: 2,
+            mb: 1,
           }}
         >
           Thanh toán
@@ -185,20 +217,28 @@ const CheckoutPage = () => {
 
       {/* Alerts */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert 
+          severity="error" 
+          sx={{ mb: 3, borderRadius: 0 }}
+          onClose={() => setError('')}
+        >
           {error}
         </Alert>
       )}
       {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
+        <Alert 
+          severity="success" 
+          sx={{ mb: 3, borderRadius: 0 }}
+          onClose={() => setSuccess('')}
+        >
           {success}
         </Alert>
       )}
 
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={4}>
+        <Box sx={{ display: { xs: 'block', md: 'flex' }, gap: { md: 4 } }}>
           {/* Left Column - Shipping Address */}
-          <Grid item xs={12} md={7}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Paper 
               elevation={0}
               sx={{ 
@@ -207,16 +247,17 @@ const CheckoutPage = () => {
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 0,
+                bgcolor: '#fff',
               }}
             >
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: '"Times New Roman", Times, serif',
-                  fontSize: { xs: '1rem', md: '1.25rem' },
+                  fontSize: { xs: '1rem', md: '1.125rem' },
                   fontWeight: 600,
                   mb: 3,
-                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
                 }}
               >
                 Địa chỉ giao hàng
@@ -226,20 +267,22 @@ const CheckoutPage = () => {
                 <Box>
                   <Box
                     sx={{
-                      p: 2,
-                      mb: 2,
+                      p: 2.5,
+                      mb: 2.5,
                       bgcolor: '#fafafa',
                       border: '1px solid',
                       borderColor: 'divider',
                       borderRadius: 0,
+                      minHeight: 80,
                     }}
                   >
                     <Typography 
                       variant="body1" 
                       sx={{ 
                         mb: 0,
-                        lineHeight: 1.6,
+                        lineHeight: 1.7,
                         color: 'text.primary',
+                        fontSize: '0.9375rem',
                       }}
                     >
                       {address}
@@ -255,11 +298,10 @@ const CheckoutPage = () => {
                       textTransform: 'none',
                       fontSize: '0.875rem',
                       px: 3,
-                      py: 1,
+                      py: 1.25,
                       '&:hover': {
-                        borderColor: TIFFANY_BLUE,
-                        color: TIFFANY_BLUE,
-                        bgcolor: 'transparent',
+                        borderColor: '#000',
+                        bgcolor: '#f5f5f5',
                       },
                     }}
                   >
@@ -277,14 +319,13 @@ const CheckoutPage = () => {
                   rows={4}
                   variant="outlined"
                   sx={{ 
-                    mb: 2,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 0,
                       '&:hover fieldset': {
-                        borderColor: TIFFANY_BLUE,
+                        borderColor: '#000',
                       },
                       '&.Mui-focused fieldset': {
-                        borderColor: TIFFANY_BLUE,
+                        borderColor: '#000',
                       },
                     },
                   }}
@@ -301,186 +342,215 @@ const CheckoutPage = () => {
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 0,
+                bgcolor: '#fff',
               }}
             >
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: '"Times New Roman", Times, serif',
-                  fontSize: { xs: '1rem', md: '1.25rem' },
+                  fontSize: { xs: '1rem', md: '1.125rem' },
                   fontWeight: 600,
                   mb: 3,
-                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
                 }}
               >
-                Tóm tắt đơn hàng ({cart.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
+                Tóm tắt đơn hàng ({checkoutItems.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
               </Typography>
 
-              {cart.map((item, index) => (
+              {checkoutItems.map((item, index) => (
                 <Box 
                   key={item.id} 
                   sx={{ 
-                    mb: index < cart.length - 1 ? 3 : 0, 
-                    pb: index < cart.length - 1 ? 3 : 0, 
-                    borderBottom: index < cart.length - 1 ? '1px solid' : 'none',
+                    mb: index < checkoutItems.length - 1 ? 2.5 : 0, 
+                    pb: index < checkoutItems.length - 1 ? 2.5 : 0, 
+                    borderBottom: index < checkoutItems.length - 1 ? '1px solid' : 'none',
                     borderColor: 'divider',
-                    transition: 'background-color 0.2s',
-                    '&:hover': {
-                      bgcolor: 'transparent',
-                    },
                   }}
                 >
-                  <Grid container spacing={3}>
-                    <Grid item xs={4} sm={3}>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    {/* Product Image */}
+                    <Box
+                      onClick={() => navigate(`/jewelry/product/${item.id}`)}
+                      sx={{
+                        width: { xs: 100, sm: 120, md: 140 },
+                        height: { xs: 100, sm: 120, md: 140 },
+                        flexShrink: 0,
+                        bgcolor: '#f5f5f5',
+                        overflow: 'hidden',
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        '&:hover': {
+                          transform: 'scale(1.02)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        },
+                      }}
+                    >
                       <Box
+                        component="img"
+                        src={item.urlImg || item.image}
+                        alt={item.name}
                         sx={{
-                          width: { xs: 80, sm: 100, md: 120 },
-                          height: { xs: 80, sm: 100, md: 120 },
-                          bgcolor: '#f5f5f5',
-                          overflow: 'hidden',
-                          borderRadius: 1,
-                          flexShrink: 0,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          transition: 'transform 0.2s, box-shadow 0.2s',
-                          '&:hover': {
-                            transform: 'scale(1.02)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                          },
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                    </Box>
+
+                    {/* Product Info */}
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                        <Typography 
+                          variant="body1" 
+                          onClick={() => navigate(`/jewelry/product/${item.id}`)}
+                          sx={{ 
+                            fontWeight: 500, 
+                            fontSize: { xs: '0.9rem', md: '1rem' },
+                            lineHeight: 1.4,
+                            cursor: 'pointer',
+                            flex: 1,
+                            pr: 2,
+                            '&:hover': {
+                              color: TIFFANY_BLUE,
+                            },
+                          }}
+                        >
+                          {item.name}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setCheckoutItems(prev => prev.filter(i => i.id !== item.id));
+                            // Update sessionStorage
+                            const updated = checkoutItems.filter(i => i.id !== item.id);
+                            sessionStorage.setItem('checkoutItems', JSON.stringify(updated));
+                          }}
+                          sx={{ 
+                            color: 'text.secondary',
+                            width: 32,
+                            height: 32,
+                            flexShrink: 0,
+                            '&:hover': {
+                              color: '#d32f2f',
+                              bgcolor: '#ffebee',
+                            },
+                          }}
+                        >
+                          <X size={16} />
+                        </IconButton>
+                      </Box>
+                      
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        sx={{ 
+                          mb: 1.5,
+                          fontSize: { xs: '0.8rem', md: '0.875rem' },
                         }}
                       >
-                        <Box
-                          component="img"
-                          src={item.urlImg || item.image}
-                          alt={item.name}
-                          sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            display: 'block',
-                          }}
-                        />
-                      </Box>
-                    </Grid>
-                    <Grid item xs={8} sm={9}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', height: '100%' }}>
-                        <Box sx={{ flex: 1, pr: 2 }}>
-                          <Typography 
-                            variant="body1" 
-                            sx={{ 
-                              fontWeight: 500, 
-                              mb: 0.5,
-                              fontSize: { xs: '0.9rem', md: '1rem' },
-                              lineHeight: 1.4,
-                            }}
-                          >
-                            {item.name}
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            color="text.secondary" 
-                            sx={{ 
-                              mb: 1.5,
-                              fontSize: { xs: '0.8rem', md: '0.875rem' },
-                            }}
-                          >
-                            {formatPrice(item.price)} / sản phẩm
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <IconButton
-                              size="small"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                              sx={{ 
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                width: 32, 
-                                height: 32,
-                                '&:hover': {
-                                  borderColor: TIFFANY_BLUE,
-                                  color: TIFFANY_BLUE,
-                                  bgcolor: 'transparent',
-                                },
-                                '&:disabled': {
-                                  opacity: 0.4,
-                                },
-                              }}
-                            >
-                              <Minus size={14} />
-                            </IconButton>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                minWidth: 40, 
-                                textAlign: 'center',
-                                fontWeight: 500,
-                                fontSize: '0.875rem',
-                              }}
-                            >
-                              {item.quantity}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              sx={{ 
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                width: 32, 
-                                height: 32,
-                                '&:hover': {
-                                  borderColor: TIFFANY_BLUE,
-                                  color: TIFFANY_BLUE,
-                                  bgcolor: 'transparent',
-                                },
-                              }}
-                            >
-                              <Plus size={14} />
-                            </IconButton>
-                          </Box>
-                        </Box>
-                        <Box sx={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        {formatPriceVND(item.price)} / sản phẩm
+                      </Typography>
+
+                      {/* Quantity Controls */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 'auto' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconButton
                             size="small"
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => {
+                              const newQuantity = item.quantity - 1;
+                              if (newQuantity >= 1) {
+                                setCheckoutItems(prev => 
+                                  prev.map(i => i.id === item.id ? { ...i, quantity: newQuantity } : i)
+                                );
+                              }
+                            }}
+                            disabled={item.quantity <= 1}
                             sx={{ 
-                              color: 'text.secondary',
-                              mb: 0.5,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              width: 32, 
+                              height: 32,
+                              borderRadius: 0,
                               '&:hover': {
-                                color: '#d32f2f',
-                                bgcolor: 'transparent',
+                                borderColor: '#000',
+                                bgcolor: '#f5f5f5',
+                              },
+                              '&:disabled': {
+                                opacity: 0.3,
+                                cursor: 'not-allowed',
                               },
                             }}
                           >
-                            <X size={18} />
+                            <Minus size={14} />
                           </IconButton>
                           <Typography 
-                            variant="body1" 
+                            variant="body2" 
                             sx={{ 
-                              fontWeight: 600, 
-                              mt: 0.5,
-                              fontSize: { xs: '0.9rem', md: '1rem' },
-                              fontFamily: 'serif',
+                              minWidth: 40, 
+                              textAlign: 'center',
+                              fontWeight: 500,
+                              fontSize: '0.875rem',
                             }}
                           >
-                            {formatPrice(item.price * item.quantity)}
+                            {item.quantity}
                           </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              const newQuantity = item.quantity + 1;
+                              if (newQuantity <= 10) {
+                                const updated = checkoutItems.map(i => 
+                                  i.id === item.id ? { ...i, quantity: newQuantity } : i
+                                );
+                                setCheckoutItems(updated);
+                                sessionStorage.setItem('checkoutItems', JSON.stringify(updated));
+                              }
+                            }}
+                            disabled={item.quantity >= 10}
+                            sx={{ 
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              width: 32, 
+                              height: 32,
+                              borderRadius: 0,
+                              '&:hover': {
+                                borderColor: '#000',
+                                bgcolor: '#f5f5f5',
+                              },
+                            }}
+                          >
+                            <Plus size={14} />
+                          </IconButton>
                         </Box>
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            fontSize: { xs: '0.9rem', md: '1rem' },
+                            ml: 2,
+                          }}
+                        >
+                          {formatPriceVND(item.price * item.quantity)}
+                        </Typography>
                       </Box>
-                    </Grid>
-                  </Grid>
+                    </Box>
+                  </Box>
                 </Box>
               ))}
             </Paper>
-          </Grid>
+          </Box>
 
           {/* Right Column - Order Total */}
-          <Grid item xs={12} md={5}>
+          <Box sx={{ width: { xs: '100%', md: 400 }, flexShrink: 0 }}>
             <Paper 
               elevation={0}
               sx={{ 
                 p: { xs: 3, md: 4 }, 
-                position: { md: 'sticky' }, 
-                top: { md: 20 },
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 0,
@@ -490,33 +560,33 @@ const CheckoutPage = () => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: '"Times New Roman", Times, serif',
-                  fontSize: { xs: '1rem', md: '1.25rem' },
+                  fontSize: { xs: '1rem', md: '1.125rem' },
                   fontWeight: 600,
                   mb: 3,
-                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
                 }}
               >
                 Tổng đơn hàng
               </Typography>
 
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography 
                     variant="body2" 
                     color="text.secondary"
                     sx={{ fontSize: '0.875rem' }}
                   >
-                    Tạm tính ({cart.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
+                    Tạm tính ({checkoutItems.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm)
                   </Typography>
                   <Typography 
                     variant="body2"
                     sx={{ fontWeight: 500, fontSize: '0.875rem' }}
                   >
-                    {formatPrice(total)}
+                    {formatPriceVND(total)}
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography 
                     variant="body2" 
                     color="text.secondary"
@@ -526,19 +596,18 @@ const CheckoutPage = () => {
                   </Typography>
                   <Typography 
                     variant="body2"
-                    sx={{ fontWeight: 500, fontSize: '0.875rem', color: TIFFANY_BLUE }}
+                    sx={{ fontWeight: 500, fontSize: '0.875rem', color: '#000' }}
                   >
-                    Free
+                    Miễn phí
                   </Typography>
                 </Box>
-                <Divider sx={{ my: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Divider sx={{ my: 2.5 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography 
                     variant="h6" 
                     sx={{ 
                       fontWeight: 600,
                       fontSize: { xs: '1rem', md: '1.125rem' },
-                      fontFamily: 'serif',
                     }}
                   >
                     Tổng cộng
@@ -548,10 +617,9 @@ const CheckoutPage = () => {
                     sx={{ 
                       fontWeight: 600,
                       fontSize: { xs: '1rem', md: '1.125rem' },
-                      fontFamily: 'serif',
                     }}
                   >
-                    {formatPrice(total)}
+                    {formatPriceVND(total)}
                   </Typography>
                 </Box>
                 <Typography 
@@ -560,10 +628,10 @@ const CheckoutPage = () => {
                   sx={{ 
                     display: 'block',
                     fontSize: '0.75rem',
-                    fontStyle: 'italic',
+                    mt: 1,
                   }}
                 >
-                    Giao hàng & Đổi trả miễn phí
+                  Giao hàng & Đổi trả miễn phí
                 </Typography>
               </Box>
 
@@ -571,22 +639,20 @@ const CheckoutPage = () => {
                 type="submit"
                 fullWidth
                 variant="contained"
-                disabled={loading || cart.length === 0}
+                disabled={loading || checkoutItems.length === 0}
                 sx={{
                   bgcolor: '#000',
                   color: '#fff',
                   borderRadius: 0,
-                  py: 1.75,
+                  py: 1.5,
                   fontSize: '0.875rem',
-                  letterSpacing: '0.15em',
+                  letterSpacing: '0.1em',
                   textTransform: 'uppercase',
                   fontWeight: 500,
                   mb: 2,
                   transition: 'all 0.2s',
                   '&:hover': {
                     bgcolor: '#333',
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   },
                   '&:disabled': {
                     bgcolor: '#ccc',
@@ -595,7 +661,7 @@ const CheckoutPage = () => {
                 }}
               >
                 {loading ? (
-                  <CircularProgress size={24} color="inherit" />
+                  <CircularProgress size={20} color="inherit" />
                 ) : (
                   'Đặt hàng'
                 )}
@@ -610,8 +676,9 @@ const CheckoutPage = () => {
                   textTransform: 'none',
                   fontSize: '0.875rem',
                   textDecoration: 'underline',
+                  py: 1,
                   '&:hover': {
-                    color: 'text.primary',
+                    color: '#000',
                     bgcolor: 'transparent',
                     textDecoration: 'underline',
                   },
@@ -620,8 +687,8 @@ const CheckoutPage = () => {
                 Quay lại giỏ hàng
               </Button>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </form>
     </Container>
   );

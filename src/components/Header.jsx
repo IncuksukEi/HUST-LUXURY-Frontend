@@ -796,7 +796,7 @@ const Header = (props) => {
               >
                 <Stack direction="row" spacing={6}>
                   {navLinks.map((link) => {
-                    const isActive = location.pathname === link.href;
+                    // const isActive = location.pathname === link.href; // Không dùng nữa, active không có style đặc biệt
                     const isHovering = activeMenu === link.label;
 
                     return (
@@ -819,7 +819,7 @@ const Header = (props) => {
                           padding: 0,
                           lineHeight: 1.5,
                           fontSize: "14px",
-                          fontWeight: isActive ? 700 : 300,
+                          fontWeight: 300, // Tất cả đều 300, chỉ in đậm khi hover
                           transition: "font-weight 0s",
                           "&::before": {
                             display: "block",
@@ -832,7 +832,7 @@ const Header = (props) => {
                           "&::after": {
                             content: '""',
                             position: "absolute",
-                            width: (isActive || isHovering) ? "100%" : "0%",
+                            width: isHovering ? "100%" : "0%", // Chỉ hiện underline khi hover, không phải khi active
                             height: "2px",
                             bottom: -4,
                             left: 0,
@@ -840,9 +840,9 @@ const Header = (props) => {
                             transition: "width 0.3s ease-in-out",
                           },
                           "&:hover": {
-                            fontWeight: 700,
-                            color: "text.primary",
-                            "&::after": { width: "100%" }
+                            fontWeight: 700, // In đậm khi hover (kể cả active hay không)
+                            color: "text.primary", // Màu chữ vẫn đen
+                            "&::after": { width: "100%" } // Underline màu tiffany_blue khi hover
                           }
                         }}
                       >

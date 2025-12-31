@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -12,9 +12,6 @@ import {
   CardContent,
   Grid,
   Stack,
-  Select,
-  MenuItem,
-  FormControl,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -22,36 +19,39 @@ import {
   Alert,
   Snackbar,
   Checkbox,
-  useTheme,
-  useMediaQuery,
   Fade,
   Slide,
-  Grow,
-  Zoom,
 } from '@mui/material';
 import {
   X,
   ChevronDown,
+  ChevronRight,
+  ArrowLeft,
   Truck,
   CreditCard,
   Wrench,
   Info,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
+import { useWishlist } from '../hooks/useWishlist';
 
 // Component: Product Card cho recommended products - Enhanced with Tiffany-style animations
-const ProductCard = ({ product, index = 0, onAddToCart }) => {
+const ProductCard = ({ product, onAddToCart }) => {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('Adding to cart:', product);
     if (onAddToCart) {
       onAddToCart(product);
-    } else {
-      console.log('onAddToCart is undefined!');
     }
+  };
+
+  const handleProductClick = () => {
+    navigate(`/jewelry/product/${product.id}`);
   };
 
   return (
@@ -59,6 +59,7 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
       elevation={0}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleProductClick}
       sx={{
         bgcolor: 'transparent',
         cursor: 'pointer',
@@ -137,7 +138,6 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
         <Typography
           variant="body2"
           sx={{
-            fontFamily: 'serif',
             fontSize: '0.875rem',
             color: 'text.primary',
             mb: 0.5,
@@ -150,7 +150,6 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
         <Typography
           variant="body2"
           sx={{
-            fontFamily: 'serif',
             fontSize: '0.875rem',
             color: 'text.secondary',
           }}
@@ -162,10 +161,24 @@ const ProductCard = ({ product, index = 0, onAddToCart }) => {
   );
 };
 
-// Component: Recommended Products Section - Horizontal Scroll (5 products max)
+// Component: Recommended Products Section - With Navigation Buttons (10 products, show 4 at a time)
 const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) => {
-  // Limit to 5 products
-  const displayProducts = products.slice(0, 5);
+  const [currentPage, setCurrentPage] = useState(0);
+  const PRODUCTS_PER_PAGE = 4;
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+  
+  // Get products for current page
+  const startIndex = currentPage * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const displayProducts = products.slice(startIndex, endIndex);
+
+  const handlePrevious = () => {
+    setCurrentPage((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
+  };
 
   return (
     <Box sx={{ py: { xs: 4, md: 6 }, bgcolor: '#fafafa' }}>
@@ -174,7 +187,6 @@ const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) =
           variant="h5"
           align="center"
           sx={{
-            fontFamily: 'serif',
             fontStyle: 'italic',
             fontWeight: 400,
             mb: { xs: 3, md: 5 },
@@ -189,50 +201,122 @@ const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) =
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress sx={{ color: '#0ABAB5' }} />
           </Box>
-        ) : displayProducts.length === 0 ? (
+        ) : products.length === 0 ? (
           <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
             Hiện tại không có gợi ý nào.
           </Typography>
         ) : (
-          /* Horizontal Scroll Container */
-          <Box
-            sx={{
-              display: 'flex',
-              gap: { xs: 2, md: 3 },
-              overflowX: 'auto',
-              scrollSnapType: 'x mandatory',
-              scrollBehavior: 'smooth',
-              pb: 2,
-              // Hide scrollbar but keep functionality
-              '&::-webkit-scrollbar': {
-                height: 6,
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: '#ddd',
-                borderRadius: 3,
-                '&:hover': {
-                  background: '#0ABAB5',
-                },
-              },
-            }}
-          >
-            {displayProducts.map((product, index) => (
-              <Fade in timeout={300 + index * 100} key={product.id}>
-                <Box
+          <Box sx={{ position: 'relative' }}>
+            {/* Navigation Buttons */}
+            {totalPages > 1 && (
+              <>
+                <IconButton
+                  onClick={handlePrevious}
+                  disabled={currentPage === 0}
                   sx={{
-                    flex: '0 0 auto',
-                    width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 12px)' },
-                    minWidth: 180,
-                    scrollSnapAlign: 'start',
+                    position: 'absolute',
+                    left: { xs: -8, md: -16 },
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 2,
+                    bgcolor: '#fff',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 0,
+                    width: { xs: 36, md: 48 },
+                    height: { xs: 36, md: 48 },
+                    '&:hover': {
+                      bgcolor: '#f5f5f5',
+                      borderColor: '#000',
+                    },
+                    '&:disabled': {
+                      opacity: 0.3,
+                      cursor: 'not-allowed',
+                    },
+                    display: { xs: currentPage === 0 ? 'none' : 'flex', md: 'flex' },
                   }}
                 >
-                  <ProductCard product={product} index={index} onAddToCart={onAddToCart} />
-                </Box>
-              </Fade>
-            ))}
+                  <ArrowLeft size={20} />
+                </IconButton>
+                <IconButton
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages - 1}
+                  sx={{
+                    position: 'absolute',
+                    right: { xs: -8, md: -16 },
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 2,
+                    bgcolor: '#fff',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 0,
+                    width: { xs: 36, md: 48 },
+                    height: { xs: 36, md: 48 },
+                    '&:hover': {
+                      bgcolor: '#f5f5f5',
+                      borderColor: '#000',
+                    },
+                    '&:disabled': {
+                      opacity: 0.3,
+                      cursor: 'not-allowed',
+                    },
+                    display: { xs: currentPage === totalPages - 1 ? 'none' : 'flex', md: 'flex' },
+                  }}
+                >
+                  <ChevronRight size={20} />
+                </IconButton>
+              </>
+            )}
+
+            {/* Products Row - 4 products per row */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: { xs: 2, md: 3 },
+                overflow: 'hidden',
+                position: 'relative',
+                width: '100%',
+              }}
+            >
+              {displayProducts.map((product, index) => (
+                <Fade in timeout={300 + index * 100} key={product.id}>
+                  <Box
+                    sx={{
+                      flex: '0 0 calc(25% - 9px)',
+                      minWidth: 0,
+                      maxWidth: 'calc(25% - 9px)',
+                      width: 'calc(25% - 9px)',
+                    }}
+                  >
+                    <ProductCard product={product} onAddToCart={onAddToCart} />
+                  </Box>
+                </Fade>
+              ))}
+            </Box>
+
+            {/* Page Indicators */}
+            {totalPages > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mt: 3 }}>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <Box
+                    key={i}
+                    onClick={() => setCurrentPage(i)}
+                    sx={{
+                      width: { xs: 8, md: 10 },
+                      height: { xs: 8, md: 10 },
+                      borderRadius: '50%',
+                      bgcolor: currentPage === i ? '#000' : '#ddd',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        bgcolor: currentPage === i ? '#000' : '#999',
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
           </Box>
         )}
       </Container>
@@ -241,9 +325,7 @@ const RecommendedSection = ({ products = [], onAddToCart, isLoading = false }) =
 };
 
 // Component: Cart Item with Checkbox
-const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove, onEdit, onSaveForLater, updatingItemId, removingItemId }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove, onEdit, onSaveForLater, updatingItemId, removingItemId, savingItemId }) => {
 
   return (
     <Box
@@ -311,7 +393,6 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
             <Typography
               variant="h6"
               sx={{
-                fontFamily: 'serif',
                 fontSize: { xs: '0.9rem', md: '1rem' },
                 fontWeight: 400,
                 flex: 1,
@@ -323,7 +404,6 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
             <Typography
               variant="h6"
               sx={{
-                fontFamily: 'serif',
                 fontWeight: 400,
                 fontSize: { xs: '0.9rem', md: '1rem' },
                 whiteSpace: 'nowrap',
@@ -334,32 +414,73 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
           </Box>
 
           {/* Quantity Selector */}
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-            <Typography variant="body2" color="text.secondary">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
               Số lượng
             </Typography>
-            <FormControl size="small" variant="standard">
-              <Select
-                value={item.quantity}
-                onChange={(e) => onQuantityChange(item.id, e.target.value)}
-                disabled={updatingItemId === item.id}
-                sx={{
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <IconButton
+                size="small"
+                onClick={() => onQuantityChange(item.id, item.quantity - 1)}
+                disabled={item.quantity <= 1 || updatingItemId === item.id}
+                sx={{ 
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  width: 32, 
+                  height: 32,
+                  borderRadius: 0,
+                  '&:hover': {
+                    borderColor: '#000',
+                    bgcolor: '#f5f5f5',
+                  },
+                  '&:disabled': {
+                    opacity: 0.3,
+                    cursor: 'not-allowed',
+                  },
+                }}
+              >
+                <Minus size={14} />
+              </IconButton>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  minWidth: 40, 
+                  textAlign: 'center',
+                  fontWeight: 500,
                   fontSize: '0.875rem',
-                  '&:before': { borderBottom: 'none' },
-                  '&:after': { borderBottom: 'none' },
-                  '&:hover:not(.Mui-disabled):before': { borderBottom: 'none' },
                   opacity: updatingItemId === item.id ? 0.6 : 1,
                 }}
-                IconComponent={updatingItemId === item.id ? () => <CircularProgress size={14} /> : ChevronDown}
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <MenuItem key={num} value={num}>
-                    {num}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
+                {updatingItemId === item.id ? (
+                  <CircularProgress size={14} />
+                ) : (
+                  item.quantity
+                )}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+                disabled={item.quantity >= 10 || updatingItemId === item.id}
+                sx={{ 
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  width: 32, 
+                  height: 32,
+                  borderRadius: 0,
+                  '&:hover': {
+                    borderColor: '#000',
+                    bgcolor: '#f5f5f5',
+                  },
+                  '&:disabled': {
+                    opacity: 0.3,
+                    cursor: 'not-allowed',
+                  },
+                }}
+              >
+                <Plus size={14} />
+              </IconButton>
+            </Box>
+          </Box>
 
           <Typography
             variant="body2"
@@ -376,7 +497,11 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
           <Stack direction="row" spacing={2.5} sx={{ mt: 'auto' }}>
             {[
               { label: 'Chỉnh sửa', onClick: () => onEdit(item.id), disabled: false },
-              { label: 'Lưu để sau', onClick: () => onSaveForLater(item.id), disabled: false },
+              { 
+                label: savingItemId === item.id ? 'Đang lưu...' : 'Lưu để sau', 
+                onClick: () => onSaveForLater(item), 
+                disabled: savingItemId === item.id 
+              },
               { 
                 label: removingItemId === item.id ? 'Đang xóa...' : 'Xóa', 
                 onClick: () => onRemove(item.id), 
@@ -414,8 +539,6 @@ const CartItem = ({ item, isSelected, onToggleSelect, onQuantityChange, onRemove
 
 // Component: Order Summary
 const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckout }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -614,7 +737,6 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
           <Typography
             sx={{
               color: 'white',
-              fontFamily: 'serif',
               fontWeight: 600,
               fontSize: '0.6rem',
               textAlign: 'center',
@@ -626,7 +748,7 @@ const OrderSummary = ({ subtotal, shipping, tax, total, selectedCount, onCheckou
         <Box>
           <Typography
             variant="body2"
-            sx={{ fontFamily: 'serif', fontWeight: 600, mb: 0.5 }}
+            sx={{ fontWeight: 600, mb: 0.5 }}
           >
             Hộp Xanh Đặc Trưng®
           </Typography>
@@ -647,7 +769,6 @@ const EmptyCartView = ({ isLoggedIn, onSignIn }) => {
         <Typography
           variant="h5"
           sx={{
-            fontFamily: 'serif',
             fontStyle: 'italic',
             fontWeight: 400,
             mb: 4,
@@ -700,7 +821,6 @@ const NotLoggedInView = ({ onSignIn }) => {
         <Typography
           variant="h5"
           sx={{
-            fontFamily: 'serif',
             fontStyle: 'italic',
             fontWeight: 400,
             mb: 4,
@@ -746,8 +866,7 @@ const NotLoggedInView = ({ onSignIn }) => {
 // Main Cart Component
 function Cart() {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { addToWishlist } = useWishlist();
 
   // State
   const [loading, setLoading] = useState(true);
@@ -758,6 +877,7 @@ function Cart() {
   const [selectedItems, setSelectedItems] = useState([]); // For checkout selection like Shopee
   const [error, setError] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [savingItemId, setSavingItemId] = useState(null);
 
   // Fetch cart items from API
   const fetchCart = async () => {
@@ -787,13 +907,11 @@ function Cart() {
 
   // Load recommended products from API (GET /api/products)
   const loadRecommendedProducts = async () => {
-    console.log('Fetching recommended products from API /api/products...');
     try {
       const response = await axiosClient.get('/products');
-      console.log('Products API response:', response.data);
 
       // API returns: [{ productId, name, description, urlImg, price }, ...]
-      const products = response.data.slice(0, 5).map((product) => ({
+      const products = response.data.slice(0, 10).map((product) => ({
         id: product.productId,
         name: product.name,
         price: product.price, // Number from API
@@ -801,7 +919,6 @@ function Cart() {
         description: product.description,
       }));
 
-      console.log('Mapped recommended products:', products);
       setRecommendedProducts(products);
     } catch (err) {
       console.error('Error fetching recommended products:', err);
@@ -868,7 +985,10 @@ function Cart() {
   const [updatingItemId, setUpdatingItemId] = useState(null);
 
   const handleQuantityChange = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
+    // Ensure newQuantity is a number
+    const quantity = typeof newQuantity === 'string' ? parseInt(newQuantity, 10) : Number(newQuantity);
+    
+    if (isNaN(quantity) || quantity < 1) return;
 
     const oldItems = [...cartItems];
     setUpdatingItemId(itemId);
@@ -876,34 +996,49 @@ function Cart() {
     // Optimistic update
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
+        item.id === itemId ? { ...item, quantity: quantity } : item
       )
     );
 
     try {
-      // API docs: [{ "productid": 1, "quantity": 5 }]
-      await axiosClient.post('/cart/update', [
-        { productid: itemId, quantity: newQuantity }
-      ]);
+      // API docs: [{ "product_id": 1, "quantity": 5 }]
+      const requestBody = [
+        { product_id: itemId, quantity: quantity }
+      ];
+      
+      await axiosClient.post('/cart/update', requestBody);
       
       // Refresh cart to ensure sync
       await fetchCart();
+      
+      setSnackbar({
+        open: true,
+        message: 'Đã cập nhật số lượng thành công',
+        severity: 'success'
+      });
     } catch (err) {
       console.error('Error updating quantity:', err);
+      console.error('Request body:', [{ product_id: itemId, quantity: quantity }]);
+      console.error('Error response:', err.response?.data);
+      
       // Rollback on error
       setCartItems(oldItems);
       
       let errorMessage = 'Không thể cập nhật số lượng. Vui lòng thử lại.';
       if (err.response) {
         if (err.response.status === 401) {
-          errorMessage = 'Session expired. Please login again.';
+          errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
           localStorage.removeItem('token');
           setTimeout(() => navigate('/login'), 1500);
         } else if (err.response.status === 400) {
-          errorMessage = err.response.data?.message || 'Invalid data.';
+          errorMessage = err.response.data?.message || 'Dữ liệu không hợp lệ.';
         } else if (err.response.status === 500) {
-          errorMessage = 'Server error. Please try again later.';
+          errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
+        } else {
+          errorMessage = err.response.data?.message || `Lỗi ${err.response.status}: ${err.response.statusText}`;
         }
+      } else if (err.request) {
+        errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
       }
       
       setSnackbar({
@@ -987,7 +1122,6 @@ function Cart() {
         product_id: product.id,
         quantity: 1
       };
-      console.log('Add to cart request:', requestBody);
 
       await axiosClient.post('/cart/add', requestBody);
 
@@ -1020,14 +1154,42 @@ function Cart() {
   };
 
   const handleEditItem = (itemId) => {
-    // Navigate to product page for editing
-    navigate(`/jewelry/shop/${itemId}`);
+    // Navigate to product detail page to view/edit product details
+    navigate(`/jewelry/product/${itemId}`);
   };
 
-  const handleSaveForLater = (itemId) => {
-    // For now, just remove from cart
-    console.log('Save for later:', itemId);
-    handleRemoveItem(itemId);
+  // Save item to wishlist and remove from cart
+  const handleSaveForLater = async (item) => {
+    setSavingItemId(item.id);
+    
+    try {
+      // Add to wishlist
+      addToWishlist({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        description: item.description,
+      });
+      
+      // Remove from cart
+      await handleRemoveItem(item.id);
+      
+      setSnackbar({
+        open: true,
+        message: `"${item.name}" đã được lưu vào mục đã lưu`,
+        severity: 'success'
+      });
+    } catch (err) {
+      console.error('Error saving for later:', err);
+      setSnackbar({
+        open: true,
+        message: 'Không thể lưu sản phẩm. Vui lòng thử lại.',
+        severity: 'error'
+      });
+    } finally {
+      setSavingItemId(null);
+    }
   };
 
   // Proceed to checkout with selected items
@@ -1103,7 +1265,6 @@ function Cart() {
                     variant="h5"
                     align="center"
                     sx={{
-                      fontFamily: 'serif',
                       fontStyle: 'italic',
                       fontWeight: 400,
                       mb: { xs: 3, md: 5 },
@@ -1160,6 +1321,7 @@ function Cart() {
                             onSaveForLater={handleSaveForLater}
                             updatingItemId={updatingItemId}
                             removingItemId={removingItemId}
+                            savingItemId={savingItemId}
                           />
                         ))}
                       </Box>
