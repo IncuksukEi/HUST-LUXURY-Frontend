@@ -75,14 +75,12 @@ function Login() {
             display: { xs: 'none', md: 'flex' },
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: '#E8F5F4',
-            p: { md: 4, lg: 6 },
+            px: { md: 6, lg: 8 },
           }}
         >
           <Box
             sx={{
-              maxWidth: 500,
-              textAlign: 'center',
+              width: '100%',
             }}
           >
             {/* Tiffany-style diamond rings image */}
@@ -92,11 +90,8 @@ function Login() {
               alt="Tiffany Diamond Rings"
               sx={{
                 width: '100%',
-                maxWidth: 450,
                 height: 'auto',
                 objectFit: 'cover',
-                borderRadius: 2,
-                boxShadow: '0 20px 60px rgba(10, 186, 181, 0.3)',
               }}
             />
           </Box>
