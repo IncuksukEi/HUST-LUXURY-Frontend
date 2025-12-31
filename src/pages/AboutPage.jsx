@@ -120,7 +120,8 @@ const AnimatedImage = ({ src, alt, sx = {} }) => {
 };
 
 // Feature Card Component
-const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
+const FeatureCard = ({ icon, title, description, delay = 0 }) => {
+    const Icon = icon;
     const [ref, isVisible] = useScrollAnimation(0.2);
 
     return (
@@ -128,14 +129,18 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
             ref={ref}
             sx={{
                 textAlign: 'center',
-                p: 4,
+                p: { xs: 3, md: 4 },
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
                 transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}s`,
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 '&:hover': {
                     '& .feature-icon': {
-                        transform: 'scale(1.1) rotate(5deg)',
-                        color: TIFFANY_BLUE,
+                        transform: 'scale(1.1)',
+                        bgcolor: TIFFANY_BLUE,
+                        color: '#fff',
                     },
                 },
             }}
@@ -144,21 +149,25 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
                 className="feature-icon"
                 sx={{
                     display: 'inline-flex',
-                    p: 2,
+                    p: 2.5,
                     borderRadius: '50%',
-                    bgcolor: '#f8f8f8',
+                    bgcolor: '#f0f0f0',
                     mb: 3,
                     transition: 'all 0.4s ease',
+                    color: TIFFANY_BLUE,
+                    mx: 'auto',
                 }}
             >
-                <Icon size={32} strokeWidth={1.5} />
+                <Icon size={36} strokeWidth={1.5} />
             </Box>
             <Typography
                 variant="h6"
                 sx={{
                     fontFamily: '"Be Vietnam Pro", sans-serif',
-                    fontWeight: 500,
+                    fontWeight: 600,
                     mb: 2,
+                    fontSize: { xs: '1.1rem', md: '1.25rem' },
+                    color: 'text.primary',
                 }}
             >
                 {title}
@@ -169,6 +178,8 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
                     color: 'text.secondary',
                     lineHeight: 1.8,
                     fontFamily: '"Inter", sans-serif',
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    flex: 1,
                 }}
             >
                 {description}
@@ -179,11 +190,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
 
 function AboutPage() {
     const navigate = useNavigate();
-    const [heroLoaded, setHeroLoaded] = useState(false);
-
-    useEffect(() => {
-        setHeroLoaded(true);
-    }, []);
+    const [heroLoaded] = useState(true);
 
     return (
         <Box sx={{ bgcolor: '#fff', overflow: 'hidden' }}>
@@ -281,14 +288,17 @@ function AboutPage() {
                     <Fade in={heroLoaded} timeout={2000}>
                         <Typography
                             sx={{
-                                color: 'rgba(255,255,255,0.9)',
-                                fontSize: { xs: '1rem', md: '1.2rem' },
+                                color: 'rgba(255,255,255,0.95)',
+                                fontSize: { xs: '1.1rem', md: '1.3rem' },
                                 mt: 3,
                                 fontFamily: '"Inter", sans-serif',
-                                fontWeight: 300,
+                                fontWeight: 400,
+                                maxWidth: '600px',
+                                mx: 'auto',
+                                lineHeight: 1.6,
                             }}
                         >
-                            Nơi nghệ thuật gặp gỡ đam mê
+                            Nơi nghệ thuật gặp gỡ đam mê, nơi mỗi món trang sức kể một câu chuyện riêng
                         </Typography>
                     </Fade>
                 </Container>
@@ -317,14 +327,43 @@ function AboutPage() {
             </Box>
 
             {/* Features Section */}
-            <Box sx={{ py: { xs: 8, md: 12 }, bgcolor: '#fafafa' }}>
+            <Box sx={{ py: { xs: 10, md: 14 }, bgcolor: '#fafafa' }}>
                 <Container maxWidth="lg">
-                    <Grid container spacing={4}>
+                    <AnimatedSection>
+                        <Typography
+                            variant="h3"
+                            sx={{
+                                textAlign: 'center',
+                                fontFamily: '"Be Vietnam Pro", sans-serif',
+                                fontWeight: 400,
+                                fontSize: { xs: '2rem', md: '2.5rem' },
+                                mb: 1,
+                                color: 'text.primary',
+                            }}
+                        >
+                            Điều làm nên sự khác biệt
+                        </Typography>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                textAlign: 'center',
+                                color: 'text.secondary',
+                                mb: 6,
+                                fontSize: '1.1rem',
+                                maxWidth: '600px',
+                                mx: 'auto',
+                                fontFamily: '"Inter", sans-serif',
+                            }}
+                        >
+                            Những giá trị cốt lõi định hình nên thương hiệu của chúng tôi
+                        </Typography>
+                    </AnimatedSection>
+                    <Grid container spacing={{ xs: 4, md: 6 }}>
                         <Grid item xs={12} sm={4}>
                             <FeatureCard
                                 icon={Diamond}
                                 title="Chất lượng Hoàn hảo"
-                                description="Mỗi viên đá quý được tuyển chọn kỹ lưỡng, đảm bảo tiêu chuẩn cao nhất về độ trong, cắt và màu sắc."
+                                description="Mỗi viên đá quý được tuyển chọn kỹ lưỡng, đảm bảo tiêu chuẩn cao nhất về độ trong, cắt và màu sắc. Chúng tôi chỉ làm việc với những viên đá quý đạt chứng nhận quốc tế."
                                 delay={0}
                             />
                         </Grid>
@@ -332,7 +371,7 @@ function AboutPage() {
                             <FeatureCard
                                 icon={Heart}
                                 title="Thiết kế Độc đáo"
-                                description="Những tác phẩm nghệ thuật được tạo ra với tình yêu và sự sáng tạo, phản ánh cá tính riêng của bạn."
+                                description="Những tác phẩm nghệ thuật được tạo ra với tình yêu và sự sáng tạo, phản ánh cá tính riêng của bạn. Mỗi thiết kế đều được chăm chút tỉ mỉ từ ý tưởng đến thành phẩm."
                                 delay={0.2}
                             />
                         </Grid>
@@ -340,7 +379,7 @@ function AboutPage() {
                             <FeatureCard
                                 icon={Award}
                                 title="Cam kết Vĩnh cửu"
-                                description="Bảo hành trọn đời và dịch vụ chăm sóc khách hàng tận tâm cho mỗi sản phẩm."
+                                description="Bảo hành trọn đời và dịch vụ chăm sóc khách hàng tận tâm cho mỗi sản phẩm. Chúng tôi đồng hành cùng bạn trong suốt hành trình sở hữu trang sức."
                                 delay={0.4}
                             />
                         </Grid>
@@ -358,10 +397,11 @@ function AboutPage() {
                                 sx={{
                                     color: TIFFANY_BLUE,
                                     letterSpacing: 4,
-                                    fontSize: '0.75rem',
+                                    fontSize: { xs: '0.7rem', md: '0.75rem' },
                                     mb: 2,
                                     display: 'block',
                                     fontFamily: '"Inter", sans-serif',
+                                    fontWeight: 600,
                                 }}
                             >
                                 CÂU CHUYỆN CỦA CHÚNG TÔI
@@ -374,6 +414,7 @@ function AboutPage() {
                                     fontSize: { xs: '2rem', md: '3.5rem' },
                                     mb: 4,
                                     lineHeight: 1.2,
+                                    color: 'text.primary',
                                 }}
                             >
                                 Di sản Biểu tượng
@@ -384,14 +425,14 @@ function AboutPage() {
                                 variant="body1"
                                 sx={{
                                     color: 'text.secondary',
-                                    lineHeight: 2,
-                                    fontSize: '1.05rem',
-                                    mb: 4,
+                                    lineHeight: 1.9,
+                                    fontSize: { xs: '1rem', md: '1.1rem' },
+                                    mb: 3,
                                     fontFamily: '"Inter", sans-serif',
                                 }}
                             >
                                 Được thành lập với sứ mệnh mang đến những tác phẩm trang sức
-                                đẳng cấp thế giới, <strong>MAJewelry</strong> tin rằng mỗi món trang sức
+                                đẳng cấp thế giới, <strong style={{ color: 'text.primary' }}>MAJewelry</strong> tin rằng mỗi món trang sức
                                 không chỉ là phụ kiện, mà còn là biểu tượng của tình yêu, sự cam kết
                                 và những khoảnh khắc đáng nhớ trong cuộc sống.
                             </Typography>
@@ -401,8 +442,8 @@ function AboutPage() {
                                 variant="body1"
                                 sx={{
                                     color: 'text.secondary',
-                                    lineHeight: 2,
-                                    fontSize: '1.05rem',
+                                    lineHeight: 1.9,
+                                    fontSize: { xs: '1rem', md: '1.1rem' },
                                     fontFamily: '"Inter", sans-serif',
                                 }}
                             >
@@ -440,10 +481,11 @@ function AboutPage() {
                                     sx={{
                                         color: TIFFANY_BLUE,
                                         letterSpacing: 4,
-                                        fontSize: '0.75rem',
+                                        fontSize: { xs: '0.7rem', md: '0.75rem' },
                                         mb: 2,
                                         display: 'block',
                                         fontFamily: '"Inter", sans-serif',
+                                        fontWeight: 600,
                                     }}
                                 >
                                     SỰ TINH XẢO
@@ -456,6 +498,7 @@ function AboutPage() {
                                         fontSize: { xs: '2rem', md: '3.5rem' },
                                         mb: 4,
                                         lineHeight: 1.2,
+                                        color: 'text.primary',
                                     }}
                                 >
                                     Nghệ thuật Thủ công
@@ -466,9 +509,9 @@ function AboutPage() {
                                     variant="body1"
                                     sx={{
                                         color: 'text.secondary',
-                                        lineHeight: 2,
-                                        fontSize: '1.05rem',
-                                        mb: 4,
+                                        lineHeight: 1.9,
+                                        fontSize: { xs: '1rem', md: '1.1rem' },
+                                        mb: 3,
                                         fontFamily: '"Inter", sans-serif',
                                     }}
                                 >
@@ -482,8 +525,8 @@ function AboutPage() {
                                     variant="body1"
                                     sx={{
                                         color: 'text.secondary',
-                                        lineHeight: 2,
-                                        fontSize: '1.05rem',
+                                        lineHeight: 1.9,
+                                        fontSize: { xs: '1rem', md: '1.1rem' },
                                         fontFamily: '"Inter", sans-serif',
                                     }}
                                 >
@@ -568,10 +611,11 @@ function AboutPage() {
                                 sx={{
                                     color: TIFFANY_BLUE,
                                     letterSpacing: 4,
-                                    fontSize: '0.75rem',
+                                    fontSize: { xs: '0.7rem', md: '0.75rem' },
                                     mb: 2,
                                     display: 'block',
                                     fontFamily: '"Inter", sans-serif',
+                                    fontWeight: 600,
                                 }}
                             >
                                 TRÁCH NHIỆM
@@ -584,6 +628,7 @@ function AboutPage() {
                                     fontSize: { xs: '2rem', md: '3.5rem' },
                                     mb: 4,
                                     lineHeight: 1.2,
+                                    color: 'text.primary',
                                 }}
                             >
                                 Cam kết Bền vững
@@ -594,9 +639,9 @@ function AboutPage() {
                                 variant="body1"
                                 sx={{
                                     color: 'text.secondary',
-                                    lineHeight: 2,
-                                    fontSize: '1.05rem',
-                                    mb: 4,
+                                    lineHeight: 1.9,
+                                    fontSize: { xs: '1rem', md: '1.1rem' },
+                                    mb: 3,
                                     fontFamily: '"Inter", sans-serif',
                                 }}
                             >
@@ -610,8 +655,8 @@ function AboutPage() {
                                 variant="body1"
                                 sx={{
                                     color: 'text.secondary',
-                                    lineHeight: 2,
-                                    fontSize: '1.05rem',
+                                    lineHeight: 1.9,
+                                    fontSize: { xs: '1rem', md: '1.1rem' },
                                     fontFamily: '"Inter", sans-serif',
                                 }}
                             >
