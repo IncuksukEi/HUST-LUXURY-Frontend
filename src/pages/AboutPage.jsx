@@ -19,7 +19,9 @@ const LOCAL_IMAGES = {
     hero: '/image/tiffany-diamond-hero.webp',
     story1: '/image/tiffany-diamond-feature1.webp',
     story2: '/image/tiffany-diamond-feature2.webp',
+    story2Mobile: '/image/TiffanyDiamond-ContentPg-FWMH2-Mobile.jpg',
     blueBox: '/image/holiday-still-desktop.webp',
+    blueBoxMobile: '/image/holiday-still.webp',
     feature: '/image/BOR_JLP.webp',
 };
 
@@ -73,8 +75,8 @@ const AnimatedSection = ({ children, delay = 0, direction = 'up' }) => {
     );
 };
 
-// Animated Image with Hover Effect
-const AnimatedImage = ({ src, alt, sx = {} }) => {
+// Animated Image with optional Hover Effect
+const AnimatedImage = ({ src, alt, sx = {}, disableHover = false }) => {
     const [ref, isVisible] = useScrollAnimation(0.1);
 
     return (
@@ -86,21 +88,23 @@ const AnimatedImage = ({ src, alt, sx = {} }) => {
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'scale(1)' : 'scale(0.95)',
                 transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    inset: 0,
-                    bgcolor: 'transparent',
-                    transition: 'all 0.4s ease',
-                },
-                '&:hover': {
-                    '& img': {
-                        transform: 'scale(1.05)',
-                    },
+                ...(!disableHover && {
                     '&::after': {
-                        bgcolor: 'rgba(10, 186, 181, 0.1)',
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        bgcolor: 'transparent',
+                        transition: 'all 0.4s ease',
                     },
-                },
+                    '&:hover': {
+                        '& img': {
+                            transform: 'scale(1.05)',
+                        },
+                        '&::after': {
+                            bgcolor: 'rgba(10, 186, 181, 0.1)',
+                        },
+                    },
+                }),
                 ...sx,
             }}
         >
@@ -112,7 +116,9 @@ const AnimatedImage = ({ src, alt, sx = {} }) => {
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    ...(!disableHover && {
+                        transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }),
                 }}
             />
         </Box>
@@ -180,6 +186,8 @@ const FeatureCard = ({ icon, title, description, delay = 0 }) => {
                     fontFamily: '"Inter", sans-serif',
                     fontSize: { xs: '0.9rem', md: '1rem' },
                     flex: 1,
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
                 }}
             >
                 {description}
@@ -358,32 +366,38 @@ function AboutPage() {
                             Những giá trị cốt lõi định hình nên thương hiệu của chúng tôi
                         </Typography>
                     </AnimatedSection>
-                    <Grid container spacing={{ xs: 4, md: 6 }}>
-                        <Grid item xs={12} sm={4}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', md: 'row' },
+                            gap: { xs: 4, md: 4 },
+                        }}
+                    >
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
                             <FeatureCard
                                 icon={Diamond}
                                 title="Chất lượng Hoàn hảo"
                                 description="Mỗi viên đá quý được tuyển chọn kỹ lưỡng, đảm bảo tiêu chuẩn cao nhất về độ trong, cắt và màu sắc. Chúng tôi chỉ làm việc với những viên đá quý đạt chứng nhận quốc tế."
                                 delay={0}
                             />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
                             <FeatureCard
                                 icon={Heart}
                                 title="Thiết kế Độc đáo"
                                 description="Những tác phẩm nghệ thuật được tạo ra với tình yêu và sự sáng tạo, phản ánh cá tính riêng của bạn. Mỗi thiết kế đều được chăm chút tỉ mỉ từ ý tưởng đến thành phẩm."
                                 delay={0.2}
                             />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
                             <FeatureCard
                                 icon={Award}
                                 title="Cam kết Vĩnh cửu"
                                 description="Bảo hành trọn đời và dịch vụ chăm sóc khách hàng tận tâm cho mỗi sản phẩm. Chúng tôi đồng hành cùng bạn trong suốt hành trình sở hữu trang sức."
                                 delay={0.4}
                             />
-                        </Grid>
-                    </Grid>
+                        </Box>
+                    </Box>
                 </Container>
             </Box>
 
@@ -458,86 +472,128 @@ function AboutPage() {
                             src={LOCAL_IMAGES.story1}
                             alt="Heritage"
                             sx={{ height: { xs: 400, md: 550 } }}
+                            disableHover={true}
                         />
                     </Grid>
                 </Grid>
             </Container>
 
-            {/* Section 2: Craftsmanship - Reversed Layout */}
-            <Box sx={{ bgcolor: '#f5f5f5', py: { xs: 8, md: 16 } }}>
-                <Container maxWidth="lg">
-                    <Grid container spacing={{ xs: 4, md: 10 }} alignItems="center" direction={{ xs: 'column-reverse', md: 'row' }}>
-                        <Grid item xs={12} md={6}>
-                            <AnimatedImage
-                                src={LOCAL_IMAGES.story2}
-                                alt="Craftsmanship"
-                                sx={{ height: { xs: 400, md: 550 } }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <AnimatedSection delay={0} direction="right">
-                                <Typography
-                                    variant="overline"
-                                    sx={{
-                                        color: TIFFANY_BLUE,
-                                        letterSpacing: 4,
-                                        fontSize: { xs: '0.7rem', md: '0.75rem' },
-                                        mb: 2,
-                                        display: 'block',
-                                        fontFamily: '"Inter", sans-serif',
-                                        fontWeight: 600,
-                                    }}
-                                >
-                                    SỰ TINH XẢO
-                                </Typography>
-                                <Typography
-                                    variant="h2"
-                                    sx={{
-                                        fontFamily: '"Be Vietnam Pro", sans-serif',
-                                        fontWeight: 400,
-                                        fontSize: { xs: '2rem', md: '3.5rem' },
-                                        mb: 4,
-                                        lineHeight: 1.2,
-                                        color: 'text.primary',
-                                    }}
-                                >
-                                    Nghệ thuật Thủ công
-                                </Typography>
-                            </AnimatedSection>
-                            <AnimatedSection delay={0.2} direction="right">
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        color: 'text.secondary',
-                                        lineHeight: 1.9,
-                                        fontSize: { xs: '1rem', md: '1.1rem' },
-                                        mb: 3,
-                                        fontFamily: '"Inter", sans-serif',
-                                    }}
-                                >
-                                    Mỗi tác phẩm của chúng tôi đều được chế tác bởi những nghệ nhân
-                                    bậc thầy, sử dụng những kỹ thuật truyền thống được truyền lại
-                                    qua nhiều thế hệ, kết hợp với công nghệ hiện đại tiên tiến nhất.
-                                </Typography>
-                            </AnimatedSection>
-                            <AnimatedSection delay={0.4} direction="right">
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        color: 'text.secondary',
-                                        lineHeight: 1.9,
-                                        fontSize: { xs: '1rem', md: '1.1rem' },
-                                        fontFamily: '"Inter", sans-serif',
-                                    }}
-                                >
-                                    Từ việc lựa chọn những viên kim cương hoàn hảo nhất đến quy trình
-                                    đánh bóng tỉ mỉ từng chi tiết, chúng tôi cam kết mang đến sự hoàn mỹ
-                                    trong từng sản phẩm.
-                                </Typography>
-                            </AnimatedSection>
-                        </Grid>
-                    </Grid>
-                </Container>
+            {/* Section 2: Craftsmanship - Full Width with Text Overlay */}
+            <Box
+                sx={{
+                    position: 'relative',
+                    width: '100%',
+                    overflow: 'hidden',
+                }}
+            >
+                {/* Image Container - Full Width */}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        width: '100%',
+                    }}
+                >
+                    {/* Desktop Image */}
+                    <Box
+                        component="img"
+                        src={LOCAL_IMAGES.story2}
+                        alt="Craftsmanship"
+                        sx={{
+                            width: '100%',
+                            height: 'auto',
+                            display: { xs: 'none', md: 'block' },
+                            objectFit: 'cover',
+                            minHeight: { md: '600px' },
+                        }}
+                    />
+                    {/* Mobile Image */}
+                    <Box
+                        component="img"
+                        src={LOCAL_IMAGES.story2Mobile}
+                        alt="Craftsmanship"
+                        sx={{
+                            width: '100%',
+                            height: 'auto',
+                            display: { xs: 'block', md: 'none' },
+                            objectFit: 'cover',
+                        }}
+                    />
+                </Box>
+                
+                {/* Text Content - Desktop: overlay on image, Mobile: below image */}
+                <Box
+                    sx={{
+                        position: { xs: 'static', md: 'absolute' },
+                        top: { md: '20%', lg: '25%' },
+                        left: { md: '8%', lg: '10%' },
+                        maxWidth: { xs: '100%', md: '45%', lg: '500px' },
+                        zIndex: { xs: 1, md: 2 },
+                        bgcolor: { xs: '#fff', md: 'transparent' },
+                        p: { xs: 3, sm: 4, md: 0 },
+                        width: { xs: '100%', md: 'auto' },
+                    }}
+                >
+                        <AnimatedSection delay={0} direction="right">
+                            <Typography
+                                variant="overline"
+                                sx={{
+                                    color: TIFFANY_BLUE,
+                                    letterSpacing: { xs: 3, md: 4 },
+                                    fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' },
+                                    mb: { xs: 1.5, md: 2 },
+                                    display: 'block',
+                                    fontFamily: '"Inter", sans-serif',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                SỰ TINH XẢO
+                            </Typography>
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontFamily: '"Be Vietnam Pro", sans-serif',
+                                    fontWeight: 400,
+                                    fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem', xl: '3.5rem' },
+                                    mb: { xs: 2, md: 3 },
+                                    lineHeight: 1.2,
+                                    color: '#000',
+                                }}
+                            >
+                                Nghệ thuật Thủ công
+                            </Typography>
+                        </AnimatedSection>
+                        <AnimatedSection delay={0.2} direction="right">
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    color: 'text.secondary',
+                                    lineHeight: { xs: 1.7, md: 1.9 },
+                                    fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem', lg: '1.1rem' },
+                                    mb: { xs: 1.5, md: 2 },
+                                    fontFamily: '"Inter", sans-serif',
+                                }}
+                            >
+                                Mỗi tác phẩm của chúng tôi đều được chế tác bởi những nghệ nhân
+                                bậc thầy, sử dụng những kỹ thuật truyền thống được truyền lại
+                                qua nhiều thế hệ, kết hợp với công nghệ hiện đại tiên tiến nhất.
+                            </Typography>
+                        </AnimatedSection>
+                        <AnimatedSection delay={0.4} direction="right">
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    color: 'text.secondary',
+                                    lineHeight: { xs: 1.7, md: 1.9 },
+                                    fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem', lg: '1.1rem' },
+                                    fontFamily: '"Inter", sans-serif',
+                                }}
+                            >
+                                Từ việc lựa chọn những viên kim cương hoàn hảo nhất đến quy trình
+                                đánh bóng tỉ mỉ từng chi tiết, chúng tôi cam kết mang đến sự hoàn mỹ
+                                trong từng sản phẩm.
+                            </Typography>
+                        </AnimatedSection>
+                    </Box>
             </Box>
 
             {/* Section 3: Full Width Quote with Parallax */}
@@ -551,6 +607,7 @@ function AboutPage() {
                     overflow: 'hidden',
                 }}
             >
+                {/* Desktop Image */}
                 <Box
                     component="img"
                     src={LOCAL_IMAGES.blueBox}
@@ -561,6 +618,21 @@ function AboutPage() {
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
+                        display: { xs: 'none', md: 'block' },
+                    }}
+                />
+                {/* Mobile Image */}
+                <Box
+                    component="img"
+                    src={LOCAL_IMAGES.blueBoxMobile}
+                    alt="MAJewelry Collection"
+                    sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: { xs: 'block', md: 'none' },
                     }}
                 />
                 <Box
