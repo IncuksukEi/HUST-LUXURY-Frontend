@@ -104,7 +104,7 @@ const BROWSE_CATEGORIES = [
 ];
 
 // Collection slugs và special pages (không có description)
-const COLLECTION_SLUGS = ['wedding', 'summer-vibes', 'gift', 'luxury-limited', 'new-jewelry'];
+const COLLECTION_SLUGS = ['wedding', 'summer-vibes', 'gift', 'luxury-limited', 'new-jewelry', 'diamond', 'gold'];
 
 const JewelryShopPage = () => {
     const { slug } = useParams();

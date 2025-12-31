@@ -30,6 +30,8 @@ const COLLECTION_SLUG_TO_KEYWORDS = {
     'gift': ['gift'],
     'luxury-limited': ['luxury'],
     'new-jewelry': ['new'],
+    'diamond': ['diamond'], // Trang sức kim cương
+    'gold': ['gold'], // Trang sức vàng
 };
 
 // Mapping từ collection slug sang tên hiển thị
@@ -39,6 +41,8 @@ const COLLECTION_SLUG_TO_NAME = {
     'gift': 'Quà Tặng (Gift)',
     'luxury-limited': 'Luxury Limited',
     'new-jewelry': 'Hàng Mới Về',
+    'diamond': 'Kim Cương (Diamond)',
+    'gold': 'Vàng (Gold)',
 };
 
 // Helper function để format price VND
