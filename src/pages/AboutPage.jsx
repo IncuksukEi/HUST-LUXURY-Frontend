@@ -742,6 +742,7 @@ function AboutPage() {
                             src={LOCAL_IMAGES.feature}
                             alt="Sustainability"
                             sx={{ height: { xs: 400, md: 550 } }}
+                            disableHover={true}
                         />
                     </Grid>
                 </Grid>
