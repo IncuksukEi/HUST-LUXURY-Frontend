@@ -96,72 +96,20 @@ function Register() {
               textAlign: 'center',
             }}
           >
-            {/* Tiffany-style gift boxes image placeholder */}
+            {/* Tiffany-style diamond rings image */}
             <Box
+              component="img"
+              src="https://media.tiffany.com/is/image/tco/2022_Sports_ESports_LP_Tile-1_Mobile"
+              alt="Tiffany Diamond Rings"
               sx={{
                 width: '100%',
-                height: 500,
-                background: 'linear-gradient(135deg, #81D8D0 0%, #0ABAB5 100%)',
+                maxWidth: 450,
+                height: 'auto',
+                objectFit: 'cover',
                 borderRadius: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
                 boxShadow: '0 20px 60px rgba(10, 186, 181, 0.3)',
-                position: 'relative',
-                overflow: 'hidden',
               }}
-            >
-              {/* Decorative ribbon */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: 40,
-                  bgcolor: 'rgba(255,255,255,0.9)',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                }}
-              />
-              <Box
-                sx={{
-                  position: 'absolute',
-                  width: 40,
-                  height: '100%',
-                  bgcolor: 'rgba(255,255,255,0.9)',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                }}
-              />
-              {/* Bow */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '45%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: 80,
-                  height: 80,
-                  bgcolor: 'rgba(255,255,255,0.95)',
-                  borderRadius: '50%',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                }}
-              />
-              <Typography
-                variant="h4"
-                sx={{
-                  position: 'absolute',
-                  bottom: 60,
-                  color: 'white',
-                  fontFamily: '"Times New Roman", Times, serif',
-                  fontWeight: 600,
-                  letterSpacing: '0.15em',
-                  textShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                }}
-              >
-                HUST LUXURY
-              </Typography>
-            </Box>
+            />
           </Box>
         </Box>
 
@@ -206,8 +154,8 @@ function Register() {
           )}
 
           {/* Create Account Form */}
-          <Box 
-            component="form" 
+          <Box
+            component="form"
             onSubmit={handleRegisterSubmit}
           >
             <TextField
