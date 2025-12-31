@@ -26,6 +26,8 @@ const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderHistoryPage = lazy(() => import('./pages/OrderHistoryPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CartProvider } from './contexts/CartContext';
@@ -70,6 +72,8 @@ function AppContent() {
             <Route path="/orders" element={<OrderHistoryPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/change-password" element={<ChangePasswordPage />} />
             <Route element={<ProtectedRoute />}>
