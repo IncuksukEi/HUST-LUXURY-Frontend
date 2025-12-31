@@ -53,30 +53,23 @@ const navLinks = [
 
 const TIFFANY_BLUE = "#81d8d0";
 
-// --- MOCK DATA (Đã refactor sang dạng Object) ---
+// --- JEWELRY MENU DATA ---
 const JEWELRY_MENU_DATA = {
   categories: [
     { label: "Necklaces & Pendants", href: "/jewelry/shop/necklaces-pendants" },
     { label: "Earrings", href: "/jewelry/shop/earrings" },
     { label: "Bracelets", href: "/jewelry/shop/bracelets" },
     { label: "Rings", href: "/jewelry/shop/rings" },
-    { label: "Brooches", href: "/jewelry/shop/brooches" },
     { label: "Explore All Jewelry >", href: "/jewelry" }
   ],
   collections: [
-    { label: "Tiffany HardWear", href: "/jewelry/shop/tiffany-hardwear" },
-    { label: "Tiffany Lock", href: "/jewelry/shop/tiffany-lock" },
-    { label: "Tiffany Knot", href: "/jewelry/shop/tiffany-knot" },
-    { label: "Tiffany T", href: "/jewelry/shop/tiffany-t" },
-    { label: "Bird on a Rock", href: "/jewelry/shop/bird-on-a-rock" },
-    { label: "Sixteen Stone", href: "/jewelry/shop/sixteen-stone" },
-    { label: "Elsa Peretti™", href: "/jewelry/shop/elsa-peretti" },
-    { label: "Return to Tiffany™", href: "/jewelry/shop/return-to-tiffany" },
-    { label: "Explore All Jewelry Collections >", href: "/collections" }
+    { label: "Bộ Sưu Tập Cưới (Wedding)", href: "/jewelry/shop/wedding" },
+    { label: "Summer Vibes", href: "/jewelry/shop/summer-vibes" },
+    { label: "Quà Tặng (Gift)", href: "/jewelry/shop/gift" },
+    { label: "Luxury Limited", href: "/jewelry/shop/luxury-limited" },
   ],
   featured: [
-    { label: "New Arrivals", href: "/jewelry/shop/new-jewelry/" },
-    { label: "Most Popular Jewelry", href: "/jewelry/shop/most-popular-jewelry/" },
+    { label: "Hàng Mới Về", href: "/jewelry/shop/new-jewelry/" },
   ],
   image: "/image/NAV_Gifts.webp"
 };
@@ -899,7 +892,7 @@ const Header = (props) => {
                   {/* --- CỘT 1: Browse by Category --- */}
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: "0.85rem", letterSpacing: 1 }}>
-                      Browse by Category
+                      Duyệt Theo Danh Mục
                     </Typography>
                     <Stack spacing={1.5}>
                       {JEWELRY_MENU_DATA.categories.map((item, index) => (
@@ -941,7 +934,7 @@ const Header = (props) => {
                   {/* --- CỘT 2: Collections --- */}
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: "0.85rem", letterSpacing: 1 }}>
-                      Collections
+                      Bộ Sưu Tập
                     </Typography>
                     <Stack spacing={1.5}>
                       {JEWELRY_MENU_DATA.collections.map((item, index) => (
@@ -982,7 +975,7 @@ const Header = (props) => {
                   {/* --- CỘT 3: Featured --- */}
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, fontSize: "0.85rem", letterSpacing: 1 }}>
-                      Featured
+                      Nổi Bật
                     </Typography>
                     <Stack spacing={1.5}>
                       {JEWELRY_MENU_DATA.featured.map((item, index) => (
@@ -1049,7 +1042,7 @@ const Header = (props) => {
 
                     <Box sx={{ textAlign: "left", mt: 1 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 300, fontSize: ".875rem", letterSpacing: 0.5 }}>
-                        Gifts for Her
+                        Quà Tặng Cho Cô Ấy
                       </Typography>
                       <Link
                         component={RouterLink}
@@ -1062,7 +1055,7 @@ const Header = (props) => {
                           "&:hover": { color: "text.secondary" },
                         }}
                       >
-                        Shop Now <ChevronRight size={16} style={{ marginLeft: 4 }} />
+                        Mua Ngay <ChevronRight size={16} style={{ marginLeft: 4 }} />
                       </Link>
                     </Box>
                   </Box>

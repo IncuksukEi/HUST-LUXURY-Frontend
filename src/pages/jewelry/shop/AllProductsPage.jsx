@@ -3,27 +3,44 @@ import { Box, Container, Typography, CircularProgress, Alert } from '@mui/materi
 import JewelryProduct from '../../../components/jewelry/JewelryProduct';
 import axiosClient from '../../../api/axiosClient';
 
-// Helper function to format price from VND to USD
-const formatPrice = (price) => {
-  // Assuming price is in VND, convert to USD (1 USD ≈ 25,000 VND)
-  const priceInUSD = price / 25000;
-  return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+// Helper function to format price VND
+const formatPriceVND = (price) => {
+  // Đảm bảo price là số
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(numPrice)) return '0 ₫';
+  
+  // Format price từ VND với locale Vietnamese
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(numPrice);
 };
 
 // Map API product to JewelryProduct format
-const mapProductToJewelryFormat = (apiProduct, index) => {
+const mapProductToJewelryFormat = (apiProduct, isNew = false) => {
   return {
     id: apiProduct.productId,
     name: apiProduct.name,
     description: apiProduct.description || `${apiProduct.name} - A luxurious piece crafted with exceptional attention to detail.`,
-    price: formatPrice(apiProduct.price),
+    price: formatPriceVND(apiProduct.price), // Format VND
+    priceRaw: apiProduct.price, // Lưu giá gốc (VND) để sort
     image: apiProduct.urlImg,
     collection: apiProduct.collectionName || null,
     material: apiProduct.materialName || null,
     gemstone: apiProduct.gemstoneName || null,
-    isNew: index < 4, // First 4 products are "New"
+    isNew: isNew, // Sẽ được tính toán dựa trên productId
     category: 'All Products',
   };
+};
+
+// Helper function: Xác định 10 sản phẩm có productId lớn nhất (sản phẩm mới nhất)
+const getTopNewProductIds = (products, topN = 10) => {
+  // Sắp xếp theo productId giảm dần và lấy top N
+  const sorted = [...products].sort((a, b) => b.productId - a.productId);
+  const topIds = sorted.slice(0, topN).map(p => p.productId);
+  return new Set(topIds); // Dùng Set để lookup nhanh
 };
 
 const AllProductsPage = () => {
@@ -48,10 +65,14 @@ const AllProductsPage = () => {
         throw new Error('Invalid response format: expected array');
       }
       
+      // Xác định 10 sản phẩm có productId lớn nhất (sản phẩm mới nhất)
+      const topNewProductIds = getTopNewProductIds(response.data, 10);
+      
       // Map API products to JewelryProduct format
-      const mappedProducts = response.data.map((product, index) => 
-        mapProductToJewelryFormat(product, index)
-      );
+      const mappedProducts = response.data.map((product) => {
+        const isNew = topNewProductIds.has(product.productId);
+        return mapProductToJewelryFormat(product, isNew);
+      });
       
       setProducts(mappedProducts);
     } catch (err) {
@@ -109,7 +130,6 @@ const AllProductsPage = () => {
           <Typography
             variant="h3"
             sx={{
-              fontFamily: '"Times New Roman", Times, serif',
               fontSize: { xs: '1.5rem', md: '2.5rem' },
               fontWeight: 400,
               mb: 2,
