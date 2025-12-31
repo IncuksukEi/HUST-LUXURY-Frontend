@@ -60,7 +60,7 @@ const ServiceBanner = () => {
               lineHeight: 1.2
             }}
           >
-            Discover Our Gifting Services
+            Khám Phá Dịch Vụ Tặng Quà Của Chúng Tôi
           </Typography>
 
           <Typography 
@@ -74,14 +74,14 @@ const ServiceBanner = () => {
               px: 1
             }}
           >
-            From finding the perfect present to product personalization, 
-            master the art of holiday gifting with a one-on-one in-store or 
-            virtual appointment with a MAJewelry client advisor.
+            Từ việc tìm món quà hoàn hảo đến cá nhân hóa sản phẩm, 
+            làm chủ nghệ thuật tặng quà trong dịp lễ với cuộc hẹn trực tiếp tại cửa hàng hoặc 
+            trực tuyến với cố vấn khách hàng của MAJewelry.
           </Typography>
 
           <Link 
             component={RouterLink} 
-            to="/appointment" 
+            to="/contact" 
             underline="none"
             sx={{
               fontSize: { xs: '0.875rem', sm: '1rem' },
@@ -109,7 +109,7 @@ const ServiceBanner = () => {
               }
             }}
           >
-            Book an Appointment <ChevronRightIcon sx={{ fontSize: '1.2em', ml: 0.5 }} />
+            Đặt Lịch Hẹn <ChevronRightIcon sx={{ fontSize: '1.2em', ml: 0.5 }} />
           </Link>
         </Box>
       </Box>
@@ -174,7 +174,7 @@ const ServiceBanner = () => {
                   lineHeight: 1.2,
                 }}
               >
-                Discover Our Gifting Services
+                Khám Phá Dịch Vụ Tặng Quà Của Chúng Tôi
               </Typography>
 
               <Typography 
@@ -187,14 +187,14 @@ const ServiceBanner = () => {
                   maxWidth: '100%',
                 }}
               >
-                From finding the perfect present to product personalization, 
-                master the art of holiday gifting with a one-on-one in-store or 
-                virtual appointment with a MAJewelry client advisor.
+                Từ việc tìm món quà hoàn hảo đến cá nhân hóa sản phẩm, 
+                làm chủ nghệ thuật tặng quà trong dịp lễ với cuộc hẹn trực tiếp tại cửa hàng hoặc 
+                trực tuyến với cố vấn khách hàng của MAJewelry.
               </Typography>
 
               <Link 
                 component={RouterLink} 
-                to="/appointment" 
+                to="/contact" 
                 underline="none"
                 sx={{
                   fontSize: { md: '0.875rem', lg: '1rem', xl: '1rem' },
@@ -222,7 +222,7 @@ const ServiceBanner = () => {
                   }
                 }}
               >
-                Book an Appointment <ChevronRightIcon sx={{ fontSize: '1.2em', ml: 0.5 }} />
+                Đặt Lịch Hẹn <ChevronRightIcon sx={{ fontSize: '1.2em', ml: 0.5 }} />
               </Link>
             </Box>
           </Box>

@@ -103,11 +103,16 @@ const BROWSE_CATEGORIES = [
     },
 ];
 
+// Collection slugs và special pages (không có description)
+const COLLECTION_SLUGS = ['wedding', 'summer-vibes', 'gift', 'luxury-limited', 'new-jewelry'];
+
 const JewelryShopPage = () => {
     const { slug } = useParams();
     const currentCategoryData = CATEGORY_DATA_MAP[slug];
+    const isCollection = COLLECTION_SLUGS.includes(slug);
 
-    if (!currentCategoryData) {
+    // Nếu không phải category và cũng không phải collection, hiển thị lỗi
+    if (!currentCategoryData && !isCollection) {
         return (
             <Container sx={{ py: 10, textAlign: 'center' }}>
                 <Typography variant="h5">Danh mục không tồn tại</Typography>
@@ -123,20 +128,24 @@ const JewelryShopPage = () => {
                 {/* <JewelryCategorySection data={currentCategoryData} /> */}
 
                 {/* Product Grid & Filter */}
-                {/* Truyền key=slug để React remount component khi chuyển category, reset state filter */}
-                {/* Component sẽ tự fetch từ API dựa trên categorySlug */}
+                {/* Truyền key=slug để React remount component khi chuyển category/collection, reset state filter */}
+                {/* Component sẽ tự fetch từ API dựa trên categorySlug (category hoặc collection) */}
                 <JewelryProduct key={slug} categorySlug={slug} />
             </Container>
 
-            {/* Browse by Category Section */}
-            <JewelryCategoryGrid 
-                categories={BROWSE_CATEGORIES}
-                title="Browse by Category"
-                description="Explore our iconic jewelry designs."
-            />
+            {/* Browse by Category Section - Chỉ hiển thị cho category, không hiển thị cho collection */}
+            {!isCollection && (
+                <JewelryCategoryGrid 
+                    categories={BROWSE_CATEGORIES}
+                    title="Browse by Category"
+                    description="Explore our iconic jewelry designs."
+                />
+            )}
 
-            {/* Category Description Section - Ở cuối trang */}
-            <JewelryCategoryDescription categoryData={currentCategoryData} />
+            {/* Category Description Section - Chỉ hiển thị cho category, không hiển thị cho collection */}
+            {!isCollection && currentCategoryData && (
+                <JewelryCategoryDescription categoryData={currentCategoryData} />
+            )}
         </Box>
     );
 };

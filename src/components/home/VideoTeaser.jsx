@@ -79,7 +79,7 @@ const VideoTeaser = () => {
                 textAlign: 'center'
               }}
             >
-              The Art of Gifting
+              Nghệ Thuật Tặng Quà
             </Typography>
             <Typography 
               variant="body1" 
@@ -93,11 +93,11 @@ const VideoTeaser = () => {
                 mx: 'auto'
               }}
             >
-              Celebrate every facet of the ones you love with meaningful designs this holiday.
+              Tôn vinh mọi khía cạnh của những người bạn yêu thương với những thiết kế ý nghĩa trong dịp lễ này.
             </Typography>
             <Button
               component={RouterLink}
-              to="/gifts"
+              to="/about"
               variant="outlined"
               sx={{
                 borderColor: 'text.primary', 
@@ -110,7 +110,7 @@ const VideoTeaser = () => {
                 '&:hover': { bgcolor: 'text.primary', color: 'white', borderColor: 'text.primary' }
               }}
             >
-              Explore the Gift Guide
+              Khám Phá Hướng Dẫn Quà Tặng
             </Button>
           </Box>
         </Grid>

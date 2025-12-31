@@ -23,27 +23,70 @@ const CATEGORY_SLUG_TO_ID = {
     'rings': 4,
 };
 
-// Helper function để format price từ VND sang USD
-const formatPrice = (price) => {
-    // Assuming price is in VND, convert to USD (1 USD ≈ 25,000 VND)
-    const priceInUSD = price / 25000;
-    return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+// Mapping từ collection slug sang keywords để search
+const COLLECTION_SLUG_TO_KEYWORDS = {
+    'wedding': ['wedding'],
+    'summer-vibes': ['summer'],
+    'gift': ['gift'],
+    'luxury-limited': ['luxury'],
+    'new-jewelry': ['new'],
+};
+
+// Mapping từ collection slug sang tên hiển thị
+const COLLECTION_SLUG_TO_NAME = {
+    'wedding': 'Bộ Sưu Tập Cưới (Wedding)',
+    'summer-vibes': 'Summer Vibes',
+    'gift': 'Quà Tặng (Gift)',
+    'luxury-limited': 'Luxury Limited',
+    'new-jewelry': 'Hàng Mới Về',
+};
+
+// Helper function để format price VND
+const formatPriceVND = (price) => {
+    // Đảm bảo price là số - xử lý cả trường hợp string có dấu phẩy hoặc ký tự đặc biệt
+    let numPrice;
+    if (typeof price === 'string') {
+        // Loại bỏ tất cả ký tự không phải số (trừ dấu chấm và dấu phẩy)
+        const cleaned = price.replace(/[^\d.,]/g, '').replace(/,/g, '');
+        numPrice = parseFloat(cleaned);
+    } else {
+        numPrice = price;
+    }
+    
+    if (isNaN(numPrice) || numPrice <= 0) return '0 ₫';
+    
+    // Format price từ VND với locale Vietnamese
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(numPrice);
 };
 
 // Map API product to JewelryProduct format
-const mapProductToJewelryFormat = (apiProduct, index) => {
+const mapProductToJewelryFormat = (apiProduct, isNew = false) => {
     return {
         id: apiProduct.productId,
         name: apiProduct.name,
         description: apiProduct.description || `${apiProduct.name} - A luxurious piece crafted with exceptional attention to detail.`,
-        price: formatPrice(apiProduct.price),
+        price: formatPriceVND(apiProduct.price), // Format VND
+        priceRaw: apiProduct.price, // Lưu giá gốc (VND) để sort
         image: apiProduct.urlImg,
         collection: apiProduct.collectionName || null,
         material: apiProduct.materialName || null,
         gemstone: apiProduct.gemstoneName || null,
-        isNew: index < 4, // First 4 products are "New"
+        isNew: isNew, // Sẽ được tính toán dựa trên productId
         category: 'All Products',
     };
+};
+
+// Helper function: Xác định 10 sản phẩm có productId lớn nhất (sản phẩm mới nhất)
+const getTopNewProductIds = (products, topN = 10) => {
+    // Sắp xếp theo productId giảm dần và lấy top N
+    const sorted = [...products].sort((a, b) => b.productId - a.productId);
+    const topIds = sorted.slice(0, topN).map(p => p.productId);
+    return new Set(topIds); // Dùng Set để lookup nhanh
 };
 
 // --- 2. FILTER COMPONENT (Desktop Dropdown) ---
@@ -432,8 +475,7 @@ const ProductCard = ({ product }) => {
                     justifyContent: 'flex-start'
                 }}>
                     {product.collection && (
-                        <Typography variant="subtitle2" sx={{ 
-                            fontFamily: 'Sterling Display A', 
+                        <Typography variant="subtitle2" sx={{
                             fontSize: { xs: '0.85rem', md: '0.95rem' }, 
                             fontWeight: 500, 
                             mb: 0.5, 
@@ -543,27 +585,53 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
             setLoading(true);
             setError('');
             
-            // Map categorySlug to categoryId
-            const categoryId = CATEGORY_SLUG_TO_ID[categorySlug];
+            let response;
             
-            if (!categoryId) {
-                setError('Không tìm thấy danh mục');
-                setLoading(false);
-                return;
-            }
+            // Nếu là trang "new-jewelry", fetch tất cả products để lấy top 10 có productId lớn nhất
+            if (categorySlug === 'new-jewelry') {
+                response = await axiosClient.get('/products');
+            } else {
+                // Check if it's a collection (search mode)
+                const collectionKeywords = COLLECTION_SLUG_TO_KEYWORDS[categorySlug];
+                if (collectionKeywords) {
+                    // Fetch products using search API with first keyword
+                    // API: /api/products/search?q=keyword
+                    response = await axiosClient.get(`/products/search?q=${collectionKeywords[0]}`);
+                } else {
+                    // Check if it's a category
+                    const categoryId = CATEGORY_SLUG_TO_ID[categorySlug];
+                    
+                    if (!categoryId) {
+                        setError('Không tìm thấy danh mục hoặc bộ sưu tập');
+                        setLoading(false);
+                        return;
+                    }
 
-            // Fetch products from API
-            const response = await axiosClient.get(`/products/category/${categoryId}`);
+                    // Fetch products from category API
+                    response = await axiosClient.get(`/products/category/${categoryId}`);
+                }
+            }
             
             // Check if response.data is an array
             if (!Array.isArray(response.data)) {
                 throw new Error('Invalid response format: expected array');
             }
             
+            // Xác định 10 sản phẩm có productId lớn nhất (sản phẩm mới nhất)
+            const topNewProductIds = getTopNewProductIds(response.data, 10);
+            
             // Map API products to JewelryProduct format
-            const mappedProducts = response.data.map((product, index) => 
-                mapProductToJewelryFormat(product, index)
-            );
+            let mappedProducts = response.data.map((product) => {
+                const isNew = topNewProductIds.has(product.productId);
+                return mapProductToJewelryFormat(product, isNew);
+            });
+            
+            // Nếu là trang "new-jewelry", chỉ lấy 10 sản phẩm mới nhất
+            if (categorySlug === 'new-jewelry') {
+                mappedProducts = mappedProducts
+                    .filter(product => product.isNew === true)
+                    .sort((a, b) => b.id - a.id); // Sắp xếp theo productId giảm dần
+            }
             
             setProducts(mappedProducts);
         } catch (err) {
@@ -690,9 +758,9 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
         const gemMatch = selectedGemstones.length === 0 || (p.gemstone && selectedGemstones.includes(p.gemstone));
         return colMatch && matMatch && gemMatch;
     }).sort((a, b) => {
-        // Simple sort logic demo
-        if (sortOption === 'Giá cao đến thấp') return parseInt(b.price.replace(/\D/g,'')) - parseInt(a.price.replace(/\D/g,''));
-        if (sortOption === 'Giá thấp đến cao') return parseInt(a.price.replace(/\D/g,'')) - parseInt(b.price.replace(/\D/g,''));
+        // Sort logic using raw price (VND)
+        if (sortOption === 'Giá cao đến thấp') return (b.priceRaw || 0) - (a.priceRaw || 0);
+        if (sortOption === 'Giá thấp đến cao') return (a.priceRaw || 0) - (b.priceRaw || 0);
         if (sortOption === 'Mới nhất') return b.isNew ? 1 : -1;
         return a.id - b.id; // Default
     });
@@ -730,10 +798,10 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
         <Container maxWidth="xl" >
             {/* Header & Breadcrumb */}
             <Typography variant="caption" color="text.secondary" sx={{ pt: 1.375, pb: 0.625, display: 'block', textTransform: 'uppercase', fontSize: { xs: '0.65rem', md: '0.7rem' }, letterSpacing: '0.1em' }}>
-                Home &nbsp;/&nbsp; Jewelry &nbsp;/&nbsp; {categorySlug ? categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'All Products'}
+                Home &nbsp;/&nbsp; Jewelry &nbsp;/&nbsp; {categorySlug ? (COLLECTION_SLUG_TO_NAME[categorySlug] || categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')) : 'All Products'}
             </Typography>
-            <Typography variant="h4" sx={{ fontFamily: 'Sterling Display A', py: 2, fontWeight: 400, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
-                {categorySlug ? categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'All Products'}
+            <Typography variant="h4" sx={{ py: 2, fontWeight: 400, fontSize: { xs: '1.5rem', md: '2.125rem' } }}>
+                {categorySlug ? (COLLECTION_SLUG_TO_NAME[categorySlug] || categorySlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')) : 'All Products'}
             </Typography>
 
             {/* Filter Bar */}
@@ -927,7 +995,7 @@ const JewelryProduct = ({ products: propsProducts, categorySlug }) => {
                 </Grid>
             ) : (
                 <Box sx={{ py: 10, textAlign: 'center' }}>
-                    <Typography variant="h6" sx={{ fontFamily: 'Sterling Display A' }}>Không tìm thấy kết quả.</Typography>
+                    <Typography variant="h6">Không tìm thấy kết quả.</Typography>
                     <Typography color="text.secondary" sx={{ mb: 2 }}>Thử xóa một số bộ lọc.</Typography>
                     <Button variant="outlined" onClick={handleClearAll} sx={{ color: '#000', borderColor: '#000', borderRadius: 0 }}>Xóa bộ lọc</Button>
                 </Box>

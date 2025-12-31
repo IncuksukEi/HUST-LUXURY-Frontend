@@ -9,15 +9,15 @@ const TIFFANY_BLUE = '#81d8d0'; // Màu xanh chủ đạo cho hover
 // Dữ liệu ảnh
 const ITEMS = [
   { 
-    title: 'Gifts for Her', 
+    title: 'Quà Tặng Cho Cô Ấy', 
     image: '/image/gfh-hp.webp' 
   },
   { 
-    title: 'Diamond Jewelry', 
+    title: 'Trang Sức Kim Cương', 
     image: '/image/diamond-hp.webp' 
   },
   { 
-    title: 'Gold Jewelry', 
+    title: 'Trang Sức Vàng', 
     image: '/image/gold-hp.webp' 
   },
 ];
@@ -41,7 +41,7 @@ const HighlightCategories = () => {
           fontSize: { xs: '1.5rem', sm: '1.25rem', md: '1.25rem', lg: '1.5rem' }
         }}
       >
-        Find the Perfect Gift
+        Tìm Món Quà Hoàn Hảo
       </Typography>
       
       <Grid container spacing={{ xs: 3, sm: 4, md: 4 }}>
@@ -49,7 +49,7 @@ const HighlightCategories = () => {
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.title}>
             <Link 
               component={RouterLink} 
-              to="/shop" 
+              to="/jewelry/shop" 
               underline="none" 
               sx={{ 
                 display: 'block', 
