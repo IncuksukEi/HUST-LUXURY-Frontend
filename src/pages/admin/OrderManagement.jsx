@@ -20,7 +20,6 @@ const OrderManagement = () => {
             setOrders(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("Failed to fetch orders:", error);
-            // message.error("Failed to fetch orders");
         } finally {
             setLoading(false);
         }
@@ -45,11 +44,6 @@ const OrderManagement = () => {
         if (!selectedOrder) return;
         setUpdating(true);
         try {
-            // Construct the payload as per API screenshot requirements
-            // Payload needs: orderId, userId, phone, status, orderAddress, products (list of objects)
-            // We can just spread selectedOrder and overwrite status, assuming the backend handles the rest or ignores extra fields.
-            // Based on screenshot 7.3, it sends quite a full object.
-
             const payload = {
                 ...selectedOrder,
                 status: value
@@ -112,10 +106,16 @@ const OrderManagement = () => {
             dataIndex: 'status',
             key: 'status',
             render: (status) => {
-                let color = 'geekblue';
-                if (status === 'DELIVERED') color = 'green';
-                if (status === 'CANCELLED') color = 'volcano';
-                if (status === 'PENDING') color = 'gold';
+                let color = 'default';
+                // Cập nhật màu sắc dựa trên các trạng thái trong ảnh
+                switch (status) {
+                    case 'PENDING': color = 'gold'; break;
+                    case 'CONFIRMED': color = 'geekblue'; break;
+                    case 'SHIPPED': color = 'cyan'; break; // Đã sửa từ SHIPPING -> SHIPPED
+                    case 'RECEIVED': color = 'green'; break; // Đã sửa từ DELIVERED -> RECEIVED
+                    case 'CANCELLED': color = 'volcano'; break;
+                    default: color = 'default';
+                }
                 return (
                     <Tag color={color} key={status}>
                         {status}
@@ -176,11 +176,12 @@ const OrderManagement = () => {
                                         onChange={handleStatusChange}
                                         loading={updating}
                                     >
+                                        {/* Cập nhật các Option */}
                                         <Option value="PENDING">PENDING</Option>
                                         <Option value="CONFIRMED">CONFIRMED</Option>
-                                        <Option value="SHIPPING">SHIPPING</Option>
-                                        <Option value="DELIVERED">DELIVERED</Option>
+                                        <Option value="SHIPPED">SHIPPED</Option>
                                         <Option value="CANCELLED">CANCELLED</Option>
+                                        <Option value="RECEIVED">RECEIVED</Option>
                                     </Select>
                                 </Descriptions.Item>
                             </Descriptions>
@@ -193,7 +194,7 @@ const OrderManagement = () => {
                                 renderItem={(item) => (
                                     <List.Item>
                                         <List.Item.Meta
-                                            avatar={<Avatar src={item.urlImg || "https://via.placeholder.com/50"} />} // Assuming product has urlImg
+                                            avatar={<Avatar src={item.urlImg || "https://via.placeholder.com/50"} />}
                                             title={item.name}
                                             description={`Quantity: ${item.quantity} | Price: ${item.price?.toLocaleString()} VNĐ`}
                                         />
