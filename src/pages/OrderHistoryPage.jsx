@@ -53,10 +53,17 @@ const getStatusLabel = (status) => {
   }
 };
 
-// Format price from VND to USD
-const formatPrice = (price) => {
-  const priceInUSD = price / 25000;
-  return `$${priceInUSD.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+// Helper function để format price VND
+const formatPriceVND = (price) => {
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(numPrice)) return '0 ₫';
+  
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(numPrice);
 };
 
 // Format date
@@ -269,7 +276,7 @@ const OrderHistoryPage = () => {
                   sx={{ mb: 1 }}
                 />
                 <Typography variant="h6" sx={{ fontWeight: 600, mt: 1 }}>
-                  {formatPrice(order.totalPrice)}
+                  {formatPriceVND(order.totalPrice)}
                 </Typography>
               </Box>
             </Box>
@@ -315,7 +322,7 @@ const OrderHistoryPage = () => {
                           {product.description}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Số lượng: {product.quantity} × {formatPrice(product.price)}
+                          Số lượng: {product.quantity} × {formatPriceVND(product.price)}
                         </Typography>
                       </Box>
                     </Box>
