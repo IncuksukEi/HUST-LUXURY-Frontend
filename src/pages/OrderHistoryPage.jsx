@@ -26,7 +26,7 @@ const getStatusColor = (status) => {
       return 'info';
     case 'SHIPPED':
       return 'primary';
-    case 'DELIVERED':
+    case 'RECEIVED':
       return 'success';
     case 'CANCELLED':
       return 'error';
@@ -44,7 +44,7 @@ const getStatusLabel = (status) => {
       return 'Đã xác nhận';
     case 'SHIPPED':
       return 'Đang giao hàng';
-    case 'DELIVERED':
+    case 'RECEIVED':
       return 'Đã giao hàng';
     case 'CANCELLED':
       return 'Đã hủy';
