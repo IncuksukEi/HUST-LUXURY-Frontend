@@ -265,6 +265,8 @@ const ProductCard = ({ product }) => {
     const [isHovered, setIsHovered] = useState(false);
     const { isInWishlist, toggleWishlist } = useWishlist();
     const isLiked = isInWishlist(product.id);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // Mỗi sản phẩm chỉ có 1 ảnh
     const productImage = product.image || product.images?.[0] || '/placeholder.png';
@@ -361,6 +363,93 @@ const ProductCard = ({ product }) => {
                         sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', mixBlendMode: 'multiply' }}
                     />
                 </Box>
+
+                {/* Info block cho mobile (ẩn hover card để không bị lộ thông tin ở hàng cuối) */}
+                {isMobile && (
+                    <Box
+                        sx={{
+                            textAlign: 'center',
+                            px: 1,
+                            py: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1,
+                        }}
+                    >
+                        {product.collection && (
+                            <Typography
+                                variant="subtitle2"
+                                sx={{
+                                    fontSize: '0.95rem',
+                                    fontWeight: 500,
+                                    lineHeight: 1.3,
+                                    color: '#000',
+                                }}
+                            >
+                                {product.collection}
+                            </Typography>
+                        )}
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                fontSize: '0.9rem',
+                                color: '#333',
+                                lineHeight: 1.4,
+                            }}
+                        >
+                            {product.name}
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                fontSize: '0.9rem',
+                                color: '#666',
+                                mb: 0.5,
+                            }}
+                        >
+                            {product.price}
+                        </Typography>
+                        {product.description && (
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                    lineHeight: 1.6,
+                                    px: 0.5,
+                                    fontSize: '0.8rem',
+                                    color: '#666',
+                                }}
+                            >
+                                {product.description}
+                            </Typography>
+                        )}
+                        <Button
+                            variant="outlined"
+                            fullWidth
+                            sx={{
+                                borderRadius: 0,
+                                color: '#000',
+                                borderColor: '#000',
+                                borderWidth: '1px',
+                                textTransform: 'none',
+                                fontSize: '0.9rem',
+                                py: 1.25,
+                                fontWeight: 400,
+                                '&:hover': {
+                                    bgcolor: '#000',
+                                    color: '#fff',
+                                    borderColor: '#000',
+                                },
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(productUrl);
+                            }}
+                        >
+                            View details
+                        </Button>
+                    </Box>
+                )}
             </Box>
 
             {/* [HOVER CARD]: Card đè lên khi hover, hiện đầy đủ thông tin */}
@@ -385,13 +474,13 @@ const ProductCard = ({ product }) => {
                     },
                     transition: 'opacity 0.3s ease-out',
                     cursor: 'pointer',
-                    zIndex: { xs: 1, md: isHovered ? 100 : -1 }, // Đè lên khi hover
-                    opacity: { xs: 1, md: isHovered ? 1 : 0 },
-                    pointerEvents: { xs: 'auto', md: isHovered ? 'auto' : 'none' },
-                    display: 'flex',
+                    zIndex: { xs: -1, md: isHovered ? 100 : -1 }, // Ẩn trên mobile để tránh lộ info
+                    opacity: { xs: 0, md: isHovered ? 1 : 0 },
+                    pointerEvents: { xs: 'none', md: isHovered ? 'auto' : 'none' },
+                    display: { xs: 'none', md: 'flex' }, // không render ở mobile
                     flexDirection: 'column',
                     minHeight: '100%',
-                    visibility: { xs: 'visible', md: isHovered ? 'visible' : 'hidden' }
+                    visibility: { xs: 'hidden', md: isHovered ? 'visible' : 'hidden' }
                 }}
             >
                 {/* 1. Wishlist Icon (Góc phải trên) - Luôn hiển thị trên hover card */}
